@@ -294,6 +294,7 @@ button.gslot.empty{border:1.5px dashed #cdbcab;background:#faf6f1;color:var(--br
 button.gslot.empty small{font-size:10.5px;margin-top:4px;font-weight:600}
 .gslot.fr{float:right;margin:0 0 6px 8px}
 .food.fx{display:flex;gap:10px;align-items:flex-start}.food .fb{flex:1;min-width:0}
+.upd{margin-top:8px;border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
@@ -904,7 +905,7 @@ function renderGuide(){
      <button class="tile" data-g="compras"><span class="e">🛍️</span><b>Compras</b><small>Listas de cada pessoa</small></button>
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
-    </div><p class="gnote">Funciona sem internet. O que você marca fica salvo só neste celular.<br>Versão 14/11 · fotos ao lado</p>`;
+    </div><p class="gnote">Funciona sem internet. O que você marca fica salvo só neste celular.<br>Versão 14/11 · fotos ao lado<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='roteiro'){
@@ -1005,12 +1006,17 @@ $('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPh
   shrink(f,u=>{gImg[id]=u;if(!gsave('img',gImg)){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),400)});
 $('#gzoom').addEventListener('click',()=>$('#gzoom').classList.remove('show'));
 $('#homebtn').addEventListener('click',()=>openGuide());
+$('#guide').addEventListener('click',async e=>{if(!e.target.closest('#updbtn'))return;e.target.textContent='Atualizando…';
+  try{if(navigator.onLine===false){showToast('Precisa de internet para atualizar');e.target.textContent='🔄 Atualizar app';return}
+    if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}
+    if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.update().catch(()=>{})))}}catch(_){}
+  location.replace(location.pathname+'?v='+Date.now())});
 $('#wback').addEventListener('click',()=>openGuide());
 
 openGuide();
 </script>
 <script>
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update().catch(()=>{})})}).catch(()=>{})})}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 </script>
 </body>
