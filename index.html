@@ -997,7 +997,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const t=todayISO(),start='2026-11-20';
     let cd='';{const diff=Math.round((new Date(start+'T12:00')-new Date(t+'T12:00'))/864e5);if(diff>1)cd=`Faltam ${diff} dias ✈️`;else if(diff===1)cd='É amanhã! ✈️';else if(GUIDE.days.some(x=>x.d===t))cd='Boa viagem! 🎢'}
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
-    const nRest=GUIDE.rests.length+gRest.length;
+    const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
     B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 01/12</small></span></button>
@@ -1066,12 +1066,12 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     let h=gTop('🍔 Restaurantes');
     h+=`<details class="gdet"><summary>⭐ Como ler as notas</summary>${GUIDE.legend.map(l=>`<div class="lg"><span class="nb ${nc(l[0].replace('abaixo de ','6,9').split('–')[0])}">${esc(l[0])}</span> ${esc(l[1])}</div>`).join('')}<div class="lg2">Notas da sua lista: recomendações subjetivas de sabor, diferencial e custo-benefício.</div></details>`;
     h+=`<details class="gdet"><summary>🏆 Top 15 da viagem</summary>${GUIDE.top.map((x,i)=>`<div class="top" data-rgo="${x.r}"><span class="tn">${i+1}</span><span class="tb"><b>${esc(x.n)}</b><small>${esc(x.w)}</small></span><span class="nb ${nc(x.nota)}">${esc(x.nota)}</span></div>`).join('')}<div class="lg2">* Produto sazonal, sujeito à confirmação no evento de 2026.</div></details>`;
-    GUIDE.days.forEach(d=>{const sd=srcOf(d.d);const rs=GUIDE.rests.filter(r=>r.day===sd&&!r.extra);if(!rs.length)return;const tt=dayBase(sd).title;
+    GUIDE.days.forEach(d=>{const sd=srcOf(d.d);const rs=GUIDE.rests.filter(r=>r.day===sd&&!r.extra&&!r.park);if(!rs.length)return;const tt=dayBase(sd).title;
       h+=`<div class="gsec">${dLabel(d)}${tt?` <small>· ${esc(tt)}</small>`:''}</div>`+rs.map(r=>rCard(r)).join('')});
     const mine=gRest.map((e,i)=>Object.assign({ui:i},e));
     if(mine.length)h+=`<div class="gsec">Adicionados por você</div>`+mine.map(foodCard).join('');
     h+=gForm?eatForm(false):`<button class="gbtn alt" data-addeat="1">+ Adicionar restaurante</button>`;
-    h+=`<div class="gsec">🎢 Comer dentro dos parques</div><div class="tiles">`+GUIDE.parks.map(p=>`<button class="tile" data-parkfood="${p.id}">${parkPic(p,1)}<b>${esc(p.n)}</b><small>${GUIDE.rests.filter(r=>r.park===p.id).length+p.food.length} lugares</small></button>`).join('')+`</div>`;
+    h+=`<p class="gnote">Os restaurantes dentro dos parques estão em 🎢 Parques → escolha o parque → 🍔 Onde comer.</p>`;
     B.innerHTML=h;return;
   }
 }
@@ -1142,7 +1142,7 @@ $('#guide').addEventListener('click',e=>{
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
   if(b=t.closest('[data-ropen]')){const id=b.dataset.ropen;gOpenR[id]=!gOpenR[id];const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;return}
-  if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
+  if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;const rr=GUIDE.rests.find(x=>x.id===id);if(rr&&rr.park){gPark=rr.park;gPTab='food';gView='park';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
   if(t.closest('[data-meswap]')){closeGuide();openWelcome(true);return}
   if(t.closest('[data-swapopen]')){gSwap=true;renderGuide();return}
   if(t.closest('[data-swapcancel]')){gSwap=false;renderGuide();return}
