@@ -323,6 +323,25 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .kchip{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin:3px 0 1px}
 .kchip.kq{background:#e3ecf8;color:#2a4f7f}.kchip.km{background:#f3e3f3;color:#7a2f7a}.kchip.ks{background:#fdf0d3;color:#7a5a00}.kchip.kc{background:#eee;color:#555}
 .sst{font-size:12px;color:var(--muted);margin:0 2px 6px}
+
+.bal{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:8px}
+.bal .r{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #eee4d8;font-size:14.5px}
+.bal .r:last-child{border-bottom:0}
+.amt{font-weight:700}.amt.pos{color:#256b37}.amt.neg{color:#a1231b}.amt.zero{color:var(--muted);font-weight:500}
+.sett{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:14.5px}
+.sett .tx{flex:1}
+.sett button{border:1px solid var(--ok);background:#e6f2e8;color:#256b37;border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700}
+.exp{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.exp .ic{font-size:22px;line-height:1}
+.exp .b{flex:1;min-width:0}.exp .b b{display:block;font-size:15px}.exp .b small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.exp .v{font-weight:700;font-size:15px;white-space:nowrap}
+.exp .del{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 0 0 4px}
+.exp.pay{background:#f6fbf7}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pchips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:14px;color:var(--ink)}
+.pchips button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.splitrow{display:flex;align-items:center;gap:8px;margin-top:6px}.splitrow span{flex:1;font-size:14px}.splitrow input{width:110px!important}
+.sumchk{font-size:13px;margin-top:6px;font-weight:600}.sumchk.bad{color:#a1231b}.sumchk.good{color:#256b37}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
@@ -934,9 +953,11 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="compras"><span class="e">🛍️</span><b>Compras</b><small>Listas de cada pessoa</small></button>
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
-    </div><p class="gnote"><span class="syncst"></span><br>Mercado e brinquedos feitos aparecem para todo o grupo. O resto fica salvo só neste celular.<br>Versão 14/11 · sincroniza com o grupo<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+     <button class="tile wide" data-g="contas"><span class="e">💸</span><span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas · quem deve para quem':'Dividir despesas e acertar quem deve'})()}</small></span></button>
+    </div><p class="gnote"><span class="syncst"></span><br>Mercado, brinquedos feitos e contas aparecem para todo o grupo. O resto fica salvo só neste celular.<br>Versão 14/11 · contas do grupo<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
+  if(gView==='contas'){renderContas(B);return}
   if(gView==='roteiro'){
     const t=todayISO();
     if(!gDay)gDay=(GUIDE.days.find(x=>x.d===t)||GUIDE.days[0]).d;
@@ -1021,7 +1042,7 @@ $('#guide').addEventListener('click',e=>{
   if(b=t.closest('[data-g]')){const g=b.dataset.g;
     if(g==='compras'){closeGuide();if(who==='Mercado')who='';openWelcome();return}
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
-    gView=g;gForm=false;renderGuide();$('#guide').scrollTop=0;return}
+    gView=g;gForm=false;exForm=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gsave('img',gImg);renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gsave('img',gImg);renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').classList.add('show');return}
@@ -1059,11 +1080,81 @@ $('#guide').addEventListener('click',async e=>{if(!e.target.closest('#updbtn'))r
   location.replace(location.pathname+'?v='+Date.now())});
 $('#wback').addEventListener('click',()=>openGuide());
 
+
+/* ===== Contas do grupo ===== */
+const GROUP=['Bia','Davi','Davi Júnior','Gabriela','Geovana','Lane'];
+let gEx=gload('ex',[]),exForm=null;
+function saveEx(){gsave('ex',gEx);syncChanged()}
+const cents=s=>{s=String(s||'').trim().replace(/[^\d,\.]/g,'');if(!s)return NaN;if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else s=s.replace(',','.');return Math.round(parseFloat(s)*100)};
+const usd=c=>'US$ '+(c/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function eqSplit(total,names){const n=names.length,base=Math.floor(total/n);let rem=total-base*n;const o={};names.forEach(p=>{o[p]=base+(rem>0?1:0);rem--});return o}
+function balances(){const b={};GROUP.forEach(p=>b[p]=0);gEx.forEach(e=>{if(e.del)return;b[e.payer]=(b[e.payer]||0)+e.amt;Object.keys(e.split||{}).forEach(p=>{b[p]=(b[p]||0)-e.split[p]})});return b}
+function settle(b){const cr=[],db=[];Object.keys(b).forEach(p=>{if(b[p]>0)cr.push([p,b[p]]);else if(b[p]<0)db.push([p,-b[p]])});cr.sort((a,c)=>c[1]-a[1]);db.sort((a,c)=>c[1]-a[1]);
+  const out=[];let i=0,j=0;while(i<db.length&&j<cr.length){const v=Math.min(db[i][1],cr[j][1]);if(v>0)out.push({from:db[i][0],to:cr[j][0],v});db[i][1]-=v;cr[j][1]-=v;if(!db[i][1])i++;if(!cr[j][1])j++}return out}
+function myName(){try{return localStorage.getItem(GK+'eu')||(who&&GROUP.includes(who)?who:'Bia')}catch(e){return 'Bia'}}
+function renderContas(B){
+  const L=gEx.filter(e=>!e.del).sort((a,c)=>c.t-a.t);const b=balances();const st=settle(b);
+  let h=gTop('Contas do grupo');
+  if(exForm){h+=exFormHtml();B.innerHTML=h;exUpd();return}
+  h+=`<button class="gbtn" data-exnew="1">+ Nova despesa</button><div class="syncst sst" style="margin-top:6px"></div>`;
+  h+=`<div class="gsec">💰 Saldo de cada um</div><div class="bal">${GROUP.map(p=>{const v=b[p]||0;return `<div class="r"><span>${esc(p)}</span><span class="amt ${v>0?'pos':v<0?'neg':'zero'}">${v>0?'recebe '+usd(v):v<0?'deve '+usd(-v):'em dia'}</span></div>`}).join('')}</div>`;
+  h+=`<div class="gsec">🤝 Como acertar</div>`+(st.length?st.map(s=>`<div class="sett"><span class="tx"><b>${esc(s.from)}</b> paga <b>${usd(s.v)}</b> para <b>${esc(s.to)}</b></span><button data-settle="${esc(s.from)}|${esc(s.to)}|${s.v}">Já pagou</button></div>`).join(''):`<div class="gempty">Ninguém deve nada a ninguém 🎉</div>`);
+  h+=`<div class="gsec">🧾 Despesas (${L.filter(e=>e.kind!=='pay').length})</div>`+(L.length?L.map(e=>{const ps=Object.keys(e.split||{});const dt=new Date(e.t);const ds=dt.getDate()+'/'+(dt.getMonth()+1);
+    if(e.kind==='pay')return `<div class="exp pay"><span class="ic">💸</span><div class="b"><b>${esc(e.payer)} pagou ${esc(ps[0]||'')}</b><small>Acerto de contas · ${ds}</small></div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`;
+    const all=ps.length===GROUP.length;const eq=ps.every(p=>Math.abs(e.split[p]-e.amt/ps.length)<1);
+    return `<div class="exp"><span class="ic">${e.ic||'🧾'}</span><div class="b"><b>${esc(e.desc)}</b><small>Pago por ${esc(e.payer)} · ${ds}</small><small>${all?'Dividido entre todos':'Dividido entre '+ps.map(esc).join(', ')}${eq?(ps.length>1?' · '+usd(Math.round(e.amt/ps.length))+' cada':''):''}</small>${eq?'':`<small>${ps.map(p=>esc(p)+' '+usd(e.split[p])).join(' · ')}</small>`}</div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`}).join(''):`<div class="gempty">Nenhuma despesa ainda.<br>Toque em “+ Nova despesa”.</div>`);
+  h+=`<p class="gnote">Valores em dólar. Todos do grupo veem as mesmas contas.</p>`;
+  B.innerHTML=h;
+}
+const EXIC=['🛒','🍔','🍦','🎢','🚗','⛽','🅿️','🏠','🎁','🧾'];
+function exFormHtml(){const f=exForm;
+  return `<form class="gform" id="exf" autocomplete="off">
+  <label>O que foi *</label><input id="ex_d" value="${esc(f.desc)}" placeholder="Ex.: Walmart, água no parque, jantar">
+  <div class="pchips" id="ex_ic">${EXIC.map(i=>`<button type="button" data-exic="${i}" class="${f.ic===i?'on':''}">${i}</button>`).join('')}</div>
+  <label>Valor total (US$) *</label><input id="ex_v" inputmode="decimal" value="${esc(f.v)}" placeholder="0,00">
+  <label>Quem pagou</label><div class="pchips">${GROUP.map(p=>`<button type="button" data-expayer="${esc(p)}" class="${f.payer===p?'on':''}">${esc(p)}</button>`).join('')}</div>
+  <label>Dividir entre <small>(toque para tirar ou pôr)</small></label><div class="pchips">${GROUP.map(p=>`<button type="button" data-exsplit="${esc(p)}" class="${f.who.includes(p)?'on':''}">${esc(p)}</button>`).join('')}</div>
+  <div class="ptabs" style="margin-top:10px"><button type="button" data-exmode="eq" class="${f.mode==='eq'?'on':''}">Partes iguais</button><button type="button" data-exmode="val" class="${f.mode==='val'?'on':''}">Valores diferentes</button></div>
+  <div id="ex_rows">${f.mode==='val'?f.who.map(p=>`<div class="splitrow"><span>${esc(p)}</span><input data-exval="${esc(p)}" inputmode="decimal" value="${esc(f.vals[p]||'')}" placeholder="0,00"></div>`).join(''):''}</div>
+  <div class="sumchk" id="ex_sum"></div><div class="ferr" id="ex_err" style="color:#a1231b;font-size:13px"></div>
+  <button class="gbtn" type="submit">Salvar despesa</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
+function exUpd(){const f=exForm;if(!f)return;const el=$('#ex_sum');if(!el)return;const tot=cents(f.v);
+  if(!f.who.length){el.className='sumchk bad';el.textContent='Escolha pelo menos uma pessoa.';return}
+  if(isNaN(tot)||tot<=0){el.className='sumchk';el.textContent='';return}
+  if(f.mode==='eq'){el.className='sumchk good';el.textContent=f.who.length>1?`${usd(Math.round(tot/f.who.length))} para cada um (${f.who.length} pessoas)`:`Tudo para ${f.who[0]}`;return}
+  const s=f.who.reduce((a,p)=>a+(cents(f.vals[p])||0),0),d=tot-s;
+  el.className='sumchk '+(d===0?'good':'bad');el.textContent=d===0?'✓ A soma bate com o total':(d>0?`Faltam ${usd(d)} para fechar o total`:`Passou ${usd(-d)} do total`)}
+function exSync(){const f=exForm;if(!f)return;const d=$('#ex_d'),v=$('#ex_v');if(d)f.desc=d.value;if(v)f.v=v.value;document.querySelectorAll('[data-exval]').forEach(i=>f.vals[i.dataset.exval]=i.value)}
+$('#guide').addEventListener('input',e=>{if(!exForm)return;if(e.target.closest('#exf')){exSync();exUpd()}});
+$('#guide').addEventListener('click',e=>{const t=e.target;let b;
+  if(gView!=='contas')return;
+  if(t.closest('[data-exnew]')){exForm={desc:'',v:'',ic:'🧾',payer:myName(),who:GROUP.slice(),mode:'eq',vals:{}};renderGuide();$('#guide').scrollTop=0;setTimeout(()=>{const i=$('#ex_d');if(i)i.focus()},50);e.stopImmediatePropagation();return}
+  if(!exForm&&(b=t.closest('[data-exdel]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Apagar?';b.style.color='#a1231b';b.style.fontSize='12.5px';b.style.fontWeight='700';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='✕';b.removeAttribute('style')}},3500);e.stopImmediatePropagation();return}
+    const ex=gEx.find(x=>x.id===b.dataset.exdel);if(ex){ex.del=1;ex.t2=Date.now();saveEx();renderGuide();showToast('Despesa apagada',()=>{ex.del=0;ex.t2=Date.now();saveEx();renderGuide()})}e.stopImmediatePropagation();return}
+  if(!exForm&&(b=t.closest('[data-settle]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Confirmar?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Já pagou'}},3500);e.stopImmediatePropagation();return}const [fr,to,v]=b.dataset.settle.split('|');const now=Date.now();
+    gEx.push({id:'x'+now+Math.floor(Math.random()*999),kind:'pay',desc:'Acerto',amt:+v,payer:fr,split:{[to]:+v},t:now});saveEx();renderGuide();showToast(`💸 ${fr} pagou ${usd(+v)} para ${to}`);e.stopImmediatePropagation();return}
+  if(!exForm)return;
+  exSync();
+  if(b=t.closest('[data-exic]')){exForm.ic=b.dataset.exic;renderGuide();e.stopImmediatePropagation();return}
+  if(b=t.closest('[data-expayer]')){exForm.payer=b.dataset.expayer;try{localStorage.setItem(GK+'eu',exForm.payer)}catch(_){}renderGuide();e.stopImmediatePropagation();return}
+  if(b=t.closest('[data-exsplit]')){const p=b.dataset.exsplit,w=exForm.who;if(w.includes(p))exForm.who=w.filter(x=>x!==p);else exForm.who=GROUP.filter(x=>w.includes(x)||x===p);renderGuide();e.stopImmediatePropagation();return}
+  if(b=t.closest('[data-exmode]')){exForm.mode=b.dataset.exmode;renderGuide();e.stopImmediatePropagation();return}
+  if(t.closest('[data-cancel]')){exForm=null;renderGuide();e.stopImmediatePropagation();return}
+},true);
+$('#guide').addEventListener('submit',e=>{if(e.target.id!=='exf')return;e.preventDefault();e.stopImmediatePropagation();exSync();const f=exForm,err=$('#ex_err');
+  const tot=cents(f.v);if(!f.desc.trim()){err.textContent='Escreva o que foi.';return}
+  if(isNaN(tot)||tot<=0){err.textContent='Coloque o valor.';return}
+  if(!f.who.length){err.textContent='Escolha quem vai dividir.';return}
+  let split;if(f.mode==='eq')split=eqSplit(tot,f.who);else{split={};let s=0;for(const p of f.who){const c=cents(f.vals[p])||0;if(c<0){err.textContent='Valor inválido.';return}split[p]=c;s+=c}if(s!==tot){err.textContent='A soma por pessoa precisa bater com o total.';return}Object.keys(split).forEach(p=>{if(!split[p])delete split[p]})}
+  const now=Date.now();gEx.push({id:'x'+now+Math.floor(Math.random()*999),kind:'exp',desc:f.desc.trim(),ic:f.ic,amt:tot,payer:f.payer,split,t:now});
+  saveEx();exForm=null;renderGuide();$('#guide').scrollTop=0;showToast('🧾 Despesa salva');
+},true);
+
 /* ===== Sincronização do grupo (Firebase Realtime Database, REST) ===== */
 const SYNC=(()=>{
   const BASE='https://orlando-2026-a171b-default-rtdb.firebaseio.com/trips/orl26-646c3697a123f642';
   const QK='orl-sync-q',SK='orl-sync-snap',LK='orl-sync-last';
-  let q=[],snap={mkt:{},md:{},rd:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
+  let q=[],snap={mkt:{},md:{},rd:{},ex:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
   try{q=JSON.parse(localStorage.getItem(QK)||'[]')||[]}catch(e){q=[]}
   try{snap=Object.assign(snap,JSON.parse(localStorage.getItem(SK)||'{}')||{})}catch(e){}
   try{last=+localStorage.getItem(LK)||0}catch(e){}
@@ -1081,6 +1172,8 @@ const SYNC=(()=>{
     // comprados do mercado
     const ids=mktIds();
     ids.forEach(id=>{const d=done[id]?1:0;if((snap.md[id]||0)!==d){snap.md[id]=d;put('md/'+id,{v:d,t:now})}});
+    // contas do grupo
+    (gEx||[]).forEach(x=>{const tt=Math.max(x.t||0,x.t2||0);if((snap.ex[x.id]||0)!==tt){snap.ex[x.id]=tt;put('ex/'+x.id,x)}});
     // brinquedos feitos
     const rc={};Object.keys(gRides||{}).forEach(pk=>Object.keys(gRides[pk]||{}).forEach(i=>{if(gRides[pk][i])rc[pk+'_'+i]=1}));
     Object.keys(rc).forEach(k=>{if(!snap.rd[k]){snap.rd[k]=1;put('rd/'+k,{v:1,t:now})}});
@@ -1110,6 +1203,10 @@ const SYNC=(()=>{
     Object.keys(R).forEach(k=>{if(pending('rd/'+k))return;const v=R[k]&&R[k].v?1:0;const j=k.lastIndexOf('_'),pk=k.slice(0,j),i=k.slice(j+1);
       const m=gRides[pk]=gRides[pk]||{};if(v&&!m[i]){m[i]=1;chg=true}else if(!v&&m[i]){delete m[i];chg=true}snap.rd[k]=v});
     if(chg)gsave('rides',gRides);
+    let ech=false;const E=data.ex||{};
+    Object.keys(E).forEach(id=>{if(pending('ex/'+id))return;const r=E[id];if(!r)return;const tt=Math.max(r.t||0,r.t2||0);const loc=gEx.find(x=>x.id===id);
+      if(!loc){gEx.push(r);ech=true}else{const lt=Math.max(loc.t||0,loc.t2||0);if(tt>lt){Object.assign(loc,r);ech=true}}snap.ex[id]=tt});
+    if(ech){try{localStorage.setItem(GK+'ex',JSON.stringify(gEx))}catch(e){}chg=true}
     last=Date.now();ok=true;sv();applying=false;
     if(ch||dch){rebuild();render()}
     if(chg&&$('#guide').classList.contains('show')){const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y}
