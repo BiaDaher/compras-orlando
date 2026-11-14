@@ -342,6 +342,9 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .pchips button.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .splitrow{display:flex;align-items:center;gap:8px;margin-top:6px}.splitrow span{flex:1;font-size:14px}.splitrow input{width:110px!important}
 .sumchk{font-size:13px;margin-top:6px;font-weight:600}.sumchk.bad{color:#a1231b}.sumchk.good{color:#256b37}
+.mechip{display:flex;align-items:center;gap:8px;margin:0 auto 4px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 14px 4px 4px;font-size:14px;color:var(--ink);font-weight:600}
+.mechip .av{width:32px;height:32px;font-size:19px}
+.mechip small{color:var(--muted);font-weight:400}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
@@ -374,8 +377,8 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 <main id="list"></main>
 <div class="welcome" id="welcome">
  <button class="wback" id="wback">‹ Guia da viagem</button>
- <h2>Quem está comprando?</h2>
- <p class="lead">Orlando 2026 · toque no seu nome para abrir a sua lista</p>
+ <h2 id="wtitle">Quem está comprando?</h2>
+ <p class="lead" id="wlead">Orlando 2026 · toque no seu nome para abrir a sua lista</p>
  <div class="pgrid" id="pgrid"></div>
 </div>
 <div class="sheet iconsheet" id="iconsheet">
@@ -498,13 +501,17 @@ const LISTS=()=>{const L=DATA.lists.slice();custom.forEach(c=>{if(c.who&&!L.incl
 if(who&&!DATA.lists.includes(who))who=null;
 const inWho=i=>!who||i.who===who;
 function avHtml(n){const a=avatars[n];if(a&&a.img)return `<img src="${a.img}" alt="">`;return esc((a&&a.e)||DEFAV[n]||'🙂')}
+let wStart=false;
 function renderWelcome(){
   const L=LISTS().filter(n=>n!=='Mercado');
+  $('#wtitle').textContent=wStart?'Quem é você?':'Quem está comprando?';
+  $('#wlead').textContent=wStart?'Orlando 2026 · toque no seu nome para entrar no guia':'Orlando 2026 · toque no seu nome para abrir a sua lista';
+  $('#wback').style.display=wStart?'none':'';
   $('#pgrid').innerHTML=L.map(n=>{const c=ITEMS.filter(i=>i.who===n).length;
     return `<div class="pcard" data-w="${esc(n)}" role="button"><button class="edit" data-e="${esc(n)}" aria-label="Trocar ícone">✏️</button><div class="av">${avHtml(n)}</div><b>${esc(n)}</b><small>${n==='Mercado'?(c?c+' itens':'Lista do grupo'):(c?c+' produtos':'Lista ainda vazia')}</small></div>`}).join('')
-   +`<div class="pcard all" data-w="" role="button"><div class="av">👥</div><b>Todos</b><small>Ver todas as listas</small></div>`;
+   +(wStart?'':`<div class="pcard all" data-w="" role="button"><div class="av">👥</div><b>Todos</b><small>Ver todas as listas</small></div>`);
 }
-function openWelcome(){renderWelcome();$('#welcome').classList.add('show');window.scrollTo(0,0)}
+function openWelcome(st){wStart=!!st;renderWelcome();$('#welcome').classList.add('show');window.scrollTo(0,0)}
 function light(i,p){
   if(i.meta==null||p==null)return null;
   if(p<=i.meta+1e-9)return {c:'g',t:'VERDE',d:'comprar'};
@@ -784,6 +791,7 @@ function closeIcon(){$('#iconsheet').classList.remove('show');icFor=null;renderW
 $('#pgrid').addEventListener('click',e=>{
   const ed=e.target.closest('.edit');if(ed){openIcon(ed.dataset.e);return}
   const c=e.target.closest('.pcard');if(!c)return;
+  if(wStart){const n=c.dataset.w;try{localStorage.setItem(GK+'eu',n)}catch(_){}who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}wStart=false;rebuild();openGuide();return}
   who=c.dataset.w;try{localStorage.setItem(PERS_KEY,who)}catch(_){}
   $('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);
 });
@@ -946,7 +954,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     let cd='';{const diff=Math.round((new Date(start+'T12:00')-new Date(t+'T12:00'))/864e5);if(diff>1)cd=`Faltam ${diff} dias ✈️`;else if(diff===1)cd='É amanhã! ✈️';else if(GUIDE.days.some(x=>x.d===t))cd='Boa viagem! 🎢'}
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.length,0);
     const nRest=GUIDE.rests.length+gRest.length;
-    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
+    const me=myName();B.innerHTML=`<button class="mechip" data-meswap="1"><span class="av">${avHtml(me)}</span>Olá, ${esc(me)} <small>· trocar</small></button><div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 01/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
@@ -1048,6 +1056,7 @@ $('#guide').addEventListener('click',e=>{
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').classList.add('show');return}
   if(b=t.closest('[data-ropen]')){const id=b.dataset.ropen;gOpenR[id]=!gOpenR[id];const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;return}
   if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
+  if(t.closest('[data-meswap]')){closeGuide();openWelcome(true);return}
   if(b=t.closest('[data-day]')){gDay=b.dataset.day;gForm=false;renderGuide();return}
   if(b=t.closest('[data-parkfood]')){gPark=b.dataset.parkfood;gPTab='food';gView='park';gForm=false;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-park]')){gPark=b.dataset.park;gPTab='rides';gLv='';gView='park';gForm=false;renderGuide();$('#guide').scrollTop=0;return}
@@ -1138,7 +1147,7 @@ $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   if(!exForm)return;
   exSync();
   if(b=t.closest('[data-exic]')){exForm.ic=b.dataset.exic;renderGuide();e.stopImmediatePropagation();return}
-  if(b=t.closest('[data-expayer]')){exForm.payer=b.dataset.expayer;try{localStorage.setItem(GK+'eu',exForm.payer)}catch(_){}renderGuide();e.stopImmediatePropagation();return}
+  if(b=t.closest('[data-expayer]')){exForm.payer=b.dataset.expayer;renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exsplit]')){const p=b.dataset.exsplit,w=exForm.who;if(w.includes(p))exForm.who=w.filter(x=>x!==p);else exForm.who=GROUP.filter(x=>w.includes(x)||x===p);renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exmode]')){exForm.mode=b.dataset.exmode;renderGuide();e.stopImmediatePropagation();return}
   if(t.closest('[data-cancel]')){exForm=null;renderGuide();e.stopImmediatePropagation();return}
@@ -1245,7 +1254,7 @@ const SYNC=(()=>{
 })();
 function syncChanged(){try{clearTimeout(window._sct);window._sct=setTimeout(()=>SYNC.diff(),60)}catch(e){}}
 
-openGuide();
+openWelcome(true);
 SYNC.start();
 </script>
 <script>
