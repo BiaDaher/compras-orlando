@@ -954,7 +954,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     let cd='';{const diff=Math.round((new Date(start+'T12:00')-new Date(t+'T12:00'))/864e5);if(diff>1)cd=`Faltam ${diff} dias ✈️`;else if(diff===1)cd='É amanhã! ✈️';else if(GUIDE.days.some(x=>x.d===t))cd='Boa viagem! 🎢'}
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.length,0);
     const nRest=GUIDE.rests.length+gRest.length;
-    const me=myName();B.innerHTML=`<button class="mechip" data-meswap="1"><span class="av">${avHtml(me)}</span>Olá, ${esc(me)} <small>· trocar</small></button><div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
+    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 01/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
@@ -1254,7 +1254,7 @@ const SYNC=(()=>{
 })();
 function syncChanged(){try{clearTimeout(window._sct);window._sct=setTimeout(()=>SYNC.diff(),60)}catch(e){}}
 
-openWelcome(true);
+openGuide();
 SYNC.start();
 </script>
 <script>
