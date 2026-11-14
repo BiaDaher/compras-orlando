@@ -317,6 +317,9 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .top{display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px dashed #eee4d8;cursor:pointer}
 .top .tn{width:22px;text-align:center;font-weight:700;color:var(--brand)}.top .tb{flex:1;min-width:0}.top .tb b{display:block;font-size:14px}.top .tb small{color:var(--muted);font-size:12px}
 .gsec small{font:12.5px sans-serif;color:var(--muted)}
+.tile .timg{width:100%;height:96px;border-radius:12px}
+.tile .timg.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #cdbcab;background:#faf6f1;color:var(--brand);font-size:24px;box-sizing:border-box}
+.tile .timg.empty small{font-size:11.5px;font-weight:600;margin-top:4px}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
@@ -950,7 +953,7 @@ function renderGuide(){
   }
   if(gView==='parques'){
     B.innerHTML=gTop('Parques')+`<p class="ptip" style="margin-bottom:10px">Escolha o parque para ver a ordem dos brinquedos e onde comer. Situação conferida em ${GUIDE.updated}.</p>`+
-    ['Disney','Universal'].map(g=>`<div class="gsec">${g}</div><div class="tiles">`+GUIDE.parks.filter(p=>p.g===g).map(p=>{const dn=Object.keys(gRides[p.id]||{}).length;return `<button class="tile" data-park="${p.id}">${gImg['p:'+p.id]?`<img class="timg" src="${gImg['p:'+p.id]}" alt="">`:`<span class="e">${p.e}</span>`}<b>${esc(p.n)}</b><small>${p.rides.length} atrações${dn?' · '+dn+' feitas':''}</small></button>`}).join('')+`</div>`).join('');
+    ['Disney','Universal'].map(g=>`<div class="gsec">${g}</div><div class="tiles">`+GUIDE.parks.filter(p=>p.g===g).map(p=>{const dn=Object.keys(gRides[p.id]||{}).length;return `<button class="tile" data-park="${p.id}">${parkPic(p)}<b>${esc(p.n)}</b><small>${p.rides.length} atrações${dn?' · '+dn+' feitas':''}</small></button>`}).join('')+`</div>`).join('');
     return;
   }
   if(gView==='park'){
@@ -980,7 +983,7 @@ function renderGuide(){
     const mine=gRest.map((e,i)=>Object.assign({ui:i},e));
     if(mine.length)h+=`<div class="gsec">Adicionados por você</div>`+mine.map(foodCard).join('');
     h+=gForm?eatForm(false):`<button class="gbtn alt" data-addeat="1">+ Adicionar restaurante</button>`;
-    h+=`<div class="gsec">🎢 Comer dentro dos parques</div><div class="tiles">`+GUIDE.parks.map(p=>`<button class="tile" data-parkfood="${p.id}"><span class="e">${p.e}</span><b>${esc(p.n)}</b><small>${GUIDE.rests.filter(r=>r.park===p.id).length+p.food.length} lugares</small></button>`).join('')+`</div>`;
+    h+=`<div class="gsec">🎢 Comer dentro dos parques</div><div class="tiles">`+GUIDE.parks.map(p=>`<button class="tile" data-parkfood="${p.id}">${parkPic(p,1)}<b>${esc(p.n)}</b><small>${GUIDE.rests.filter(r=>r.park===p.id).length+p.food.length} lugares</small></button>`).join('')+`</div>`;
     B.innerHTML=h;return;
   }
 }
@@ -988,6 +991,7 @@ let gImg=gload('img',{}),gPhId=null;
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
 function phSlot(id,cls){return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
 function phAct(id,q){if(!(id&&gImg[id]))return '';return `<div class="pha"><button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button></div>`}
+function parkPic(p,ro){const im=gImg['p:'+p.id];if(im)return `<img class="timg" src="${im}" alt="">`;return ro?`<span class="e">${p.e}</span>`:`<span class="timg empty" data-ph="p:${p.id}">📷<small>Pôr foto</small></span>`}
 let gOpenR={};
 function nc(n){const v=parseFloat(String(n).replace(',','.'));return v>=9.5?'n1':v>=9?'n2':v>=8?'n3':v>=7?'n4':'n5'}
 function rBest(r){let b=null;r.groups.forEach(g=>g.items.forEach(i=>{const v=parseFloat(i.nota.replace(',','.'));if(!b||v>b.v)b={i,v}}));return b&&b.i}
