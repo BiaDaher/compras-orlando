@@ -240,6 +240,11 @@ header{position:sticky}
 .pspot .b b{font-weight:600;font-size:14.5px}
 .rd2 .pt{display:block;font-size:12px;line-height:1.3;color:var(--muted);font-style:italic;margin:1px 0 2px}
 .myday{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);margin:12px 2px 6px}
+.nfrow{display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:13px;color:var(--muted)}
+.nfbtn{border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:12px;padding:10px 12px;font:inherit;font-weight:600;width:100%;text-align:left}
+.nfbtn small{color:var(--muted);font-weight:400}
+.nfth{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line);flex:none}
+.nfth.sm{width:40px;height:40px;margin-right:10px}
 .ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
 .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center}
 .ev .edt{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 2px}
@@ -1176,7 +1181,7 @@ $('#guide').addEventListener('click',e=>{
   if(b=t.closest('[data-g]')){const g=b.dataset.g;
     if(g==='compras'){closeGuide();if(who==='Mercado')who='';openWelcome();return}
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
-    gView=g;gForm=false;exForm=null;myWho=null;myForm=null;myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
+    if(myForm&&myForm.id&&gImg['my:'+myForm.id]&&!Object.values(gMy).some(L=>L.some(x=>x.id===myForm.id))){delete gImg['my:'+myForm.id];gImgSave()}if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}gView=g;gForm=false;exForm=null;myWho=null;myForm=null;myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
@@ -1222,8 +1227,8 @@ $('#guide').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
     if(gView==='park'){it.park=gPark;gEat.push(it);gsave('eat',gEat)}else{gRest.push(it);gsave('rest',gRest)}
     gForm=false;renderGuide();showToast('＋ '+it.n+' adicionado');return}
 });
-$('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPhId)return;const id=gPhId;
-  shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),400)});
+$('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPhId)return;const id=gPhId;const big=/^(nf|my):/.test(id);if(gView==='meus')myKeep();if(exForm)exSync();
+  shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast(big?'🧾 Nota anexada':'📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),big?1400:400)});
 $('#gzoom').addEventListener('click',e=>{const z=$('#gzoom'),id=z.dataset.id;z.classList.remove('show');
   if(e.target.id==='gz_ch'&&id){gPhId=id;$('#gphoto').value='';$('#gphoto').click();return}
   if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];gImgSave();const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
@@ -1259,7 +1264,7 @@ function renderContas(B){
   h+=`<div class="gsec">🧾 Despesas (${L.filter(e=>e.kind!=='pay').length})</div>`+(L.length?L.map(e=>{const ps=Object.keys(e.split||{});const dt=new Date(e.t);const ds=dt.getDate()+'/'+(dt.getMonth()+1);
     if(e.kind==='pay')return `<div class="exp pay"><span class="ic">💸</span><div class="b"><b>${esc(e.payer)} pagou ${esc(ps[0]||'')}</b><small>Acerto de contas · ${ds}</small></div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`;
     const all=ps.length===GROUP.length;const allNow=!all&&ps.length===GROUP.length-Object.keys(JOIN).length&&Object.keys(JOIN).every(p=>!ps.includes(p));const eq=ps.every(p=>Math.abs(e.split[p]-e.amt/ps.length)<1);
-    return `<div class="exp"><span class="ic">${e.ic||'🧾'}</span><div class="b"><b>${esc(e.desc)}</b><small>Pago por ${esc(e.payer)} · ${ds}</small><small>${all?'Dividido entre todos':allNow?'Dividido entre todos (antes de Yuri e Serena chegarem)':'Dividido entre '+ps.map(esc).join(', ')}${eq?(ps.length>1?' · '+usd(Math.round(e.amt/ps.length))+' cada':''):''}</small>${eq?'':`<small>${ps.map(p=>esc(p)+' '+usd(e.split[p])).join(' · ')}</small>`}</div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`}).join(''):`<div class="gempty">Nenhuma despesa ainda.<br>Toque em “+ Nova despesa”.</div>`);
+    return `<div class="exp">${gImg['nf:'+e.id]?`<img class="nfth sm" src="${gImg['nf:'+e.id]}" data-zoom="nf:${e.id}" alt="">`:`<span class="ic">${e.ic||'🧾'}</span>`}<div class="b"><b>${esc(e.desc)}</b><small>Pago por ${esc(e.payer)} · ${ds}</small><small>${all?'Dividido entre todos':allNow?'Dividido entre todos (antes de Yuri e Serena chegarem)':'Dividido entre '+ps.map(esc).join(', ')}${eq?(ps.length>1?' · '+usd(Math.round(e.amt/ps.length))+' cada':''):''}</small>${eq?'':`<small>${ps.map(p=>esc(p)+' '+usd(e.split[p])).join(' · ')}</small>`}</div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`}).join(''):`<div class="gempty">Nenhuma despesa ainda.<br>Toque em “+ Nova despesa”.</div>`);
   h+=`<p class="gnote">Valores em dólar. Todos do grupo veem as mesmas contas.</p>`;
   B.innerHTML=h;
 }
@@ -1268,6 +1273,7 @@ let gMy=gload('my',{}),myForm=null,myWho=null,myPinFor=null,myPinNew=null,gPin=g
 function pinHash(n,p){let h=5381;const t=n+'|'+p+'|orl26';for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))>>>0;return h.toString(36)}
 function saveMy(){gsave('my',gMy)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&myWho&&gPin[myWho]){myWho=null;if(gView==='meus')renderGuide()}});
+function myKeep(){const f=myForm=myForm||{};const d=$('#my_d'),v=$('#my_v'),o=$('#my_pl');if(d)f.d=d.value;if(v)f.v=v.value;if(o)f.otherv=o.value}
 function myDefDay(){const t=todayISO();const ds=GUIDE.days.map(z=>z.d);return ds.includes(t)?t:(t<ds[0]?ds[0]:ds[ds.length-1])}
 function myClean(t){t=String(t||'').replace(/^[^A-Za-zÀ-ÿ0-9]+/,'').split(' — ')[0].split(': ')[0].replace(/^(Saída para o |Chegada ao |Passeio por |Almoço no |Almoço na |Jantar no |Jantar na |Café da manhã no )/,'').trim();return t}
 function myPlaces(d){const x=GUIDE.days.find(z=>z.d===d);if(!x)return [];const out=[];const add=n=>{n=(n||'').trim();if(n&&!out.includes(n))out.push(n)};
@@ -1289,11 +1295,12 @@ function renderMeus(B){
   const me=myWho;const T=myTotals(me);
   let h=gTop('👛 Gastos de '+me);
   h+=`<div class="pchips" style="margin:2px 0 10px"><button type="button" data-myswitch="1">↩ Trocar de perfil</button><button type="button" data-mypinset="${esc(me)}">${gPin[me]?'🔑 Mudar senha':'🔒 Criar senha'}</button></div>`;
-  const mf=myForm=myForm||{};if(!mf.day)mf.day=myDefDay();const opts=myPlaces(mf.day);if(mf.pl==null)mf.pl='';
+  const mf=myForm=myForm||{};if(!mf.day)mf.day=myDefDay();if(!mf.id)mf.id='m'+Date.now()+Math.floor(Math.random()*999);const nfk='my:'+mf.id;const opts=myPlaces(mf.day);if(mf.pl==null)mf.pl='';
   h+=`<form class="gform" id="myf" autocomplete="off"><label>Dia</label><div class="chips" id="mydays" style="padding-bottom:6px">${GUIDE.days.map(z=>{const [y,m,d]=z.d.split('-');return `<button type="button" class="chip${z.d===mf.day?' on':''}" data-myday="${z.d}"><small>${z.w}</small><b>${+d}</b><small>${MES[m-1]}</small></button>`}).join('')}</div>
     <label>Onde <small>(do roteiro do dia)</small></label><div class="pchips">${opts.map(o=>`<button type="button" data-mypl="${esc(o)}" class="${mf.pl===o?'on':''}">${esc(o)}</button>`).join('')}<button type="button" data-mypl="__outro" class="${mf.other?'on':''}">+ Outro lugar</button></div>
     ${mf.other?`<input id="my_pl" value="${esc(mf.otherv||'')}" placeholder="Nome do lugar" style="margin-top:8px">`:''}
     <div class="two"><div style="flex:2"><label>O que foi *</label><input id="my_d" value="${esc(mf.d||'')}" placeholder="Ex.: picolé, lanche, ímã"></div><div><label>Valor (US$) *</label><input id="my_v" value="${esc(mf.v||'')}" inputmode="decimal" placeholder="0,00"></div></div>
+    <div class="nfrow">${gImg[nfk]?`<img class="nfth" src="${gImg[nfk]}" data-zoom="${nfk}" alt=""><span>🧾 Nota anexada · toque para ver</span>`:`<button type="button" class="nfbtn" data-ph="${nfk}">📷 Foto da nota fiscal <small>(opcional)</small></button>`}</div>
     <div class="ferr" id="my_err" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit">+ Anotar gasto</button></form>`;
   h+=`<div class="gsec">📊 Resumo de ${esc(me)}</div><div class="bal">
     <div class="r"><span>Gastos pessoais anotados</span><span class="amt">${usd(T.pes)}</span></div>
@@ -1302,7 +1309,7 @@ function renderMeus(B){
     <div class="r"><span><b>Total da viagem</b></span><span class="amt"><b>${usd(T.all)}</b></span></div></div>`;
   const dk=x=>{if(x.day)return x.day;const d=new Date(x.t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};const L=T.L.slice().sort((a,c)=>(dk(c)>dk(a)?1:dk(c)<dk(a)?-1:c.t-a.t));const byDay={};L.forEach(x=>{(byDay[dk(x)]=byDay[dk(x)]||[]).push(x)});
   h+=`<div class="gsec">🧾 Gastos pessoais (${L.length})</div>`+(L.length?Object.keys(byDay).map(k=>{const xs=byDay[k];const [y,m,d]=k.split('-');const tot=xs.reduce((a,x)=>a+x.amt,0);
-    const wd=(GUIDE.days.find(z=>z.d===k)||{}).w;return `<div class="myday"><span>${wd?wd+' ':''}${+d}/${m}</span><span>${usd(tot)}</span></div>`+xs.map(x=>{const dt=new Date(x.t);return `<div class="exp"><div class="b"><b>${esc(x.desc)}</b><small>${x.pl?'📍 '+esc(x.pl):''}</small></div><span class="v">${usd(x.amt)}</span><button class="del" data-mydel="${x.id}" aria-label="Apagar">✕</button></div>`}).join('')}).join(''):`<div class="gempty">Nada anotado ainda. Comprou um picolé? Anote aqui em cima.</div>`);
+    const wd=(GUIDE.days.find(z=>z.d===k)||{}).w;return `<div class="myday"><span>${wd?wd+' ':''}${+d}/${m}</span><span>${usd(tot)}</span></div>`+xs.map(x=>{const dt=new Date(x.t);return `<div class="exp">${gImg['my:'+x.id]?`<img class="nfth sm" src="${gImg['my:'+x.id]}" data-zoom="my:${x.id}" alt="">`:''}<div class="b"><b>${esc(x.desc)}</b><small>${x.pl?'📍 '+esc(x.pl):''}</small></div><span class="v">${usd(x.amt)}</span><button class="del" data-mydel="${x.id}" aria-label="Apagar">✕</button></div>`}).join('')}).join(''):`<div class="gempty">Nada anotado ainda. Comprou um picolé? Anote aqui em cima.</div>`);
   h+=`<p class="gnote">Fica só neste celular: os gastos pessoais não vão para o grupo. Despesas para dividir vão em 💸 Contas do grupo.</p>`;
   B.innerHTML=h}
 $('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.target;let b;
@@ -1313,7 +1320,7 @@ $('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.targ
   if(t.closest('[data-mypinoff]')){delete gPin[myPinNew];gsave('mypin',gPin);myPinNew=null;renderGuide();showToast('Senha removida');return}
   if(t.closest('[data-myforgot]')){if(!t.dataset.sure){t.dataset.sure=1;t.textContent='Para recuperar, a senha e os gastos pessoais de '+myPinFor+' neste celular são apagados. Toque de novo para confirmar.';return}
     const n=myPinFor;delete gPin[n];gsave('mypin',gPin);delete gMy[n];saveMy();myPinFor=null;myWho=n;renderGuide();showToast('Senha e gastos de '+n+' apagados');return}
-  const keep=()=>{const f=myForm=myForm||{};const d=$('#my_d'),v=$('#my_v'),o=$('#my_pl');if(d)f.d=d.value;if(v)f.v=v.value;if(o)f.otherv=o.value};
+  const keep=myKeep;
   if(b=t.closest('[data-myday]')){keep();myForm.day=b.dataset.myday;myForm.pl='';myForm.other=false;const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;const c=$('#mydays .chip.on');if(c)c.scrollIntoView({inline:'center',block:'nearest'});return}
   if(b=t.closest('[data-mypl]')){keep();const v=b.dataset.mypl;if(v==='__outro'){myForm.other=!myForm.other;myForm.pl=''}else{myForm.pl=myForm.pl===v?'':v;myForm.other=false}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;if(myForm.other){const i=$('#my_pl');if(i)i.focus()}return}
   if(b=t.closest('[data-mydel]')){const me=myWho;const x=(gMy[me]||[]).find(z=>z.id===b.dataset.mydel);if(x){x.del=1;saveMy();renderGuide();showToast('Gasto apagado',()=>{x.del=0;saveMy();renderGuide()})}return}
@@ -1323,8 +1330,8 @@ $('#guide').addEventListener('submit',e=>{const fid=e.target.id;
   if(fid==='mypinf'){e.preventDefault();const a=$('#mp_1').value.trim(),c=$('#mp_2').value.trim();if(!/^\d{4}$/.test(a)){$('#mp_err').textContent='Use 4 números.';return}if(a!==c){$('#mp_err').textContent='As duas senhas não são iguais.';return}
     gPin[myPinNew]=pinHash(myPinNew,a);gsave('mypin',gPin);myPinNew=null;renderGuide();showToast('🔒 Senha criada');return}
   if(fid!=='myf')return;e.preventDefault();const d=$('#my_d').value.trim(),v=cents($('#my_v').value);
-  if(!d){$('#my_err').textContent='Escreva o que foi.';return}if(isNaN(v)||v<=0){$('#my_err').textContent='Digite o valor, ex.: 6,50';return}
-  const me=myWho;if(!me)return;const mf=myForm||{};const pl=mf.other?(($('#my_pl')||{}).value||'').trim():(mf.pl||'');(gMy[me]=gMy[me]||[]).push({id:'m'+Date.now()+Math.floor(Math.random()*999),desc:d,amt:v,day:mf.day||myDefDay(),pl,t:Date.now()});saveMy();myForm={day:mf.day,pl:mf.pl,other:mf.other,otherv:mf.otherv};renderGuide();showToast('👛 '+d+' · '+usd(v)+' anotado')},true);
+  const mf0=myForm||{};const hasNf=!!gImg['my:'+mf0.id];if(!d&&!hasNf){$('#my_err').textContent='Escreva o que foi (ou anexe a foto da nota).';return}if(isNaN(v)||v<=0){$('#my_err').textContent='Digite o valor, ex.: 6,50';return}
+  const me=myWho;if(!me)return;const mf=myForm||{};const pl=mf.other?(($('#my_pl')||{}).value||'').trim():(mf.pl||'');(gMy[me]=gMy[me]||[]).push({id:mf.id||('m'+Date.now()),desc:d||'Nota fiscal',nf:hasNf?1:0,amt:v,day:mf.day||myDefDay(),pl,t:Date.now()});saveMy();myForm={day:mf.day,pl:mf.pl,other:mf.other,otherv:mf.otherv};renderGuide();showToast('👛 '+(d||'Nota fiscal')+' · '+usd(v)+' anotado')},true);
 
 function exFormHtml(){const f=exForm;
   return `<form class="gform" id="exf" autocomplete="off">
@@ -1336,6 +1343,7 @@ function exFormHtml(){const f=exForm;
   <div class="ptabs" style="margin-top:10px"><button type="button" data-exmode="eq" class="${f.mode==='eq'?'on':''}">Partes iguais</button><button type="button" data-exmode="val" class="${f.mode==='val'?'on':''}">Valores diferentes</button></div>
   <div id="ex_rows">${f.mode==='val'?f.who.map(p=>`<div class="splitrow"><span>${esc(p)}</span><input data-exval="${esc(p)}" inputmode="decimal" value="${esc(f.vals[p]||'')}" placeholder="0,00"></div>`).join(''):''}</div>
   <div class="sumchk" id="ex_sum"></div><div class="ferr" id="ex_err" style="color:#a1231b;font-size:13px"></div>
+  <div class="nfrow">${gImg['nf:'+f.id]?`<img class="nfth" src="${gImg['nf:'+f.id]}" data-zoom="nf:${f.id}" alt=""><span>🧾 Nota anexada · todos do grupo veem</span>`:`<button type="button" class="nfbtn" data-ph="nf:${f.id}">📷 Foto da nota fiscal <small>(opcional)</small></button>`}</div>
   <button class="gbtn" type="submit">Salvar despesa</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
 function exUpd(){const f=exForm;if(!f)return;const el=$('#ex_sum');if(!el)return;const tot=cents(f.v);
   if(!f.who.length){el.className='sumchk bad';el.textContent='Escolha pelo menos uma pessoa.';return}
@@ -1347,7 +1355,7 @@ function exSync(){const f=exForm;if(!f)return;const d=$('#ex_d'),v=$('#ex_v');if
 $('#guide').addEventListener('input',e=>{if(!exForm)return;if(e.target.closest('#exf')){exSync();exUpd()}});
 $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   if(gView!=='contas')return;
-  if(t.closest('[data-exnew]')){exForm={desc:'',v:'',ic:'🧾',payer:myName(),who:presentNow(),mode:'eq',vals:{}};renderGuide();$('#guide').scrollTop=0;setTimeout(()=>{const i=$('#ex_d');if(i)i.focus()},50);e.stopImmediatePropagation();return}
+  if(t.closest('[data-exnew]')){exForm={id:'x'+Date.now()+Math.floor(Math.random()*999),desc:'',v:'',ic:'🧾',payer:myName(),who:presentNow(),mode:'eq',vals:{}};renderGuide();$('#guide').scrollTop=0;setTimeout(()=>{const i=$('#ex_d');if(i)i.focus()},50);e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-exdel]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Apagar?';b.style.color='#a1231b';b.style.fontSize='12.5px';b.style.fontWeight='700';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='✕';b.removeAttribute('style')}},3500);e.stopImmediatePropagation();return}
     const ex=gEx.find(x=>x.id===b.dataset.exdel);if(ex){ex.del=1;ex.t2=Date.now();saveEx();renderGuide();showToast('Despesa apagada',()=>{ex.del=0;ex.t2=Date.now();saveEx();renderGuide()})}e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-settle]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Confirmar?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Já pagou'}},3500);e.stopImmediatePropagation();return}const [fr,to,v]=b.dataset.settle.split('|');const now=Date.now();
@@ -1358,14 +1366,14 @@ $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   if(b=t.closest('[data-expayer]')){exForm.payer=b.dataset.expayer;renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exsplit]')){const p=b.dataset.exsplit,w=exForm.who;if(w.includes(p))exForm.who=w.filter(x=>x!==p);else exForm.who=GROUP.filter(x=>w.includes(x)||x===p);renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exmode]')){exForm.mode=b.dataset.exmode;renderGuide();e.stopImmediatePropagation();return}
-  if(t.closest('[data-cancel]')){exForm=null;renderGuide();e.stopImmediatePropagation();return}
+  if(t.closest('[data-cancel]')){if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}exForm=null;renderGuide();e.stopImmediatePropagation();return}
 },true);
 $('#guide').addEventListener('submit',e=>{if(e.target.id!=='exf')return;e.preventDefault();e.stopImmediatePropagation();exSync();const f=exForm,err=$('#ex_err');
   const tot=cents(f.v);if(!f.desc.trim()){err.textContent='Escreva o que foi.';return}
   if(isNaN(tot)||tot<=0){err.textContent='Coloque o valor.';return}
   if(!f.who.length){err.textContent='Escolha quem vai dividir.';return}
   let split;if(f.mode==='eq')split=eqSplit(tot,f.who);else{split={};let s=0;for(const p of f.who){const c=cents(f.vals[p])||0;if(c<0){err.textContent='Valor inválido.';return}split[p]=c;s+=c}if(s!==tot){err.textContent='A soma por pessoa precisa bater com o total.';return}Object.keys(split).forEach(p=>{if(!split[p])delete split[p]})}
-  const now=Date.now();gEx.push({id:'x'+now+Math.floor(Math.random()*999),kind:'exp',desc:f.desc.trim(),ic:f.ic,amt:tot,payer:f.payer,split,t:now});
+  const now=Date.now();gEx.push({id:f.id||('x'+now+Math.floor(Math.random()*999)),kind:'exp',desc:f.desc.trim(),ic:f.ic,amt:tot,payer:f.payer,split,t:now});
   saveEx();exForm=null;renderGuide();$('#guide').scrollTop=0;showToast('🧾 Despesa salva');
 },true);
 
@@ -1395,7 +1403,7 @@ const SYNC=(()=>{
     // contas do grupo
     (gEx||[]).forEach(x=>{const tt=Math.max(x.t||0,x.t2||0);if((snap.ex[x.id]||0)!==tt){snap.ex[x.id]=tt;put('ex/'+x.id,x)}});
     // fotos (guia e compras)
-    if(IDB.db){const ci={};Object.keys(photos).forEach(k=>ci['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>ci['g~'+k]=gImg[k]);
+    if(IDB.db){const ci={};Object.keys(photos).forEach(k=>ci['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>{if(!k.startsWith('my:'))ci['g~'+k]=gImg[k]});
       Object.keys(ci).forEach(k=>{const s=imgSig(ci[k]);if(snap.img[k]!==s){snap.img[k]=s;put('img/'+k,{ref:k});put('imgidx/'+k,{s,t:now})}});
       Object.keys(snap.img).forEach(k=>{if(snap.img[k]&&!(k in ci)){snap.img[k]='';put('img/'+k,null);put('imgidx/'+k,{del:1,t:now})}});}
     // mercado: excluídos e edições (quantidade/valor/loja)
