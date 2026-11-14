@@ -1043,7 +1043,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
      <button class="tile wide" data-g="contas"><span class="e">💸</span><span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas · quem deve para quem':'Dividir despesas e acertar quem deve'})()}</small></span></button>
-     <button class="tile wide" data-g="meus"><span class="e">👛</span><span><b>Meus gastos</b><small>${(()=>{const me=myName(),t=myTotals(me);return t.all?esc(me)+' · '+usd(t.all)+' na viagem':'Anote o que você gasta: picolé, lanche, lembrancinha'})()}</small></span></button>
+     <button class="tile wide" data-g="meus"><span class="e">👛</span><span><b>Meus gastos</b><small>Cada um entra no seu perfil · gastos individuais</small></span></button>
     </div><p class="gnote"><span class="syncst"></span><br>Mercado, brinquedos feitos e contas aparecem para todo o grupo. O resto fica salvo só neste celular.<br>Versão 14/11 · contas do grupo<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
@@ -1176,7 +1176,7 @@ $('#guide').addEventListener('click',e=>{
   if(b=t.closest('[data-g]')){const g=b.dataset.g;
     if(g==='compras'){closeGuide();if(who==='Mercado')who='';openWelcome();return}
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
-    gView=g;gForm=false;exForm=null;renderGuide();$('#guide').scrollTop=0;return}
+    gView=g;gForm=false;exForm=null;myWho=null;myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
@@ -1264,15 +1264,21 @@ function renderContas(B){
   B.innerHTML=h;
 }
 const EXIC=['🛒','🍔','🍦','🎢','🚗','⛽','🅿️','🏠','🎁','🧾'];
-let gMy=gload('my',{}),myForm=null;
+let gMy=gload('my',{}),myForm=null,myWho=null,myPinFor=null,myPinNew=null,gPin=gload('mypin',{});
+function pinHash(n,p){let h=5381;const t=n+'|'+p+'|orl26';for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))>>>0;return h.toString(36)}
 function saveMy(){gsave('my',gMy)}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&myWho&&gPin[myWho]){myWho=null;if(gView==='meus')renderGuide()}});
 function myTotals(me){const L=(gMy[me]||[]).filter(x=>!x.del);const pes=L.reduce((a,x)=>a+x.amt,0);
   const grp=gEx.filter(e=>!e.del&&e.kind!=='pay').reduce((a,e)=>a+((e.split||{})[me]||0),0);
   let cmp=0;try{ITEMS.forEach(i=>{if(i.who===me&&done[i.id]&&done[i.id].p!=null)cmp+=Math.round(done[i.id].p*100)*(done[i.id].q||1)})}catch(e){}
   return {pes,grp,cmp,all:pes+grp+cmp,L}}
-function renderMeus(B){const me=myName();const T=myTotals(me);
-  let h=gTop('👛 Meus gastos');
-  h+=`<div class="pchips" style="margin:2px 0 10px">${GROUP.map(p=>`<button type="button" data-myme="${esc(p)}" class="${p===me?'on':''}">${esc(p)}</button>`).join('')}</div>`;
+function renderMeus(B){
+  if(myPinNew){B.innerHTML=gTop('👛 Meus gastos')+`<form class="gform" id="mypinf" autocomplete="off"><b>${gPin[myPinNew]?'🔑 Nova senha':'🔒 Criar senha'} para ${esc(myPinNew)}</b><p class="ptip">4 números. Só quem souber a senha abre os gastos de ${esc(myPinNew)} neste celular.</p><input id="mp_1" type="password" inputmode="numeric" maxlength="4" placeholder="Senha (4 números)"><input id="mp_2" type="password" inputmode="numeric" maxlength="4" placeholder="Repita a senha" style="margin-top:8px"><div class="ferr" id="mp_err" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit">Salvar senha</button>${gPin[myPinNew]?`<button class="gbtn alt" type="button" data-mypinoff="1">Tirar a senha</button>`:''}<button class="gbtn alt" type="button" data-mypincancel="1">Cancelar</button></form>`;setTimeout(()=>{const i=$('#mp_1');if(i)i.focus()},50);return}
+  if(myPinFor){B.innerHTML=gTop('👛 Meus gastos')+`<form class="gform" id="myunlock" autocomplete="off" style="text-align:center"><div class="av" style="width:72px;height:72px;font-size:40px;margin:4px auto 8px">${avHtml(myPinFor)}</div><b>🔒 Gastos de ${esc(myPinFor)}</b><p class="ptip">Digite a senha de 4 números.</p><input id="mu_p" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="text-align:center;font-size:22px;letter-spacing:8px"><div class="ferr" id="mu_err" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit">Entrar</button><button class="gbtn alt" type="button" data-mypincancel="1">Voltar</button><button class="restore" type="button" data-myforgot="1" style="margin:10px auto 0">Esqueci a senha</button></form>`;setTimeout(()=>{const i=$('#mu_p');if(i)i.focus()},50);return}
+  if(!myWho){B.innerHTML=gTop('👛 Meus gastos')+`<p class="glead" style="text-align:center;margin:4px 0 12px">Toque no seu nome para ver os seus gastos</p><div class="pgrid">${GROUP.map(n=>`<div class="pcard" data-mywho="${esc(n)}" role="button"><div class="av">${avHtml(n)}</div><b>${esc(n)}</b><small>${gPin[n]?'🔒 com senha':'sem senha'}</small></div>`).join('')}</div><p class="gnote">Os gastos pessoais ficam só neste celular. Quem quiser pode criar uma senha para o próprio perfil.</p>`;return}
+  const me=myWho;const T=myTotals(me);
+  let h=gTop('👛 Gastos de '+me);
+  h+=`<div class="pchips" style="margin:2px 0 10px"><button type="button" data-myswitch="1">↩ Trocar de perfil</button><button type="button" data-mypinset="${esc(me)}">${gPin[me]?'🔑 Mudar senha':'🔒 Criar senha'}</button></div>`;
   h+=`<form class="gform" id="myf" autocomplete="off"><div class="two"><div style="flex:2"><label>O que foi *</label><input id="my_d" placeholder="Ex.: picolé, lanche, ímã"></div><div><label>Valor (US$) *</label><input id="my_v" inputmode="decimal" placeholder="0,00"></div></div>
     <div class="pchips" id="my_ic">${EXIC.map(i=>`<button type="button" data-myic="${i}" class="${(myForm&&myForm.ic||'🍦')===i?'on':''}">${i}</button>`).join('')}</div>
     <div class="ferr" id="my_err" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit">+ Anotar gasto</button></form>`;
@@ -1284,16 +1290,26 @@ function renderMeus(B){const me=myName();const T=myTotals(me);
   const L=T.L.slice().sort((a,c)=>c.t-a.t);const byDay={};L.forEach(x=>{const d=new Date(x.t);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');(byDay[k]=byDay[k]||[]).push(x)});
   h+=`<div class="gsec">🧾 Gastos pessoais (${L.length})</div>`+(L.length?Object.keys(byDay).map(k=>{const xs=byDay[k];const [y,m,d]=k.split('-');const tot=xs.reduce((a,x)=>a+x.amt,0);
     return `<div class="myday"><span>${+d}/${m}</span><span>${usd(tot)}</span></div>`+xs.map(x=>{const dt=new Date(x.t);return `<div class="exp"><span class="ic">${x.ic||'🧾'}</span><div class="b"><b>${esc(x.desc)}</b><small>${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}</small></div><span class="v">${usd(x.amt)}</span><button class="del" data-mydel="${x.id}" aria-label="Apagar">✕</button></div>`}).join('')}).join(''):`<div class="gempty">Nada anotado ainda. Comprou um picolé? Anote aqui em cima.</div>`);
-  h+=`<p class="gnote">Fica só neste celular: ninguém do grupo vê os seus gastos pessoais. Despesas para dividir vão em 💸 Contas do grupo.</p>`;
+  h+=`<p class="gnote">Fica só neste celular: os gastos pessoais não vão para o grupo. Despesas para dividir vão em 💸 Contas do grupo.</p>`;
   B.innerHTML=h}
 $('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.target;let b;
-  if(b=t.closest('[data-myme]')){try{localStorage.setItem(GK+'eu',b.dataset.myme)}catch(_){}renderGuide();return}
+  if(b=t.closest('[data-mywho]')){const n=b.dataset.mywho;if(gPin[n]){myPinFor=n}else{myWho=n;try{localStorage.setItem(GK+'eu',n)}catch(_){}}renderGuide();return}
+  if(t.closest('[data-myswitch]')){myWho=null;renderGuide();return}
+  if(b=t.closest('[data-mypinset]')){myPinNew=b.dataset.mypinset;renderGuide();return}
+  if(t.closest('[data-mypincancel]')){myPinNew=null;myPinFor=null;renderGuide();return}
+  if(t.closest('[data-mypinoff]')){delete gPin[myPinNew];gsave('mypin',gPin);myPinNew=null;renderGuide();showToast('Senha removida');return}
+  if(t.closest('[data-myforgot]')){if(!t.dataset.sure){t.dataset.sure=1;t.textContent='Para recuperar, a senha e os gastos pessoais de '+myPinFor+' neste celular são apagados. Toque de novo para confirmar.';return}
+    const n=myPinFor;delete gPin[n];gsave('mypin',gPin);delete gMy[n];saveMy();myPinFor=null;myWho=n;renderGuide();showToast('Senha e gastos de '+n+' apagados');return}
   if(b=t.closest('[data-myic]')){myForm=myForm||{};myForm.ic=b.dataset.myic;document.querySelectorAll('[data-myic]').forEach(x=>x.classList.toggle('on',x===b));return}
-  if(b=t.closest('[data-mydel]')){const me=myName();const x=(gMy[me]||[]).find(z=>z.id===b.dataset.mydel);if(x){x.del=1;saveMy();renderGuide();showToast('Gasto apagado',()=>{x.del=0;saveMy();renderGuide()})}return}
+  if(b=t.closest('[data-mydel]')){const me=myWho;const x=(gMy[me]||[]).find(z=>z.id===b.dataset.mydel);if(x){x.del=1;saveMy();renderGuide();showToast('Gasto apagado',()=>{x.del=0;saveMy();renderGuide()})}return}
 });
-$('#guide').addEventListener('submit',e=>{if(e.target.id!=='myf')return;e.preventDefault();const d=$('#my_d').value.trim(),v=cents($('#my_v').value);
+$('#guide').addEventListener('submit',e=>{const fid=e.target.id;
+  if(fid==='myunlock'){e.preventDefault();const v=$('#mu_p').value.trim();if(pinHash(myPinFor,v)===gPin[myPinFor]){myWho=myPinFor;myPinFor=null;try{localStorage.setItem(GK+'eu',myWho)}catch(_){}renderGuide()}else{$('#mu_err').textContent='Senha errada.';$('#mu_p').value=''}return}
+  if(fid==='mypinf'){e.preventDefault();const a=$('#mp_1').value.trim(),c=$('#mp_2').value.trim();if(!/^\d{4}$/.test(a)){$('#mp_err').textContent='Use 4 números.';return}if(a!==c){$('#mp_err').textContent='As duas senhas não são iguais.';return}
+    gPin[myPinNew]=pinHash(myPinNew,a);gsave('mypin',gPin);myPinNew=null;renderGuide();showToast('🔒 Senha criada');return}
+  if(fid!=='myf')return;e.preventDefault();const d=$('#my_d').value.trim(),v=cents($('#my_v').value);
   if(!d){$('#my_err').textContent='Escreva o que foi.';return}if(isNaN(v)||v<=0){$('#my_err').textContent='Digite o valor, ex.: 6,50';return}
-  const me=myName();(gMy[me]=gMy[me]||[]).push({id:'m'+Date.now()+Math.floor(Math.random()*999),desc:d,amt:v,ic:(myForm&&myForm.ic)||'🍦',t:Date.now()});saveMy();myForm=null;renderGuide();showToast('👛 '+d+' · '+usd(v)+' anotado')},true);
+  const me=myWho;if(!me)return;(gMy[me]=gMy[me]||[]).push({id:'m'+Date.now()+Math.floor(Math.random()*999),desc:d,amt:v,ic:(myForm&&myForm.ic)||'🍦',t:Date.now()});saveMy();myForm=null;renderGuide();showToast('👛 '+d+' · '+usd(v)+' anotado')},true);
 
 function exFormHtml(){const f=exForm;
   return `<form class="gform" id="exf" autocomplete="off">
