@@ -175,9 +175,10 @@ body.mkt main{padding-bottom:30px}
 .me small{color:var(--muted);font-size:12px}
 .av{border-radius:50%;background:var(--brand2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
 .av img{width:100%;height:100%;object-fit:cover}
-.welcome{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto;display:none;padding:calc(28px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom))}
+.welcome{position:fixed;inset:0;background:var(--bg);z-index:30;overflow:auto;display:none;padding:calc(18px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
 .welcome.show{display:block}
-.welcome h2{font:700 24px Georgia,serif;color:var(--brand);margin:6px 0 4px;text-align:center}
+.welcome h2{font:700 22px Georgia,serif;color:var(--brand);margin:14px 0 4px;text-align:center}
+.wtop{margin:-10px 0 4px}
 .welcome p.lead{text-align:center;color:var(--muted);margin:0 0 20px;font-size:14.5px}
 .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:520px;margin:0 auto}
 .pcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 10px 12px;text-align:center;position:relative}
@@ -197,10 +198,10 @@ footer{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 3
 .tot{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;font-size:13.5px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;gap:10px;z-index:6}
 .tot span:last-child{font-weight:700}
 
-.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}.hrow h1{margin:0;text-align:right}
-.backbtn{border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:7px 14px;font-size:15px;font-weight:700;flex:none}
+.hrow{margin-bottom:8px}
+.backbtn{display:inline-flex;align-items:center;gap:4px;height:36px;border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:0 14px;font:700 14.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;flex:none;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.backbtn:active{background:var(--brand2)}
 header{position:sticky}
-.wback{border:0;background:none;color:var(--brand);font-size:15px;font-weight:600;padding:4px 0;margin-bottom:4px}
 .guide{position:fixed;inset:0;background:var(--bg);z-index:35;overflow:auto;display:none;padding:calc(18px + env(safe-area-inset-top)) 14px calc(30px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .guide.show{display:block}
 .gh{font:700 25px Georgia,serif;color:var(--brand);margin:8px 0 2px;text-align:center}
@@ -213,9 +214,9 @@ header{position:sticky}
 .tile small{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
 .tile.wide{grid-column:1/-1;display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px}
 .tile.wide .e{margin:0;font-size:36px}
-.gtop{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.gtop button{border:0;background:none;color:var(--brand);font-size:15px;font-weight:600;padding:6px 2px}
-.gtop h3{flex:1;margin:0;font:700 20px Georgia,serif;color:var(--brand);text-align:right}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+.topbar .ttl{flex:1;min-width:0;margin:0;font:700 19px/1.2 Georgia,serif;color:var(--brand);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gtop{position:sticky;top:calc(-18px - env(safe-area-inset-top));z-index:3;background:var(--bg);margin:calc(-18px - env(safe-area-inset-top)) -14px 10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line)}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -14px;padding-left:14px;padding-right:14px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:7px 10px;text-align:center;font:inherit;color:var(--ink);min-width:52px}
@@ -373,7 +374,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 </head>
 <body>
 <header>
-  <div class="hrow"><button class="backbtn" id="homebtn">‹ Início</button><h1 id="htitle">Listas de compras</h1></div>
+  <div class="topbar hrow"><button class="backbtn" id="homebtn">‹ Início</button><h1 class="ttl" id="htitle">Listas de compras</h1></div>
   <div class="who" id="who"></div>
   <div class="sub"><span id="count"></span><span id="shown"></span></div>
   <div class="bar"><i id="prog"></i></div>
@@ -398,7 +399,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 <div class="exclhead" id="exclhead" style="margin:12px 12px 0"><span>🗑 Produtos excluídos — toque num produto para restaurar</span><button id="exclback">Voltar</button></div>
 <main id="list"></main>
 <div class="welcome" id="welcome">
- <button class="wback" id="wback">‹ Guia da viagem</button>
+ <div class="topbar wtop"><button class="backbtn" id="wback">‹ Início</button><span class="ttl">🛍️ Compras</span></div>
  <h2 id="wtitle">Quem está comprando?</h2>
  <p class="lead" id="wlead">Orlando 2026 · toque no seu nome para abrir a sua lista</p>
  <div class="pgrid" id="pgrid"></div>
@@ -540,7 +541,7 @@ function renderWelcome(){
   const L=LISTS().filter(n=>n!=='Mercado');
   $('#wtitle').textContent=wStart?'Quem é você?':'Quem está comprando?';
   $('#wlead').textContent=wStart?'Orlando 2026 · toque no seu nome para entrar no guia':'Orlando 2026 · toque no seu nome para abrir a sua lista';
-  $('#wback').style.display=wStart?'none':'';
+  $('#wback').style.visibility=wStart?'hidden':'';
   $('#pgrid').innerHTML=L.map(n=>{const c=ITEMS.filter(i=>i.who===n).length;
     return `<div class="pcard" data-w="${esc(n)}" role="button"><button class="edit" data-e="${esc(n)}" aria-label="Trocar ícone">✏️</button><div class="av">${avHtml(n)}</div><b>${esc(n)}</b><small>${n==='Mercado'?(c?c+' itens':'Lista do grupo'):(c?c+' produtos':'Lista ainda vazia')}</small></div>`}).join('')
    +(wStart?'':`<div class="pcard all" data-w="" role="button"><div class="av">👥</div><b>Todos</b><small>Ver todas as listas</small></div>`);
@@ -989,7 +990,7 @@ function dayItems(x){x=Object.assign({},dayBase(srcOf(x.d)),{d:x.d});return (x.i
 function parkById(id){return GUIDE.parks.find(p=>p.id===id)}
 function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
 function closeGuide(){$('#guide').classList.remove('show')}
-function gTop(t,back){return `<div class="gtop"><button data-g="${back||'home'}">‹ ${back&&back!=='home'?'Voltar':'Início'}</button><h3>${t}</h3></div>`}
+function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
 function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
   const B=$('#gbody');
   if(gView==='home'){
@@ -1017,7 +1018,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const its=dayItems(x);
     const chips=GUIDE.days.map(z=>{const [y,m,d]=z.d.split('-');const has=dayItems(z).length;return `<button class="chip${z.d===gDay?' on':''}" data-day="${z.d}"><small>${z.w}</small><b>${+d}</b><small>${MES[m-1]}</small>${has?'<i class="dot"></i>':''}</button>`}).join('');
     const parkOpts=GUIDE.parks.map(p=>`<option value="${p.id}">${p.e} ${esc(p.n)}</option>`).join('');
-    B.innerHTML=gTop('Roteiro')+`<div class="chips" id="dchips">${chips}</div>
+    B.innerHTML=gTop('🗓️ Roteiro')+`<div class="chips" id="dchips">${chips}</div>
      <div class="dayh">${dLabel(x)}${x.title?`<small class="dtit">${esc(x.title)}</small>`:''}</div>${x.flag?`<div class="flag">${esc(x.flag)}</div>`:''}
      ${its.length?its.map(e=>{const p=e.park&&parkById(e.park);return `<div class="ev"><div class="h">${esc(e.h||'—')}</div><div class="b">${e.base&&e.q?phSlot('e:'+srcOf(gDay)+':'+e.o,'fr'):''}<b>${esc(e.t)}</b>${e.n?`<small>${esc(e.n)}</small>`:''}${(p||e.addr||e.rest)?`<div class="evb">${p?`<button class="go" data-park="${p.id}">${p.e} Ver guia do ${esc(p.n)}</button>`:''}${e.rest?`<button class="go" data-rgo="${e.rest}">🍽️ Ver cardápio</button>`:''}${e.addr?`<a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.addr)}" target="_blank" rel="noopener">📍 Mapa</a>`:''}</div>`:''}${e.base&&e.q?phAct('e:'+gDay+':'+e.o,e.q):''}</div>${e.base?'':`<button class="del" data-del="${e.ui}" aria-label="Apagar">✕</button>`}</div>`}).join(''):`<div class="gempty">Nada programado ainda para este dia.</div>`}
      ${gForm?`<form class="gform" id="evf" autocomplete="off"><div class="two"><div><label>Horário</label><input id="ev_h" type="time"></div><div><label>Parque (opcional)</label><select id="ev_p"><option value="">—</option>${parkOpts}</select></div></div>
@@ -1033,7 +1034,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     return;
   }
   if(gView==='parques'){
-    B.innerHTML=gTop('Parques')+`<p class="ptip" style="margin-bottom:10px">Escolha o parque para ver a ordem dos brinquedos e onde comer. Situação conferida em ${GUIDE.updated}.</p>`+
+    B.innerHTML=gTop('🎢 Parques')+`<p class="ptip" style="margin-bottom:10px">Escolha o parque para ver a ordem dos brinquedos e onde comer. Situação conferida em ${GUIDE.updated}.</p>`+
     `<details class="gdet"><summary>📋 Regras que mudam o resultado</summary>${GUIDE.rules.map((r,i)=>`<div class="lg2" style="font-size:13.5px;color:var(--ink)">${i+1}. ${esc(r)}</div>`).join('')}</details>`+
     orphanHtml()+`<div class="tiles">`+GUIDE.parks.slice().sort((x,y)=>dispOf(parkBase(x.id)||'').localeCompare(dispOf(parkBase(y.id)||''))).map(p=>{const dn=gRides[p.id]||{};const n=[...p.rides,...p.extras].filter(r=>r.act!==false&&dn[r.k]).length;const tot=p.rides.filter(r=>r.act).length+p.extras.length;return `<button class="tile" data-park="${p.id}">${parkPic(p)}<b>${esc(p.n)}</b><small>📅 ${esc(effDateLabel(p))}</small><small>${n?n+' de '+tot+' feitos':tot+' atrações'}</small></button>`}).join('')+`</div>`;
     return;
@@ -1062,7 +1063,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     B.innerHTML=h;return;
   }
   if(gView==='rest'){
-    let h=gTop('Restaurantes');
+    let h=gTop('🍔 Restaurantes');
     h+=`<details class="gdet"><summary>⭐ Como ler as notas</summary>${GUIDE.legend.map(l=>`<div class="lg"><span class="nb ${nc(l[0].replace('abaixo de ','6,9').split('–')[0])}">${esc(l[0])}</span> ${esc(l[1])}</div>`).join('')}<div class="lg2">Notas da sua lista: recomendações subjetivas de sabor, diferencial e custo-benefício.</div></details>`;
     h+=`<details class="gdet"><summary>🏆 Top 15 da viagem</summary>${GUIDE.top.map((x,i)=>`<div class="top" data-rgo="${x.r}"><span class="tn">${i+1}</span><span class="tb"><b>${esc(x.n)}</b><small>${esc(x.w)}</small></span><span class="nb ${nc(x.nota)}">${esc(x.nota)}</span></div>`).join('')}<div class="lg2">* Produto sazonal, sujeito à confirmação no evento de 2026.</div></details>`;
     GUIDE.days.forEach(d=>{const sd=srcOf(d.d);const rs=GUIDE.rests.filter(r=>r.day===sd&&!r.extra);if(!rs.length)return;const tt=dayBase(sd).title;
@@ -1201,7 +1202,7 @@ function settle(b){const cr=[],db=[];Object.keys(b).forEach(p=>{if(b[p]>0)cr.pus
 function myName(){try{return localStorage.getItem(GK+'eu')||(who&&GROUP.includes(who)?who:'Bia')}catch(e){return 'Bia'}}
 function renderContas(B){
   const L=gEx.filter(e=>!e.del).sort((a,c)=>c.t-a.t);const b=balances();const st=settle(b);
-  let h=gTop('Contas do grupo');
+  let h=gTop('💸 Contas do grupo');
   if(exForm){h+=exFormHtml();B.innerHTML=h;exUpd();return}
   h+=`<button class="gbtn" data-exnew="1">+ Nova despesa</button><div class="syncst sst" style="margin-top:6px"></div>`;
   h+=`<div class="gsec">💰 Saldo de cada um</div><div class="bal">${GROUP.map(p=>{const v=b[p]||0;return `<div class="r"><span>${esc(p)}</span><span class="amt ${v>0?'pos':v<0?'neg':'zero'}">${v>0?'recebe '+usd(v):v<0?'deve '+usd(-v):'em dia'}</span></div>`}).join('')}</div>`;
