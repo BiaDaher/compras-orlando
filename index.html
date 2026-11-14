@@ -239,6 +239,7 @@ header{position:sticky}
 .ev .b small{display:block;color:var(--muted);font-size:13px;white-space:pre-wrap;margin-top:2px}
 .pspot .b b{font-weight:600;font-size:14.5px}
 .rd2 .pt{display:block;font-size:12px;line-height:1.3;color:var(--muted);font-style:italic;margin:1px 0 2px}
+.myday{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);margin:12px 2px 6px}
 .ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
 .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center}
 .ev .edt{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 2px}
@@ -1042,10 +1043,12 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
      <button class="tile wide" data-g="contas"><span class="e">💸</span><span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas · quem deve para quem':'Dividir despesas e acertar quem deve'})()}</small></span></button>
+     <button class="tile wide" data-g="meus"><span class="e">👛</span><span><b>Meus gastos</b><small>${(()=>{const me=myName(),t=myTotals(me);return t.all?esc(me)+' · '+usd(t.all)+' na viagem':'Anote o que você gasta: picolé, lanche, lembrancinha'})()}</small></span></button>
     </div><p class="gnote"><span class="syncst"></span><br>Mercado, brinquedos feitos e contas aparecem para todo o grupo. O resto fica salvo só neste celular.<br>Versão 14/11 · contas do grupo<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
+  if(gView==='meus'){renderMeus(B);return}
   if(gView==='roteiro'){
     const t=todayISO();
     if(!gDay)gDay=(GUIDE.days.find(x=>x.d===t)||GUIDE.days[0]).d;
@@ -1261,6 +1264,37 @@ function renderContas(B){
   B.innerHTML=h;
 }
 const EXIC=['🛒','🍔','🍦','🎢','🚗','⛽','🅿️','🏠','🎁','🧾'];
+let gMy=gload('my',{}),myForm=null;
+function saveMy(){gsave('my',gMy)}
+function myTotals(me){const L=(gMy[me]||[]).filter(x=>!x.del);const pes=L.reduce((a,x)=>a+x.amt,0);
+  const grp=gEx.filter(e=>!e.del&&e.kind!=='pay').reduce((a,e)=>a+((e.split||{})[me]||0),0);
+  let cmp=0;try{ITEMS.forEach(i=>{if(i.who===me&&done[i.id]&&done[i.id].p!=null)cmp+=Math.round(done[i.id].p*100)*(done[i.id].q||1)})}catch(e){}
+  return {pes,grp,cmp,all:pes+grp+cmp,L}}
+function renderMeus(B){const me=myName();const T=myTotals(me);
+  let h=gTop('👛 Meus gastos');
+  h+=`<div class="pchips" style="margin:2px 0 10px">${GROUP.map(p=>`<button type="button" data-myme="${esc(p)}" class="${p===me?'on':''}">${esc(p)}</button>`).join('')}</div>`;
+  h+=`<form class="gform" id="myf" autocomplete="off"><div class="two"><div style="flex:2"><label>O que foi *</label><input id="my_d" placeholder="Ex.: picolé, lanche, ímã"></div><div><label>Valor (US$) *</label><input id="my_v" inputmode="decimal" placeholder="0,00"></div></div>
+    <div class="pchips" id="my_ic">${EXIC.map(i=>`<button type="button" data-myic="${i}" class="${(myForm&&myForm.ic||'🍦')===i?'on':''}">${i}</button>`).join('')}</div>
+    <div class="ferr" id="my_err" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit">+ Anotar gasto</button></form>`;
+  h+=`<div class="gsec">📊 Resumo de ${esc(me)}</div><div class="bal">
+    <div class="r"><span>Gastos pessoais anotados</span><span class="amt">${usd(T.pes)}</span></div>
+    <div class="r"><span>Minha parte nas contas do grupo</span><span class="amt">${usd(T.grp)}</span></div>
+    <div class="r"><span>Compras da minha lista (com preço)</span><span class="amt">${usd(T.cmp)}</span></div>
+    <div class="r"><span><b>Total da viagem</b></span><span class="amt"><b>${usd(T.all)}</b></span></div></div>`;
+  const L=T.L.slice().sort((a,c)=>c.t-a.t);const byDay={};L.forEach(x=>{const d=new Date(x.t);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');(byDay[k]=byDay[k]||[]).push(x)});
+  h+=`<div class="gsec">🧾 Gastos pessoais (${L.length})</div>`+(L.length?Object.keys(byDay).map(k=>{const xs=byDay[k];const [y,m,d]=k.split('-');const tot=xs.reduce((a,x)=>a+x.amt,0);
+    return `<div class="myday"><span>${+d}/${m}</span><span>${usd(tot)}</span></div>`+xs.map(x=>{const dt=new Date(x.t);return `<div class="exp"><span class="ic">${x.ic||'🧾'}</span><div class="b"><b>${esc(x.desc)}</b><small>${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}</small></div><span class="v">${usd(x.amt)}</span><button class="del" data-mydel="${x.id}" aria-label="Apagar">✕</button></div>`}).join('')}).join(''):`<div class="gempty">Nada anotado ainda. Comprou um picolé? Anote aqui em cima.</div>`);
+  h+=`<p class="gnote">Fica só neste celular: ninguém do grupo vê os seus gastos pessoais. Despesas para dividir vão em 💸 Contas do grupo.</p>`;
+  B.innerHTML=h}
+$('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.target;let b;
+  if(b=t.closest('[data-myme]')){try{localStorage.setItem(GK+'eu',b.dataset.myme)}catch(_){}renderGuide();return}
+  if(b=t.closest('[data-myic]')){myForm=myForm||{};myForm.ic=b.dataset.myic;document.querySelectorAll('[data-myic]').forEach(x=>x.classList.toggle('on',x===b));return}
+  if(b=t.closest('[data-mydel]')){const me=myName();const x=(gMy[me]||[]).find(z=>z.id===b.dataset.mydel);if(x){x.del=1;saveMy();renderGuide();showToast('Gasto apagado',()=>{x.del=0;saveMy();renderGuide()})}return}
+});
+$('#guide').addEventListener('submit',e=>{if(e.target.id!=='myf')return;e.preventDefault();const d=$('#my_d').value.trim(),v=cents($('#my_v').value);
+  if(!d){$('#my_err').textContent='Escreva o que foi.';return}if(isNaN(v)||v<=0){$('#my_err').textContent='Digite o valor, ex.: 6,50';return}
+  const me=myName();(gMy[me]=gMy[me]||[]).push({id:'m'+Date.now()+Math.floor(Math.random()*999),desc:d,amt:v,ic:(myForm&&myForm.ic)||'🍦',t:Date.now()});saveMy();myForm=null;renderGuide();showToast('👛 '+d+' · '+usd(v)+' anotado')},true);
+
 function exFormHtml(){const f=exForm;
   return `<form class="gform" id="exf" autocomplete="off">
   <label>O que foi *</label><input id="ex_d" value="${esc(f.desc)}" placeholder="Ex.: Walmart, água no parque, jantar">
