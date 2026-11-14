@@ -288,7 +288,9 @@ a.go{display:inline-block;text-decoration:none}
 .phero{display:block;width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:4px}
 .tile .timg{width:64px;height:64px;object-fit:cover;border-radius:12px;display:block;margin:0 auto 6px}
 .gzoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
-.gzoom.show{display:flex}.gzoom img{max-width:100%;max-height:100%;border-radius:12px}
+.gzoom.show{display:flex;flex-direction:column;gap:14px}
+.gzb{display:flex;gap:8px}.gzb button{border:0;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:600;background:#fff;color:var(--ink)}
+.gzoom img{max-height:75%!important}.gzoom img{max-width:100%;max-height:100%;border-radius:12px}
 .gslot{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;display:block}
 button.gslot.empty{border:1.5px dashed #cdbcab;background:#faf6f1;color:var(--brand);font-size:20px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
 button.gslot.empty small{font-size:10.5px;margin-top:4px;font-weight:600}
@@ -408,7 +410,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 
 <div class="guide" id="guide"><div id="gbody"></div></div>
 <input type="file" id="gphoto" accept="image/*" style="display:none">
-<div class="gzoom" id="gzoom"><img id="gzimg" alt=""></div>
+<div class="gzoom" id="gzoom"><img id="gzimg" alt=""><div class="gzb"><button type="button" id="gz_ch">📷 Trocar foto</button><button type="button" id="gz_rm">🗑 Remover</button><button type="button" id="gz_x">Fechar</button></div></div>
 <datalist id="stl"></datalist>
 <input type="file" id="photoin" accept="image/*" style="display:none">
 <datalist id="catl"></datalist>
@@ -481,9 +483,21 @@ const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().repl
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const money=v=>'US$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const PKEY='lista-orlando-2026-fotos-v1';
+const IDB={db:null,
+  open(){return new Promise(r=>{try{const q=indexedDB.open('orl-fotos',1);q.onupgradeneeded=()=>{q.result.createObjectStore('img')};q.onsuccess=()=>{this.db=q.result;r(true)};q.onerror=()=>r(false)}catch(e){r(false)}})},
+  all(){return new Promise(r=>{if(!this.db)return r({});const o={};try{const c=this.db.transaction('img').objectStore('img').openCursor();c.onsuccess=()=>{const x=c.result;if(x){o[x.key]=x.value;x.continue()}else r(o)};c.onerror=()=>r(o)}catch(e){r(o)}})},
+  put(k,v){try{if(this.db)this.db.transaction('img','readwrite').objectStore('img').put(v,k)}catch(e){}},
+  del(k){try{if(this.db)this.db.transaction('img','readwrite').objectStore('img').delete(k)}catch(e){}}};
+const imgSig=s=>s?s.length+':'+s.slice(-24):'';
+const _shadow={};
+function persistImgs(){ // grava diferenças dos dois mapas no IndexedDB
+  if(!IDB.db)return false;const cur={};
+  Object.keys(photos).forEach(k=>cur['c~'+k]=photos[k]);if(typeof gImg!=='undefined')Object.keys(gImg).forEach(k=>cur['g~'+k]=gImg[k]);
+  Object.keys(cur).forEach(k=>{const s=imgSig(cur[k]);if(_shadow[k]!==s){IDB.put(k,cur[k]);_shadow[k]=s}});
+  Object.keys(_shadow).forEach(k=>{if(!(k in cur)){IDB.del(k);delete _shadow[k]}});return true}
 let photos={};
 try{photos=JSON.parse(localStorage.getItem(PKEY)||'{}')||{}}catch(e){photos={}}
-function saveP(){try{localStorage.setItem(PKEY,JSON.stringify(photos));return true}catch(e){return false}}
+function saveP(){if(persistImgs()){syncChanged();return true}try{localStorage.setItem(PKEY,JSON.stringify(photos));syncChanged();return true}catch(e){return false}}
 function shrink(file,cb,err,mx){
   const url=URL.createObjectURL(file),im=new Image();
   im.onload=()=>{const m=mx||260,r=Math.min(1,m/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*r);cv.height=Math.round(im.height*r);
@@ -1043,6 +1057,14 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
   }
 }
 let gImg=gload('img',{}),gPhId=null;
+function gImgSave(){if(persistImgs()){syncChanged();return true}const ok=gsave('img',gImg);syncChanged();return ok}
+(async()=>{ // carrega fotos do IndexedDB e migra as antigas do localStorage
+  if(!(await IDB.open()))return;const all=await IDB.all();
+  Object.keys(all).forEach(k=>{_shadow[k]=imgSig(all[k]);if(k.startsWith('c~'))photos[k.slice(2)]=all[k];else if(k.startsWith('g~'))gImg[k.slice(2)]=all[k]});
+  persistImgs();try{localStorage.removeItem(PKEY);localStorage.removeItem(GK+'img')}catch(e){}
+  try{rebuild();render()}catch(e){}if($('#guide').classList.contains('show')){const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y}
+  try{SYNC.diff()}catch(e){}
+})();
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
 function phSlot(id,cls){return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
 function phAct(id,q){if(!(id&&gImg[id]))return '';return `<div class="pha"><button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button></div>`}
@@ -1087,8 +1109,8 @@ $('#guide').addEventListener('click',e=>{
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
     gView=g;gForm=false;exForm=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
-  if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gsave('img',gImg);renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gsave('img',gImg);renderGuide()});return}
-  if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').classList.add('show');return}
+  if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
+  if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
   if(b=t.closest('[data-ropen]')){const id=b.dataset.ropen;gOpenR[id]=!gOpenR[id];const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;return}
   if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
   if(t.closest('[data-meswap]')){closeGuide();openWelcome(true);return}
@@ -1114,8 +1136,10 @@ $('#guide').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
     gForm=false;renderGuide();showToast('＋ '+it.n+' adicionado');return}
 });
 $('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPhId)return;const id=gPhId;
-  shrink(f,u=>{gImg[id]=u;if(!gsave('img',gImg)){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),400)});
-$('#gzoom').addEventListener('click',()=>$('#gzoom').classList.remove('show'));
+  shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),400)});
+$('#gzoom').addEventListener('click',e=>{const z=$('#gzoom'),id=z.dataset.id;z.classList.remove('show');
+  if(e.target.id==='gz_ch'&&id){gPhId=id;$('#gphoto').value='';$('#gphoto').click();return}
+  if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];gImgSave();const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
 $('#homebtn').addEventListener('click',()=>openGuide());
 $('#guide').addEventListener('click',async e=>{if(!e.target.closest('#updbtn'))return;e.target.textContent='Atualizando…';
   try{if(navigator.onLine===false){showToast('Precisa de internet para atualizar');e.target.textContent='🔄 Atualizar app';return}
@@ -1200,7 +1224,7 @@ $('#guide').addEventListener('submit',e=>{if(e.target.id!=='exf')return;e.preven
 const SYNC=(()=>{
   const BASE='https://orlando-2026-a171b-default-rtdb.firebaseio.com/trips/orl26-646c3697a123f642';
   const QK='orl-sync-q',SK='orl-sync-snap',LK='orl-sync-last';
-  let q=[],snap={mkt:{},md:{},rd:{},ex:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
+  let q=[],snap={mkt:{},md:{},rd:{},ex:{},img:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
   try{q=JSON.parse(localStorage.getItem(QK)||'[]')||[]}catch(e){q=[]}
   try{snap=Object.assign(snap,JSON.parse(localStorage.getItem(SK)||'{}')||{})}catch(e){}
   try{last=+localStorage.getItem(LK)||0}catch(e){}
@@ -1220,6 +1244,10 @@ const SYNC=(()=>{
     ids.forEach(id=>{const d=done[id]?1:0;if((snap.md[id]||0)!==d){snap.md[id]=d;put('md/'+id,{v:d,t:now})}});
     // contas do grupo
     (gEx||[]).forEach(x=>{const tt=Math.max(x.t||0,x.t2||0);if((snap.ex[x.id]||0)!==tt){snap.ex[x.id]=tt;put('ex/'+x.id,x)}});
+    // fotos (guia e compras)
+    if(IDB.db){const ci={};Object.keys(photos).forEach(k=>ci['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>ci['g~'+k]=gImg[k]);
+      Object.keys(ci).forEach(k=>{const s=imgSig(ci[k]);if(snap.img[k]!==s){snap.img[k]=s;put('img/'+k,{ref:k});put('imgidx/'+k,{s,t:now})}});
+      Object.keys(snap.img).forEach(k=>{if(snap.img[k]&&!(k in ci)){snap.img[k]='';put('img/'+k,null);put('imgidx/'+k,{del:1,t:now})}});}
     // brinquedos feitos
     const rc={};Object.keys(gRides||{}).forEach(pk=>Object.keys(gRides[pk]||{}).forEach(i=>{if(gRides[pk][i])rc[pk+'_'+i]=1}));
     Object.keys(rc).forEach(k=>{if(!snap.rd[k]){snap.rd[k]=1;put('rd/'+k,{v:1,t:now})}});
@@ -1230,7 +1258,11 @@ const SYNC=(()=>{
   async function flush(){
     if(busy||!q.length)return status();if(navigator.onLine===false)return status();
     busy=true;
-    try{while(q.length){const x=q[0];const r=await fetch(BASE+'/'+x.p+'.json',{method:'PUT',body:JSON.stringify(x.v),cache:'no-store'});if(!r.ok)throw new Error(r.status);q.shift();sv()}ok=true}
+    let sent=0;
+    try{while(q.length){const x=q[0];let v=x.v;
+        if(v&&v.ref){const k=v.ref;v=k.startsWith('c~')?photos[k.slice(2)]:gImg[k.slice(2)];if(v==null)v=null}
+        const r=await fetch(BASE+'/'+x.p+'.json',{method:'PUT',body:JSON.stringify(v),cache:'no-store'});if(!r.ok)throw new Error(r.status);q.shift();sv();sent++}
+      if(sent)await fetch(BASE+'/rev.json',{method:'PUT',body:JSON.stringify(Date.now()),cache:'no-store'});ok=true}
     catch(e){ok=false}
     busy=false;status();
   }
@@ -1260,12 +1292,23 @@ const SYNC=(()=>{
   }
   async function pull(){
     if(navigator.onLine===false)return status();
-    try{const r=await fetch(BASE+'.json',{cache:'no-store'});if(!r.ok)throw new Error(r.status);apply(await r.json())}catch(e){ok=false;status()}
+    try{const parts=['mkt','md','rd','ex','imgidx'];
+      const res=await Promise.all(parts.map(x=>fetch(BASE+'/'+x+'.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()})));
+      const data={};parts.forEach((x,i)=>data[x]=res[i]);apply(data);await pullImgs(data.imgidx||{})}catch(e){ok=false;status()}
+  }
+  async function pullImgs(ix){
+    if(!IDB.db)return;let ch=false;
+    for(const k of Object.keys(ix)){if(pending('img/'+k)||pending('imgidx/'+k))continue;const r=ix[k]||{};
+      const isC=k.startsWith('c~'),id=k.slice(2),map=isC?photos:gImg;
+      if(r.del){if(map[id]){delete map[id];ch=true}snap.img[k]='';continue}
+      if(snap.img[k]===r.s&&map[id])continue;
+      try{const x=await fetch(BASE+'/img/'+k+'.json',{cache:'no-store'});if(!x.ok)continue;const v=await x.json();if(typeof v==='string'){map[id]=v;snap.img[k]=imgSig(v);ch=true}}catch(e){}}
+    if(ch){applying=true;persistImgs();applying=false;sv();try{rebuild();render()}catch(e){}if($('#guide').classList.contains('show')){const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y}}
   }
   let pt=null;const pullSoon=()=>{clearTimeout(pt);pt=setTimeout(pull,300)};
   function live(){
     if(es||typeof EventSource==='undefined')return;
-    try{es=new EventSource(BASE+'.json');
+    try{es=new EventSource(BASE+'/rev.json');
       es.addEventListener('put',pullSoon);es.addEventListener('patch',pullSoon);
       es.onerror=()=>{try{es.close()}catch(_){}es=null;setTimeout(live,15000)}}catch(e){es=null}
   }
