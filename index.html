@@ -256,6 +256,8 @@ header{position:sticky}
 .ckrow .del{border:0;background:none;color:#c9bcb0;font-size:16px}
 .ckplus{border:0;background:none;color:var(--brand);font:inherit;font-weight:600;font-size:13.5px;padding:10px 0}
 .ckadd{display:flex;gap:8px;padding:8px 0}.ckadd input{flex:1}.ckadd .gbtn{width:auto;margin:0;padding:0 14px}
+.minirow{text-align:center;margin:14px 0 0}
+.mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:600}
 .ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
 .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center}
 .ev .edt{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 2px}
@@ -1055,13 +1057,12 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
+     <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
      <button class="tile" data-g="compras"><span class="e">🛍️</span><b>Compras</b><small>Listas de cada pessoa</small></button>
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
-     <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
-     <button class="tile wide" data-g="contas"><span class="e">💸</span><span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas · quem deve para quem':'Dividir despesas e acertar quem deve'})()}</small></span></button>
-     <button class="tile wide" data-g="ck"><span class="e">🧳</span><span><b>Checklist da viagem</b><small>O que levar · cada um tem o seu</small></span></button>
-     <button class="tile wide" data-g="meus"><span class="e">👛</span><span><b>Meus gastos</b><small>Cada um entra no seu perfil · gastos individuais</small></span></button>
-    </div><p class="gnote"><span class="syncst"></span><br>Mercado, brinquedos feitos e contas aparecem para todo o grupo. O resto fica salvo só neste celular.<br>Versão 14/11 · contas do grupo<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+     <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
+     <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
+    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 14/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
