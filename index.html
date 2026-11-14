@@ -115,7 +115,7 @@ main{padding:6px 12px 80px}
 .start button{width:100%;border:0;background:var(--brand);color:#fff;font-weight:700;font-size:16px;padding:13px;border-radius:12px}
 .mktbar{display:none;margin-top:8px}
 body.mkt .mktbar{display:block}
-body.mkt #addbtn,body.mkt #fst,body.mkt .tot{display:none}
+body.mkt #addbtn,body.mkt #fst,body.mkt .tot,body.mkt #who{display:none}
 body.mkt main{padding-bottom:30px}
 .qa{display:flex;gap:6px}
 .qa input{flex:1;min-width:0;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
@@ -197,7 +197,8 @@ footer{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 3
 .tot{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;font-size:13.5px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;gap:10px;z-index:6}
 .tot span:last-child{font-weight:700}
 
-.homebtn{position:absolute;right:12px;top:calc(10px + env(safe-area-inset-top));border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}.hrow h1{margin:0;text-align:right}
+.backbtn{border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:7px 14px;font-size:15px;font-weight:700;flex:none}
 header{position:sticky}
 .wback{border:0;background:none;color:var(--brand);font-size:15px;font-weight:600;padding:4px 0;margin-bottom:4px}
 .guide{position:fixed;inset:0;background:var(--bg);z-index:35;overflow:auto;display:none;padding:calc(18px + env(safe-area-inset-top)) 14px calc(30px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
@@ -372,8 +373,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 </head>
 <body>
 <header>
-  <button class="homebtn" id="homebtn">⌂ Guia</button>
-  <h1>Listas de compras · Orlando</h1>
+  <div class="hrow"><button class="backbtn" id="homebtn">‹ Início</button><h1 id="htitle">Listas de compras</h1></div>
   <div class="who" id="who"></div>
   <div class="sub"><span id="count"></span><span id="shown"></span></div>
   <div class="bar"><i id="prog"></i></div>
@@ -672,7 +672,7 @@ function notesHtml(i){
    </form></div>`;
 }
 function renderMkt(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
-  const on=who==='Mercado';document.body.classList.toggle('mkt',on);
+  const on=who==='Mercado';document.body.classList.toggle('mkt',on);$('#htitle').textContent=on?'🛒 Mercado do grupo':'🛍️ Listas de compras';
   if(!on)return;
   const have=ITEMS.filter(i=>i.who==='Mercado').map(i=>norm(i.t));
   $('#sugs').innerHTML=SUGG.filter(([t])=>!have.includes(norm(t))).map(([t,c])=>`<button type="button" data-t="${esc(t)}" data-c="${esc(c)}">+ ${esc(t)}</button>`).join('');
