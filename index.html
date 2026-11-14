@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Listas de compras · Orlando 2026</title>
+<title>Orlando 2026 · Guia da viagem</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#7a5236">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Compras Orlando">
+<meta name="apple-mobile-web-app-title" content="Orlando 2026">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 
@@ -48,7 +48,7 @@ main{padding:6px 12px 80px}
 .chk .box{width:22px;height:22px;border:2px solid #c9b8a6;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:15px;color:transparent}
 .done .chk{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
 .done .chk .box{background:var(--ok);border-color:var(--ok);color:#fff}
-.toast{position:fixed;left:12px;right:12px;bottom:calc(58px + env(safe-area-inset-bottom));background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.15);border-radius:12px;padding:10px 12px;display:none;justify-content:space-between;align-items:center;gap:10px;z-index:7;font-size:14px}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(58px + env(safe-area-inset-bottom));background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.15);border-radius:12px;padding:10px 12px;display:none;justify-content:space-between;align-items:center;gap:10px;z-index:60;font-size:14px}
 .toast.show{display:flex}
 .toast button{border:0;background:var(--brand2);color:var(--brand);font-weight:700;padding:8px 12px;border-radius:8px;font-size:14px}
 .det{display:none;padding:0 12px 12px;font-size:13.5px;border-top:1px dashed var(--line)}
@@ -196,10 +196,94 @@ body.mkt main{padding-bottom:30px}
 footer{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 30px}
 .tot{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;font-size:13.5px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;gap:10px;z-index:6}
 .tot span:last-child{font-weight:700}
+
+.homebtn{position:absolute;right:12px;top:calc(10px + env(safe-area-inset-top));border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+header{position:sticky}
+.wback{border:0;background:none;color:var(--brand);font-size:15px;font-weight:600;padding:4px 0;margin-bottom:4px}
+.guide{position:fixed;inset:0;background:var(--bg);z-index:35;overflow:auto;display:none;padding:calc(18px + env(safe-area-inset-top)) 14px calc(30px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.guide.show{display:block}
+.gh{font:700 25px Georgia,serif;color:var(--brand);margin:8px 0 2px;text-align:center}
+.glead{text-align:center;color:var(--muted);font-size:14px;margin:0 0 18px}
+.gcount{text-align:center;margin:-8px 0 18px;font-size:13.5px;color:var(--brand);font-weight:600}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:520px;margin:0 auto}
+.tile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 12px 14px;text-align:center;font:inherit;color:var(--ink)}
+.tile .e{font-size:40px;display:block;margin-bottom:6px}
+.tile b{display:block;font-size:16px}
+.tile small{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
+.tile.wide{grid-column:1/-1;display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px}
+.tile.wide .e{margin:0;font-size:36px}
+.gtop{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.gtop button{border:0;background:none;color:var(--brand);font-size:15px;font-weight:600;padding:6px 2px}
+.gtop h3{flex:1;margin:0;font:700 20px Georgia,serif;color:var(--brand);text-align:right}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -14px;padding-left:14px;padding-right:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:7px 10px;text-align:center;font:inherit;color:var(--ink);min-width:52px}
+.chip small{display:block;font-size:11px;color:var(--muted)}
+.chip b{font-size:17px}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip.on small{color:#f0e2d4}
+.chip .dot{display:block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin:3px auto 0}
+.chip.txt{padding:8px 12px;font-size:14px;font-weight:600}
+.dayh{font:700 18px Georgia,serif;color:var(--ink);margin:6px 2px 8px}
+.flag{background:#fff6dc;border:1px solid #f0dc9c;color:#6b5000;border-radius:12px;padding:9px 12px;font-size:13.5px;margin-bottom:10px}
+.ev{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.ev .h{font-weight:700;color:var(--brand);min-width:46px;font-size:14px;padding-top:1px}
+.ev .b{flex:1;min-width:0}
+.ev .b b{display:block;font-size:15px}
+.ev .b small{display:block;color:var(--muted);font-size:13px;white-space:pre-wrap;margin-top:2px}
+.ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
+.ev .go{margin-top:6px;border:1px solid var(--line);background:var(--brand2);color:var(--brand);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600}
+.gempty{text-align:center;color:var(--muted);padding:22px 10px;font-size:14px}
+.gform{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:6px}
+.gform label{display:block;font-size:12.5px;color:var(--muted);margin:8px 0 3px}
+.gform input,.gform select,.gform textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.gform textarea{min-height:60px;resize:vertical}
+.gform .two{display:flex;gap:8px}.gform .two>div{flex:1;min-width:0}
+.gbtn{display:block;width:100%;margin-top:10px;border:0;background:var(--brand);color:#fff;border-radius:12px;padding:12px;font-size:15px;font-weight:600}
+.gbtn.alt{background:#fff;color:var(--brand);border:1px dashed var(--brand)}
+.pintro{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:8px}
+.ptip{font-size:13px;color:var(--muted);margin:4px 2px}
+.ptabs{display:flex;background:var(--brand2);border-radius:10px;padding:3px;margin:10px 0 8px}
+.ptabs button{flex:1;border:0;background:none;padding:7px 4px;border-radius:8px;font-size:13.5px;color:var(--muted)}
+.ptabs button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.ifil{display:flex;gap:6px;margin:4px 0 8px;flex-wrap:wrap}
+.ifil button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;color:var(--ink)}
+.ifil button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ride{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.ride .num{width:26px;height:26px;border-radius:50%;background:var(--brand2);color:var(--brand);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.ride .b{flex:1;min-width:0}
+.ride .b b{display:block;font-size:15px;line-height:1.25}
+.ride .meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;font-size:12px}
+.ride .meta span{background:#f3ece4;border-radius:999px;padding:2px 8px;color:var(--muted)}
+.ride .meta .lv{font-weight:700}
+.lv.L{background:#e3f1e6!important;color:#2f6b3d!important}
+.lv.M{background:#fdf0d3!important;color:#7a5a00!important}
+.lv.R{background:#fbe1de!important;color:#a1231b!important}
+.ride .tip{font-size:13px;color:var(--muted);margin-top:5px}
+.ride .ck{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;flex:none;font-size:16px;color:#fff;display:flex;align-items:center;justify-content:center;padding:0}
+.ride.done{background:#fbfaf8}
+.ride.done b{text-decoration:line-through;color:var(--muted)}
+.ride.done .ck{background:var(--ok);border-color:var(--ok)}
+.gsec{font:700 15px Georgia,serif;color:var(--brand);margin:16px 2px 6px}
+.closed{background:#fbeeed;border:1px solid #f0cfcb;border-radius:12px;padding:8px 12px;font-size:13.5px;color:#7e2a22;margin-bottom:6px}
+.shows{font-size:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.shows div{padding:3px 0}
+.food{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.food b{font-size:15px}
+.food .k{float:right;font-size:11.5px;background:var(--brand2);color:var(--brand);border-radius:999px;padding:2px 8px;font-weight:600}
+.food .w{font-size:12.5px;color:var(--muted)}
+.food .p{font-size:14px;margin-top:4px}
+.food .p::before{content:'🍽️ '}
+.food .o{font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap}
+.food .nota{display:inline-block;margin-top:5px;font-weight:700;font-size:13px;background:#e6f2e8;color:#256b37;border-radius:8px;padding:1px 8px}
+.food .del{float:right;border:0;background:none;color:#b9aca2;font-size:17px;margin-left:6px}
+.prog2{font-size:13px;color:var(--muted);margin:2px 2px 6px}
+.gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
 <body>
 <header>
+  <button class="homebtn" id="homebtn">⌂ Guia</button>
   <h1>Listas de compras · Orlando</h1>
   <div class="who" id="who"></div>
   <div class="sub"><span id="count"></span><span id="shown"></span></div>
@@ -224,6 +308,7 @@ footer{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 3
 <div class="exclhead" id="exclhead" style="margin:12px 12px 0"><span>🗑 Produtos excluídos — toque num produto para restaurar</span><button id="exclback">Voltar</button></div>
 <main id="list"></main>
 <div class="welcome" id="welcome">
+ <button class="wback" id="wback">‹ Guia da viagem</button>
  <h2>Quem está comprando?</h2>
  <p class="lead">Orlando 2026 · toque no seu nome para abrir a sua lista</p>
  <div class="pgrid" id="pgrid"></div>
@@ -236,6 +321,8 @@ footer{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 16px 3
   <input type="file" id="avin" accept="image/*" style="display:none">
  </form>
 </div>
+
+<div class="guide" id="guide"><div id="gbody"></div></div>
 <datalist id="stl"></datalist>
 <input type="file" id="photoin" accept="image/*" style="display:none">
 <datalist id="catl"></datalist>
@@ -345,7 +432,7 @@ if(who&&!DATA.lists.includes(who))who=null;
 const inWho=i=>!who||i.who===who;
 function avHtml(n){const a=avatars[n];if(a&&a.img)return `<img src="${a.img}" alt="">`;return esc((a&&a.e)||DEFAV[n]||'🙂')}
 function renderWelcome(){
-  const L=LISTS();
+  const L=LISTS().filter(n=>n!=='Mercado');
   $('#pgrid').innerHTML=L.map(n=>{const c=ITEMS.filter(i=>i.who===n).length;
     return `<div class="pcard" data-w="${esc(n)}" role="button"><button class="edit" data-e="${esc(n)}" aria-label="Trocar ícone">✏️</button><div class="av">${avHtml(n)}</div><b>${esc(n)}</b><small>${n==='Mercado'?(c?c+' itens':'Lista do grupo'):(c?c+' produtos':'Lista ainda vazia')}</small></div>`}).join('')
    +`<div class="pcard all" data-w="" role="button"><div class="av">👥</div><b>Todos</b><small>Ver todas as listas</small></div>`;
@@ -767,7 +854,129 @@ $('#fcat').addEventListener('change',render);$('#fst').addEventListener('change'
 $('#seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));render()});
 render();
 if(who===null)who='';
-openWelcome();
+
+/* ===== Guia da viagem ===== */
+const GUIDE={"days": [{"d": "2026-11-20", "w": "Sex", "items": [], "flag": ""}, {"d": "2026-11-21", "w": "Sáb", "items": [], "flag": ""}, {"d": "2026-11-22", "w": "Dom", "items": [], "flag": ""}, {"d": "2026-11-23", "w": "Seg", "items": [], "flag": ""}, {"d": "2026-11-24", "w": "Ter", "items": [], "flag": ""}, {"d": "2026-11-25", "w": "Qua", "items": [], "flag": ""}, {"d": "2026-11-26", "w": "Qui", "items": [], "flag": "🦃 Thanksgiving (Dia de Ação de Graças): parques cheios; muitas lojas e outlets fecham ou abrem só à noite."}, {"d": "2026-11-27", "w": "Sex", "items": [], "flag": "🛍️ Black Friday: outlets e lojas abrem muito cedo (algumas de madrugada); trânsito e filas grandes."}, {"d": "2026-11-28", "w": "Sáb", "items": [], "flag": ""}, {"d": "2026-11-29", "w": "Dom", "items": [], "flag": ""}, {"d": "2026-11-30", "w": "Seg", "items": [], "flag": "💻 Cyber Monday: boas promoções online."}, {"d": "2026-12-01", "w": "Ter", "items": [], "flag": ""}], "parks": [{"id": "mk", "n": "Magic Kingdom", "e": "🏰", "g": "Disney", "intro": "Comece por Fantasyland logo na abertura, siga em sentido horário (Liberty Square → Frontierland → Adventureland) e deixe Tomorrowland para o fim do dia — TRON fica lindo à noite.", "tips": ["Em noites da festa de Natal (Mickey's Very Merry Christmas Party) o parque fecha mais cedo para quem não tem ingresso da festa — confira o calendário antes de escolher o dia.", "Desfile Festival of Fantasy à tarde e fogos Happily Ever After à noite: pegue lugar na Main Street uns 30–40 min antes."], "rides": [{"n": "Seven Dwarfs Mine Train", "a": "Fantasyland", "i": "Moderado", "h": "97 cm", "tip": "A fila cresce rápido: vá direto na abertura ou use Lightning Lane."}, {"n": "Peter Pan's Flight", "a": "Fantasyland", "i": "Leve", "h": null, "tip": "Fila longa o dia todo para um passeio curto — logo cedo é a melhor hora."}, {"n": "Under the Sea – Journey of the Little Mermaid", "a": "Fantasyland", "i": "Leve", "h": null, "tip": "Fila costuma andar rápido."}, {"n": "The Many Adventures of Winnie the Pooh", "a": "Fantasyland", "i": "Leve", "h": null, "tip": ""}, {"n": "The Barnstormer", "a": "Fantasyland", "i": "Moderado", "h": "89 cm", "tip": "Montanha-russa infantil, bem curtinha."}, {"n": "Dumbo the Flying Elephant", "a": "Fantasyland", "i": "Leve", "h": null, "tip": "Opcional; bom para crianças."}, {"n": "\"it's a small world\"", "a": "Fantasyland", "i": "Leve", "h": null, "tip": ""}, {"n": "Haunted Mansion", "a": "Liberty Square", "i": "Leve", "h": null, "tip": "Clássico obrigatório; não assusta de verdade."}, {"n": "Big Thunder Mountain Railroad", "a": "Frontierland", "i": "Moderado", "h": "102 cm", "tip": "Montanha-russa de trem; à noite é ainda melhor."}, {"n": "Pirates of the Caribbean", "a": "Adventureland", "i": "Leve", "h": null, "tip": "Tem uma descida pequena no escuro."}, {"n": "Jungle Cruise", "a": "Adventureland", "i": "Leve", "h": null, "tip": "Piadas do capitão em inglês; fila cresce à tarde."}, {"n": "Mickey's PhilharMagic", "a": "Fantasyland", "i": "Leve", "h": null, "tip": "Cinema 3D com ar-condicionado — ótimo para a hora do calor."}, {"n": "Space Mountain", "a": "Tomorrowland", "i": "Radical", "h": "112 cm", "tip": "Montanha-russa no escuro, com curvas fechadas."}, {"n": "Buzz Lightyear's Space Ranger Spin", "a": "Tomorrowland", "i": "Leve", "h": null, "tip": "Jogo de tiro ao alvo; disputa entre o grupo."}, {"n": "Tomorrowland Transit Authority PeopleMover", "a": "Tomorrowland", "i": "Leve", "h": null, "tip": "Passeio tranquilo para descansar as pernas."}, {"n": "Tomorrowland Speedway", "a": "Tomorrowland", "i": "Leve", "h": "81 cm", "tip": "Para dirigir sozinho é preciso ter 137 cm."}, {"n": "TRON Lightcycle / Run", "a": "Tomorrowland", "i": "Radical", "h": "122 cm", "tip": "A mais radical do parque. Confira no app se está com fila virtual ou Lightning Lane."}], "closed": ["Tiana's Bayou Adventure — fechada para reforma desde 2/11, com reabertura prevista para dezembro.", "Walt Disney's Carousel of Progress — fechado até 2027.", "Rios da América (Tom Sawyer Island e barco Liberty Belle) — área em obras para a nova terra dos Carros (Piston Peak)."], "food": [{"n": "Cosmic Ray's Starlight Café", "a": "Tomorrowland", "k": "Rápido", "p": "Cheeseburger ou frango; lugar grande para sentar.", "o": ""}, {"n": "Pecos Bill Tall Tale Inn", "a": "Frontierland", "k": "Rápido", "p": "Burrito ou bowl de fajita; boa barra de coberturas.", "o": ""}, {"n": "Columbia Harbour House", "a": "Liberty Square", "k": "Rápido", "p": "Lobster roll ou tiras de peixe/camarão; andar de cima é mais calmo.", "o": ""}, {"n": "Aloha Isle", "a": "Adventureland", "k": "Lanche", "p": "Dole Whip (sorvete de abacaxi) — clássico.", "o": ""}, {"n": "Casey's Corner", "a": "Main Street", "k": "Rápido", "p": "Cachorro-quente.", "o": ""}, {"n": "Gaston's Tavern", "a": "Fantasyland", "k": "Lanche", "p": "Cinnamon roll gigante e LeFou's Brew.", "o": ""}, {"n": "Be Our Guest Restaurant", "a": "Fantasyland", "k": "Mesa", "p": "Experiência no castelo da Fera; precisa de reserva.", "o": ""}], "shows": []}, {"id": "ep", "n": "EPCOT", "e": "🌐", "g": "Disney", "intro": "Faça primeiro os brinquedos de World Discovery e World Nature (lado da entrada) e vá para o World Showcase (os países) a partir do fim da manhã, quando ele abre. Termine com os fogos Luminous.", "tips": ["Fim de novembro tem festival: o Food & Wine vai até o fim do mês (confira a data de encerramento) e o Festival of the Holidays começa em 27/11, com quiosques de comida de Natal pelos países.", "Durante o Festival of the Holidays o parque fecha às 21h e os fogos começam 21h15."], "rides": [{"n": "Guardians of the Galaxy: Cosmic Rewind", "a": "World Discovery", "i": "Radical", "h": "107 cm", "tip": "Uma das melhores montanhas-russas da Disney; confira no app se tem fila virtual ou Lightning Lane."}, {"n": "Test Track", "a": "World Discovery", "i": "Moderado", "h": "102 cm", "tip": "Reaberta em 2025 com versão nova; reta final em alta velocidade."}, {"n": "Mission: SPACE", "a": "World Discovery", "i": "Moderado", "h": "102 cm", "tip": "Versão Laranja é intensa (centrífuga, 112 cm); a Verde é leve."}, {"n": "Spaceship Earth", "a": "World Celebration", "i": "Leve", "h": null, "tip": "Passeio dentro da “bola”. Confira no app se já reabriu da reforma."}, {"n": "Soarin'", "a": "World Nature", "i": "Leve", "h": "102 cm", "tip": "Voo simulado; dá um friozinho para quem tem medo de altura."}, {"n": "Living with the Land", "a": "World Nature", "i": "Leve", "h": null, "tip": "Passeio de barco pelas estufas."}, {"n": "The Seas with Nemo & Friends", "a": "World Nature", "i": "Leve", "h": null, "tip": "Aquário enorme logo na saída."}, {"n": "Journey of Water, Inspired by Moana", "a": "World Nature", "i": "Leve", "h": null, "tip": "Trilha com água interativa — pode molhar."}, {"n": "Gran Fiesta Tour (México)", "a": "World Showcase", "i": "Leve", "h": null, "tip": "Dentro da pirâmide; ótimo para fugir do calor."}, {"n": "Frozen Ever After (Noruega)", "a": "World Showcase", "i": "Leve", "h": null, "tip": "Fila longa: Lightning Lane ou logo que o World Showcase abrir."}, {"n": "Remy's Ratatouille Adventure (França)", "a": "World Showcase", "i": "Leve", "h": null, "tip": "Cinema 4D em movimento; fila longa à tarde."}], "closed": [], "food": [{"n": "Quiosques do festival", "a": "World Showcase", "k": "Lanche", "p": "Porções pequenas para provar vários países.", "o": ""}, {"n": "Les Halles Boulangerie-Patisserie", "a": "França", "k": "Rápido", "p": "Croissant, sanduíche de baguete e doces.", "o": ""}, {"n": "Kringla Bakeri og Kafe", "a": "Noruega", "k": "Lanche", "p": "School bread (pão doce com creme e coco).", "o": ""}, {"n": "Regal Eagle Smokehouse", "a": "Estados Unidos", "k": "Rápido", "p": "Churrasco americano (brisket, costela).", "o": ""}, {"n": "Sunshine Seasons", "a": "The Land", "k": "Rápido", "p": "Variado e prático perto do Soarin'.", "o": ""}, {"n": "Space 220", "a": "World Discovery", "k": "Mesa", "p": "Restaurante “na estação espacial”; precisa de reserva.", "o": ""}, {"n": "Le Cellier Steakhouse", "a": "Canadá", "k": "Mesa", "p": "Filé e sopa de cheddar; precisa de reserva.", "o": ""}], "shows": []}, {"id": "hs", "n": "Hollywood Studios", "e": "🎬", "g": "Disney", "intro": "Na abertura vá para Toy Story Land; depois Star Wars: Galaxy's Edge; por último o lado da Sunset Blvd. (Tower of Terror e Rock 'n' Roller Coaster). Feche a noite com o Fantasmic!.", "tips": ["Rise of the Resistance é o brinquedo mais disputado: Lightning Lane individual ou fila logo cedo.", "A nova terra de Monstros S.A. ainda está em obras."], "rides": [{"n": "Slinky Dog Dash", "a": "Toy Story Land", "i": "Moderado", "h": "97 cm", "tip": "Montanha-russa familiar; fila enorme depois da abertura."}, {"n": "Alien Swirling Saucers", "a": "Toy Story Land", "i": "Leve", "h": "81 cm", "tip": ""}, {"n": "Toy Story Mania!", "a": "Toy Story Land", "i": "Leve", "h": null, "tip": "Jogo 4D de tiro ao alvo."}, {"n": "Star Wars: Rise of the Resistance", "a": "Galaxy's Edge", "i": "Moderado", "h": "102 cm", "tip": "A melhor atração do parque; longa (uns 18 min)."}, {"n": "Millennium Falcon: Smugglers Run", "a": "Galaxy's Edge", "i": "Moderado", "h": "97 cm", "tip": "Simulador onde o grupo pilota a nave; quem fica de piloto se diverte mais."}, {"n": "Star Tours", "a": "Echo Lake", "i": "Moderado", "h": "102 cm", "tip": "Simulador 3D; pode enjoar."}, {"n": "Mickey & Minnie's Runaway Railway", "a": "Hollywood Blvd.", "i": "Leve", "h": null, "tip": "Esteve em reforma este ano; confira no app se está aberto."}, {"n": "The Twilight Zone Tower of Terror", "a": "Sunset Blvd.", "i": "Radical", "h": "102 cm", "tip": "Elevador em queda livre — várias quedas."}, {"n": "Rock 'n' Roller Coaster Starring The Muppets", "a": "Sunset Blvd.", "i": "Radical", "h": "122 cm", "tip": "Nova versão com os Muppets (desde maio/2026); lançamento de 0 a 90 km/h e loopings."}], "shows": ["Indiana Jones Epic Stunt Spectacular", "Beauty and the Beast – Live on Stage", "Frozen Sing-Along", "Fantasmic! (à noite)"], "closed": ["Muppet*Vision 3D e área dos Muppets — fechados para a construção de Monstros S.A."], "food": [{"n": "Woody's Lunch Box", "a": "Toy Story Land", "k": "Rápido", "p": "Lunch Box Tarts (doce) e sanduíche de brisket.", "o": ""}, {"n": "Ronto Roasters", "a": "Galaxy's Edge", "k": "Rápido", "p": "Ronto Wrap (linguiça e porco grelhado).", "o": ""}, {"n": "Docking Bay 7", "a": "Galaxy's Edge", "k": "Rápido", "p": "Pratos temáticos de Star Wars.", "o": ""}, {"n": "Milk Stand", "a": "Galaxy's Edge", "k": "Lanche", "p": "Leite azul ou verde (é tipo um smoothie de coco/fruta).", "o": ""}, {"n": "50's Prime Time Café", "a": "Echo Lake", "k": "Mesa", "p": "Frango frito e milk-shake de pasta de amendoim; os garçons fazem “teatrinho” de mãe dos anos 50.", "o": ""}, {"n": "Sci-Fi Dine-In Theater", "a": "Commissary Lane", "k": "Mesa", "p": "Come dentro de “carros” num cinema drive-in.", "o": ""}]}, {"id": "ak", "n": "Animal Kingdom", "e": "🦁", "g": "Disney", "intro": "O parque fecha cedo (por volta das 18h). Comece por Pandora (Avatar), faça o safári ainda de manhã, quando os animais estão mais ativos, e deixe Everest e Kali para depois.", "tips": ["DinoLand U.S.A. fechou e está virando a nova área Tropical Americas (abre em 2027).", "Kali River Rapids molha muito: leve capa ou roupa extra."], "rides": [{"n": "Avatar Flight of Passage", "a": "Pandora", "i": "Moderado", "h": "112 cm", "tip": "Simulador de voo incrível; vá na abertura ou use Lightning Lane."}, {"n": "Na'vi River Journey", "a": "Pandora", "i": "Leve", "h": null, "tip": "Passeio de barco calmo e bonito."}, {"n": "Kilimanjaro Safaris", "a": "Africa", "i": "Leve", "h": null, "tip": "Melhor de manhã, com animais ativos."}, {"n": "Gorilla Falls Exploration Trail", "a": "Africa", "i": "Leve", "h": null, "tip": "Trilha a pé saindo do safári."}, {"n": "Wildlife Express Train → Bluey's Wild World", "a": "Rafiki's Planet Watch", "i": "Leve", "h": null, "tip": "Experiência nova da Bluey (desde maio/2026); bom para crianças pequenas."}, {"n": "Expedition Everest", "a": "Asia", "i": "Radical", "h": "112 cm", "tip": "Montanha-russa com trecho para trás no escuro."}, {"n": "Kali River Rapids", "a": "Asia", "i": "Moderado", "h": "97 cm", "tip": "Bote no rio — você vai se molhar."}, {"n": "Maharajah Jungle Trek", "a": "Asia", "i": "Leve", "h": null, "tip": "Trilha com tigres."}], "shows": ["Festival of the Lion King", "Finding Nemo: The Big Blue… and Beyond!", "Zootopia: Better Zoogether!", "Feathered Friends in Flight!"], "closed": ["DINOSAUR e toda a DinoLand U.S.A. — fechados de vez em 2026."], "food": [{"n": "Satu'li Canteen", "a": "Pandora", "k": "Rápido", "p": "Bowls (escolha a proteína e a base); dos melhores rápidos da Disney.", "o": ""}, {"n": "Pongu Pongu", "a": "Pandora", "k": "Lanche", "p": "Night Blossom (bebida colorida com pérolas).", "o": ""}, {"n": "Flame Tree Barbecue", "a": "Discovery Island", "k": "Rápido", "p": "Costela e frango defumado.", "o": ""}, {"n": "Harambe Market", "a": "Africa", "k": "Rápido", "p": "Espetinhos e bowls.", "o": ""}, {"n": "Yak & Yeti Restaurant", "a": "Asia", "k": "Mesa", "p": "Comida asiática; bom ar-condicionado.", "o": ""}, {"n": "Tusker House", "a": "Africa", "k": "Mesa", "p": "Buffet com personagens; precisa de reserva.", "o": ""}]}, {"id": "usf", "n": "Universal Studios Florida", "e": "🎥", "g": "Universal", "intro": "Abra o dia no Beco Diagonal (Gringotts) antes da fila crescer, depois faça os brinquedos do lado de Nova York e São Francisco, e à tarde a parte de Springfield e das crianças.", "tips": ["Com ingresso Park-to-Park dá para ir de Hogwarts Express até o Islands of Adventure (Hogsmeade).", "A montanha-russa Hollywood Rip Ride Rockit fechou em 2025; a nova Fast & Furious: Hollywood Drift só abre em 2027."], "rides": [{"n": "Harry Potter and the Escape from Gringotts", "a": "Diagon Alley", "i": "Moderado", "h": "107 cm", "tip": "Montanha-russa com 3D; o Beco Diagonal é imperdível."}, {"n": "Hogwarts Express (King's Cross)", "a": "Diagon Alley", "i": "Leve", "h": null, "tip": "Precisa de ingresso Park-to-Park."}, {"n": "Revenge of the Mummy", "a": "New York", "i": "Radical", "h": "122 cm", "tip": "Montanha-russa no escuro com lançamento e trecho para trás."}, {"n": "Transformers: The Ride-3D", "a": "Production Central", "i": "Moderado", "h": "102 cm", "tip": "Simulador 3D; fila costuma andar rápido."}, {"n": "Fast & Furious – Supercharged", "a": "San Francisco", "i": "Leve", "h": "102 cm", "tip": "Atração fraca; só se tiver tempo sobrando."}, {"n": "Men in Black: Alien Attack", "a": "World Expo", "i": "Leve", "h": "107 cm", "tip": "Jogo de tiro em carrinho que gira."}, {"n": "The Simpsons Ride", "a": "Springfield", "i": "Moderado", "h": "102 cm", "tip": "Simulador; enjoa quem é sensível."}, {"n": "Kang & Kodos' Twirl 'n' Hurl", "a": "Springfield", "i": "Leve", "h": null, "tip": ""}, {"n": "E.T. Adventure", "a": "Woody Woodpecker's KidZone", "i": "Leve", "h": "86 cm", "tip": "Clássico; bicicletas voadoras."}, {"n": "Trolls Trollercoaster", "a": "DreamWorks Land", "i": "Moderado", "h": "91 cm", "tip": "Montanha-russa infantil."}, {"n": "Despicable Me Minion Mayhem", "a": "Minion Land", "i": "Moderado", "h": "102 cm", "tip": "Simulador dos Minions."}, {"n": "Illumination's Villain-Con Minion Blast", "a": "Minion Land", "i": "Leve", "h": null, "tip": "Esteira com jogo de tiro."}], "shows": ["The Bourne Stuntacular"], "closed": ["Universal Orlando's Horror Make-Up Show — fechado (previsão de volta no inverno)."], "food": [{"n": "Leaky Cauldron", "a": "Diagon Alley", "k": "Rápido", "p": "Fish & chips ou torta; Butterbeer (gelada ou frozen).", "o": ""}, {"n": "Florean Fortescue's Ice-Cream", "a": "Diagon Alley", "k": "Lanche", "p": "Sorvete de Butterbeer.", "o": ""}, {"n": "Krusty Burger", "a": "Springfield", "k": "Rápido", "p": "Hambúrguer; peça o donut gigante na Lard Lad ao lado.", "o": ""}, {"n": "Lard Lad Donuts", "a": "Springfield", "k": "Lanche", "p": "Donut gigante cor-de-rosa.", "o": ""}, {"n": "Mel's Drive-In", "a": "Hollywood", "k": "Rápido", "p": "Hambúrguer e milk-shake no estilo anos 50.", "o": ""}]}, {"id": "ioa", "n": "Islands of Adventure", "e": "🦖", "g": "Universal", "intro": "Na abertura vá direto para Hagrid's ou VelociCoaster (as filas mais longas). Depois siga o círculo: Hogsmeade → Jurassic Park → Skull Island → Toon Lagoon → Marvel → Seuss Landing.", "tips": ["Jurassic Park River Adventure reabre em 19/11, depois de quase um ano em reforma — chega bem a tempo.", "Toon Lagoon molha MUITO (Popeye é o pior): leve capa ou roupa extra."], "rides": [{"n": "Hagrid's Magical Creatures Motorbike Adventure", "a": "Hogsmeade", "i": "Moderado", "h": "122 cm", "tip": "A mais disputada; vá na abertura."}, {"n": "Harry Potter and the Forbidden Journey", "a": "Hogsmeade", "i": "Moderado", "h": "122 cm", "tip": "Dentro do castelo de Hogwarts; pode enjoar."}, {"n": "Flight of the Hippogriff", "a": "Hogsmeade", "i": "Leve", "h": "91 cm", "tip": "Montanha-russa infantil."}, {"n": "Jurassic World VelociCoaster", "a": "Jurassic Park", "i": "Radical", "h": "130 cm", "tip": "A mais radical da Universal: dois lançamentos e inversões."}, {"n": "Jurassic Park River Adventure", "a": "Jurassic Park", "i": "Moderado", "h": "107 cm", "tip": "Queda final grande; molha. Reabre em 19/11."}, {"n": "Pteranodon Flyers", "a": "Jurassic Park", "i": "Leve", "h": "91 cm", "tip": "Adulto só entra acompanhando criança."}, {"n": "Skull Island: Reign of Kong", "a": "Skull Island", "i": "Moderado", "h": "86 cm", "tip": "Caminhão no escuro com o King Kong; tem sustos."}, {"n": "Popeye & Bluto's Bilge-Rat Barges", "a": "Toon Lagoon", "i": "Moderado", "h": "107 cm", "tip": "Bote: você sai encharcado."}, {"n": "Dudley Do-Right's Ripsaw Falls", "a": "Toon Lagoon", "i": "Moderado", "h": "112 cm", "tip": "Queda de tronco; molha bastante."}, {"n": "The Amazing Adventures of Spider-Man", "a": "Marvel Super Hero Island", "i": "Moderado", "h": "102 cm", "tip": "Clássico 3D; ótimo para todos."}, {"n": "Doctor Doom's Fearfall", "a": "Marvel Super Hero Island", "i": "Radical", "h": "132 cm", "tip": "Torre de queda/lançamento vertical."}, {"n": "The Incredible Hulk Coaster", "a": "Marvel Super Hero Island", "i": "Radical", "h": "137 cm", "tip": "Lançamento subindo e várias inversões."}, {"n": "The Cat in the Hat", "a": "Seuss Landing", "i": "Leve", "h": "91 cm", "tip": "Carrinho que gira bastante."}, {"n": "One Fish, Two Fish, Red Fish, Blue Fish", "a": "Seuss Landing", "i": "Leve", "h": null, "tip": "Esguicha água."}, {"n": "The High in the Sky Seuss Trolley Train Ride!", "a": "Seuss Landing", "i": "Leve", "h": null, "tip": ""}], "closed": ["Thunder Falls Terrace (restaurante do Jurassic Park) — fechado."], "food": [{"n": "Three Broomsticks", "a": "Hogsmeade", "k": "Rápido", "p": "The Great Feast (frango, costela, milho e batatas) para dividir.", "o": ""}, {"n": "Hog's Head", "a": "Hogsmeade", "k": "Lanche", "p": "Butterbeer e suco de abóbora.", "o": ""}, {"n": "Honeydukes", "a": "Hogsmeade", "k": "Lanche", "p": "Doces do Harry Potter (sapo de chocolate).", "o": ""}, {"n": "Green Eggs and Ham Café", "a": "Seuss Landing", "k": "Rápido", "p": "Tater tots com “ovos verdes” — lanche temático.", "o": ""}, {"n": "Mythos Restaurant", "a": "Lost Continent", "k": "Mesa", "p": "O restaurante de mesa mais elogiado da Universal.", "o": ""}], "shows": []}, {"id": "epic", "n": "Epic Universe", "e": "🌌", "g": "Universal", "intro": "Chegue antes da abertura e escolha uma terra para começar (Ministério da Magia ou Super Nintendo World são os que mais enchem). As terras ficam em volta do Celestial Park; deixe a Stardust Racers para a noite, quando fica iluminada.", "tips": ["O parque costuma fechar cedo (por volta das 20h em dias normais) — confira o horário do dia.", "Para os jogos do Super Nintendo World vale comprar a pulseira Power-Up Band."], "rides": [{"n": "Harry Potter and the Battle at the Ministry", "a": "Ministry of Magic", "i": "Moderado", "h": "102 cm", "tip": "A atração mais disputada do parque; vá na abertura."}, {"n": "Mine-Cart Madness", "a": "Super Nintendo World", "i": "Moderado", "h": "102 cm", "tip": "Montanha-russa do Donkey Kong."}, {"n": "Mario Kart: Bowser's Challenge", "a": "Super Nintendo World", "i": "Leve", "h": "102 cm", "tip": "Jogo com óculos de realidade aumentada."}, {"n": "Yoshi's Adventure", "a": "Super Nintendo World", "i": "Leve", "h": "86 cm", "tip": "Passeio tranquilo."}, {"n": "Monsters Unchained: The Frankenstein Experiment", "a": "Dark Universe", "i": "Moderado", "h": "102 cm", "tip": "Escuro e com sustos; nada radical no movimento."}, {"n": "Curse of the Werewolf", "a": "Dark Universe", "i": "Moderado", "h": "122 cm", "tip": "Montanha-russa que gira."}, {"n": "Hiccup's Wing Gliders", "a": "How to Train Your Dragon – Isle of Berk", "i": "Moderado", "h": "122 cm", "tip": "Montanha-russa familiar com lançamento."}, {"n": "Dragon Racer's Rally", "a": "How to Train Your Dragon – Isle of Berk", "i": "Moderado", "h": null, "tip": "Gira bastante; quem enjoa pode pular."}, {"n": "Fyre Drill", "a": "How to Train Your Dragon – Isle of Berk", "i": "Leve", "h": null, "tip": "Barquinho com água — pode molhar."}, {"n": "Stardust Racers", "a": "Celestial Park", "i": "Radical", "h": "122 cm", "tip": "Montanha-russa dupla, a mais radical do parque."}, {"n": "Constellation Carousel", "a": "Celestial Park", "i": "Leve", "h": null, "tip": "Carrossel."}], "shows": ["The Untrainable Dragon (Isle of Berk)", "Le Cirque Arcanus (Ministry of Magic)"], "closed": [], "food": [{"n": "Toadstool Cafe", "a": "Super Nintendo World", "k": "Rápido", "p": "Pratos temáticos do Mario; costuma ter fila virtual pelo app.", "o": ""}, {"n": "The Burning Blade Tavern", "a": "Dark Universe", "k": "Rápido", "p": "Pub de monstros; bom para bebidas e lanches.", "o": ""}, {"n": "Café L'air De La Sirène", "a": "Ministry of Magic", "k": "Rápido", "p": "Frutos do mar no estilo francês.", "o": ""}, {"n": "Mead Hall", "a": "Isle of Berk", "k": "Rápido", "p": "Comida viking para dividir.", "o": ""}, {"n": "Atlantic", "a": "Celestial Park", "k": "Mesa", "p": "Restaurante de frutos do mar; precisa de reserva.", "o": ""}]}], "rest": [], "updated": "14/11/2026"};
+const GK='orl-guia-';
+function gload(k,d){try{const v=JSON.parse(localStorage.getItem(GK+k)||'null');return v==null?d:v}catch(e){return d}}
+function gsave(k,v){try{localStorage.setItem(GK+k,JSON.stringify(v));return true}catch(e){return false}}
+let gPlan=gload('plan',{}),gRides=gload('rides',{}),gRest=gload('rest',[]),gEat=gload('eat',[]);
+let gView='home',gDay=null,gPark=null,gPTab='rides',gLv='',gForm=false;
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const LVC={'Leve':'L','Moderado':'M','Radical':'R'};
+function dLabel(x){const [y,m,d]=x.d.split('-');return x.w+', '+(+d)+' de '+MES[m-1]}
+function todayISO(){const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')}
+function dayItems(x){return (x.items||[]).map((e,i)=>Object.assign({base:1,k:'b'+i},e)).concat((gPlan[x.d]||[]).map((e,i)=>Object.assign({k:'u'+i,ui:i},e))).sort((a,b)=>(a.h||'99').localeCompare(b.h||'99'))}
+function parkById(id){return GUIDE.parks.find(p=>p.id===id)}
+function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
+function closeGuide(){$('#guide').classList.remove('show')}
+function gTop(t,back){return `<div class="gtop"><button data-g="${back||'home'}">‹ ${back&&back!=='home'?'Voltar':'Início'}</button><h3>${t}</h3></div>`}
+function renderGuide(){
+  const B=$('#gbody');
+  if(gView==='home'){
+    const t=todayISO(),start='2026-11-20';
+    let cd='';{const diff=Math.round((new Date(start+'T12:00')-new Date(t+'T12:00'))/864e5);if(diff>1)cd=`Faltam ${diff} dias ✈️`;else if(diff===1)cd='É amanhã! ✈️';else if(GUIDE.days.some(x=>x.d===t))cd='Boa viagem! 🎢'}
+    const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.length,0);
+    const nRest=GUIDE.rest.length+gRest.length;
+    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12</p>${cd?`<div class="gcount">${cd}</div>`:''}
+    <div class="tiles">
+     <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 01/12</small></span></button>
+     <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
+     <button class="tile" data-g="compras"><span class="e">🛍️</span><b>Compras</b><small>Listas de cada pessoa</small></button>
+     <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
+     <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
+    </div><p class="gnote">Funciona sem internet. O que você marca fica salvo só neste celular.</p>`;
+    return;
+  }
+  if(gView==='roteiro'){
+    const t=todayISO();
+    if(!gDay)gDay=(GUIDE.days.find(x=>x.d===t)||GUIDE.days[0]).d;
+    const x=GUIDE.days.find(z=>z.d===gDay);
+    const its=dayItems(x);
+    const chips=GUIDE.days.map(z=>{const [y,m,d]=z.d.split('-');const has=dayItems(z).length;return `<button class="chip${z.d===gDay?' on':''}" data-day="${z.d}"><small>${z.w}</small><b>${+d}</b><small>${MES[m-1]}</small>${has?'<i class="dot"></i>':''}</button>`}).join('');
+    const parkOpts=GUIDE.parks.map(p=>`<option value="${p.id}">${p.e} ${esc(p.n)}</option>`).join('');
+    B.innerHTML=gTop('Roteiro')+`<div class="chips" id="dchips">${chips}</div>
+     <div class="dayh">${dLabel(x)}</div>${x.flag?`<div class="flag">${esc(x.flag)}</div>`:''}
+     ${its.length?its.map(e=>{const p=e.park&&parkById(e.park);return `<div class="ev"><div class="h">${esc(e.h||'—')}</div><div class="b"><b>${esc(e.t)}</b>${e.n?`<small>${esc(e.n)}</small>`:''}${p?`<button class="go" data-park="${p.id}">${p.e} Ver guia do ${esc(p.n)}</button>`:''}</div>${e.base?'':`<button class="del" data-del="${e.ui}" aria-label="Apagar">✕</button>`}</div>`}).join(''):`<div class="gempty">Nada programado ainda para este dia.</div>`}
+     ${gForm?`<form class="gform" id="evf" autocomplete="off"><div class="two"><div><label>Horário</label><input id="ev_h" type="time"></div><div><label>Parque (opcional)</label><select id="ev_p"><option value="">—</option>${parkOpts}</select></div></div>
+       <label>O quê *</label><input id="ev_t" placeholder="Ex.: Magic Kingdom, Outlet, Jantar" required>
+       <label>Observação</label><textarea id="ev_n" placeholder="Endereço, reserva, quem vai…"></textarea>
+       <button class="gbtn" type="submit">Salvar</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`
+     :`<button class="gbtn alt" data-addev="1">+ Adicionar à programação</button>`}`;
+    const on=B.querySelector('.chip.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
+    return;
+  }
+  if(gView==='parques'){
+    B.innerHTML=gTop('Parques')+`<p class="ptip" style="margin-bottom:10px">Escolha o parque para ver a ordem dos brinquedos e onde comer. Situação conferida em ${GUIDE.updated}.</p>`+
+    ['Disney','Universal'].map(g=>`<div class="gsec">${g}</div><div class="tiles">`+GUIDE.parks.filter(p=>p.g===g).map(p=>{const dn=Object.keys(gRides[p.id]||{}).length;return `<button class="tile" data-park="${p.id}"><span class="e">${p.e}</span><b>${esc(p.n)}</b><small>${p.rides.length} atrações${dn?' · '+dn+' feitas':''}</small></button>`}).join('')+`</div>`).join('');
+    return;
+  }
+  if(gView==='park'){
+    const p=parkById(gPark);const dn=gRides[p.id]||{};
+    let h=gTop(p.e+' '+esc(p.n),'parques')+`<div class="ptabs" id="ptabs"><button data-pt="rides" class="${gPTab==='rides'?'on':''}">🎢 Brinquedos</button><button data-pt="food" class="${gPTab==='food'?'on':''}">🍔 Onde comer</button></div>`;
+    if(gPTab==='rides'){
+      const cnt=p.rides.filter((r,i)=>dn[i]).length;
+      h+=`<div class="pintro">🧭 ${esc(p.intro)}</div>`+(p.tips||[]).map(t=>`<div class="ptip">💡 ${esc(t)}</div>`).join('');
+      h+=`<div class="ifil" id="ifil">${['','Leve','Moderado','Radical'].map(l=>`<button data-lv="${l}" class="${gLv===l?'on':''}">${l||'Todos'}</button>`).join('')}</div><div class="prog2">${cnt} de ${p.rides.length} feitos · na ordem sugerida</div>`;
+      h+=p.rides.map((r,i)=>(!gLv||r.i===gLv)?`<div class="ride${dn[i]?' done':''}"><div class="num">${i+1}</div><div class="b"><b>${esc(r.n)}</b><div class="meta"><span class="lv ${LVC[r.i]}">${r.i}</span><span>📍 ${esc(r.a)}</span><span>📏 ${r.h?'mín. '+r.h:'sem altura mínima'}</span></div>${r.tip?`<div class="tip">${esc(r.tip)}</div>`:''}</div><button class="ck" data-ride="${i}" aria-label="Feito">${dn[i]?'✓':''}</button></div>`:'').join('');
+      if(p.shows&&p.shows.length)h+=`<div class="gsec">🎭 Shows</div><div class="shows">${p.shows.map(s=>`<div>• ${esc(s)}</div>`).join('')}</div>`;
+      if(p.closed&&p.closed.length)h+=`<div class="gsec">🚧 Fechados nas suas datas</div>`+p.closed.map(c=>`<div class="closed">${esc(c)}</div>`).join('');
+      h+=`<p class="gnote">Alturas convertidas de polegadas. Situação conferida em ${GUIDE.updated}; na véspera, confira no app oficial do parque.</p>`;
+    }else{
+      const mine=gEat.map((e,i)=>Object.assign({ui:i},e)).filter(e=>e.park===p.id);
+      h+=p.food.map(foodCard).join('')+mine.map(foodCard).join('');
+      h+=gForm?eatForm(true):`<button class="gbtn alt" data-addeat="1">+ Adicionar lugar para comer</button>`;
+    }
+    B.innerHTML=h;return;
+  }
+  if(gView==='rest'){
+    const all=GUIDE.rest.map(e=>Object.assign({base:1},e)).concat(gRest.map((e,i)=>Object.assign({ui:i,mine:1},e)));
+    let h=gTop('Restaurantes');
+    h+=all.length?all.map(foodCard).join(''):`<div class="gempty">Ainda não tem restaurantes aqui.<br>Adicione abaixo — ou mande a sua lista que eu incluo tudo.</div>`;
+    h+=gForm?eatForm(false):`<button class="gbtn alt" data-addeat="1">+ Adicionar restaurante</button>`;
+    h+=`<div class="gsec">🎢 Comer dentro dos parques</div><div class="tiles">`+GUIDE.parks.map(p=>`<button class="tile" data-parkfood="${p.id}"><span class="e">${p.e}</span><b>${esc(p.n)}</b><small>${p.food.length} sugestões</small></button>`).join('')+`</div>`;
+    B.innerHTML=h;return;
+  }
+}
+function foodCard(e){const del=e.ui!=null?`<button class="del" data-delfood="${e.ui}" aria-label="Apagar">✕</button>`:'';
+  return `<div class="food">${del}${e.k?`<span class="k">${esc(e.k)}</span>`:''}<b>${esc(e.n)}</b>${e.a?`<div class="w">📍 ${esc(e.a)}</div>`:''}${e.p?`<div class="p">${esc(e.p)}</div>`:''}${e.o?`<div class="o">${esc(e.o)}</div>`:''}${e.nota?`<span class="nota">Nota ${esc(e.nota)}</span>`:''}</div>`}
+function eatForm(inPark){return `<form class="gform" id="eatf" autocomplete="off"><label>Nome *</label><input id="ea_n" required placeholder="${inPark?'Ex.: Satu\'li Canteen':'Ex.: Cheesecake Factory'}">
+  <div class="two"><div><label>Onde</label><input id="ea_a" placeholder="${inPark?'Área do parque':'Bairro / shopping'}"></div><div><label>Tipo</label><select id="ea_k"><option>Rápido</option><option>Mesa</option><option>Lanche</option><option>Buffet</option></select></div></div>
+  <label>O que pedir</label><input id="ea_p" placeholder="Prato que vale a pena">
+  <div class="two"><div><label>Nota</label><input id="ea_nt" inputmode="decimal" placeholder="Ex.: 9"></div><div></div></div>
+  <label>Observação</label><textarea id="ea_o" placeholder="Reserva, preço, dica…"></textarea>
+  <button class="gbtn" type="submit">Salvar</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
+$('#guide').addEventListener('click',e=>{
+  const t=e.target;let b;
+  if(b=t.closest('[data-g]')){const g=b.dataset.g;
+    if(g==='compras'){closeGuide();if(who==='Mercado')who='';openWelcome();return}
+    if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
+    gView=g;gForm=false;renderGuide();$('#guide').scrollTop=0;return}
+  if(b=t.closest('[data-day]')){gDay=b.dataset.day;gForm=false;renderGuide();return}
+  if(b=t.closest('[data-parkfood]')){gPark=b.dataset.parkfood;gPTab='food';gView='park';gForm=false;renderGuide();$('#guide').scrollTop=0;return}
+  if(b=t.closest('[data-park]')){gPark=b.dataset.park;gPTab='rides';gLv='';gView='park';gForm=false;renderGuide();$('#guide').scrollTop=0;return}
+  if(b=t.closest('[data-pt]')){gPTab=b.dataset.pt;gForm=false;renderGuide();return}
+  if(b=t.closest('[data-lv]')){gLv=b.dataset.lv;renderGuide();return}
+  if(b=t.closest('[data-ride]')){const i=b.dataset.ride,m=gRides[gPark]=gRides[gPark]||{};if(m[i])delete m[i];else m[i]=1;gsave('rides',gRides);
+    const card=b.closest('.ride');card.classList.toggle('done',!!m[i]);b.textContent=m[i]?'✓':'';const p=parkById(gPark);const pr=$('#gbody .prog2');if(pr)pr.textContent=p.rides.filter((r,k)=>m[k]).length+' de '+p.rides.length+' feitos · na ordem sugerida';return}
+  if(t.closest('[data-addev]')||t.closest('[data-addeat]')){gForm=true;renderGuide();const f=$('#gbody form');if(f){f.scrollIntoView({block:'center'});const i=f.querySelector('input:not([type=time])');if(i)i.focus()}return}
+  if(t.closest('[data-cancel]')){gForm=false;renderGuide();return}
+  if(b=t.closest('[data-del]')){const L=gPlan[gDay]||[];const i=+b.dataset.del;const old=L[i];L.splice(i,1);gPlan[gDay]=L;gsave('plan',gPlan);renderGuide();
+    showToast('Item apagado',()=>{(gPlan[gDay]=gPlan[gDay]||[]).splice(i,0,old);gsave('plan',gPlan);renderGuide()});return}
+  if(b=t.closest('[data-delfood]')){const arr=gView==='rest'?gRest:gEat;const key=gView==='rest'?'rest':'eat';const i=+b.dataset.delfood;const old=arr[i];arr.splice(i,1);gsave(key,arr);renderGuide();
+    showToast('Lugar apagado',()=>{arr.splice(i,0,old);gsave(key,arr);renderGuide()});return}
+});
+$('#guide').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
+  if(f.id==='evf'){const it={h:$('#ev_h').value,t:$('#ev_t').value.trim(),n:$('#ev_n').value.trim(),park:$('#ev_p').value};if(!it.t)return;
+    (gPlan[gDay]=gPlan[gDay]||[]).push(it);if(!gsave('plan',gPlan)){showToast('Não foi possível salvar neste navegador');return}gForm=false;renderGuide();showToast('＋ Adicionado ao roteiro');return}
+  if(f.id==='eatf'){const it={n:$('#ea_n').value.trim(),a:$('#ea_a').value.trim(),k:$('#ea_k').value,p:$('#ea_p').value.trim(),nota:$('#ea_nt').value.trim(),o:$('#ea_o').value.trim()};if(!it.n)return;
+    if(gView==='park'){it.park=gPark;gEat.push(it);gsave('eat',gEat)}else{gRest.push(it);gsave('rest',gRest)}
+    gForm=false;renderGuide();showToast('＋ '+it.n+' adicionado');return}
+});
+$('#homebtn').addEventListener('click',()=>openGuide());
+$('#wback').addEventListener('click',()=>openGuide());
+
+openGuide();
 </script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
