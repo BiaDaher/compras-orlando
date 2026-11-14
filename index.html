@@ -1271,6 +1271,7 @@ const SYNC=(()=>{
   }
   function status(){
     const el=document.querySelectorAll('.syncst');if(!el.length)return;
+    if(window.PREVIEW){el.forEach(e=>e.textContent='🔒 Prévia no Claude: aqui não sincroniza nem atualiza. Use o app em biadaher.github.io/compras-orlando');return}
     let t;
     if(navigator.onLine===false)t=q.length?`📴 Sem internet · ${q.length} ${q.length>1?'marcações':'marcação'} para enviar`:'📴 Sem internet · o grupo será atualizado quando voltar';
     else if(q.length)t='🔄 Enviando para o grupo…';
@@ -1279,7 +1280,7 @@ const SYNC=(()=>{
     else t='🔄 Conectando com o grupo…';
     el.forEach(e=>e.textContent=t);
   }
-  function start(){diff();flush();pull();live();
+  function start(){if(window.PREVIEW){status();return}diff();flush();pull();live();
     window.addEventListener('online',()=>{flush();pull();live()});
     window.addEventListener('offline',status);
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){flush();pull();live()}});
