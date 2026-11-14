@@ -570,6 +570,8 @@ try{custom=JSON.parse(localStorage.getItem(CKEY)||'[]')||[]}catch(e){custom=[]}
 function saveC(){try{localStorage.setItem(CKEY,JSON.stringify(custom));syncChanged();return true}catch(e){return false}}
 DATA.items.forEach(i=>{i.id=String(i.id)});
 let ITEMS=[],CATS=[];
+let _eu=null;function euGet(){if(_eu)return _eu;try{_eu=localStorage.getItem('orl-guia-eu')}catch(e){}return _eu}
+function euSet(n){_eu=n;try{localStorage.setItem('orl-guia-eu',n)}catch(e){}}
 const PERS_KEY='lista-orlando-2026-pessoa';
 let who=null;try{who=localStorage.getItem(PERS_KEY)}catch(e){}
 const AKEY='lista-orlando-2026-avatares-v1';
@@ -604,7 +606,7 @@ function light(i,p){
 const ltag=(i,p)=>{const l=light(i,p);return l?`<span class="lt ${l.c}">${l.t}</span>`:''};
 function renderWho(){
   const L=LISTS();
-  $('#who').innerHTML=who?`<button class="me" id="mebtn"><span class="av">${avHtml(who)}</span>${esc(who)} <small>· trocar</small></button>`:`<button class="me" id="mebtn"><span class="av">👥</span>Todas as listas <small>· trocar</small></button>`;
+  $('#who').innerHTML=who?`<button class="me" id="mebtn"><span class="av">${avHtml(who)}</span>${esc(who)} <small>· ver outra lista</small></button>`:`<button class="me" id="mebtn"><span class="av">👥</span>Todas as listas <small>· ver outra lista</small></button>`;
   $('#a_who').innerHTML=L.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
 }
 const getItem=id=>ITEMS.find(i=>i.id===id);
@@ -884,15 +886,15 @@ function closeIcon(){$('#iconsheet').classList.remove('show');icFor=null;renderW
 $('#pgrid').addEventListener('click',e=>{
   const ed=e.target.closest('.edit');if(ed){openIcon(ed.dataset.e);return}
   const c=e.target.closest('.pcard');if(!c)return;
-  if(wStart){const n=c.dataset.w;let cur=null;try{cur=localStorage.getItem(GK+'eu')}catch(_){}
+  if(wStart){const n=c.dataset.w;let cur=null;try{cur=euGet()}catch(_){}
     if(n!==cur&&typeof gPin!=='undefined'&&gPin[n]){$('#pgrid').innerHTML=`<form class="gform" id="idpin" style="grid-column:1/-1;text-align:center"><div class="av" style="width:72px;height:72px;font-size:40px;margin:4px auto 8px">${avHtml(n)}</div><b>🔒 ${esc(n)} tem senha</b><p class="ptip">Digite a senha de 4 números para usar o app como ${esc(n)} neste celular. Depois não pede mais.</p><input id="idp" type="password" inputmode="numeric" maxlength="4" placeholder="••••" style="text-align:center;font-size:22px;letter-spacing:8px"><div id="idperr" style="color:#a1231b;font-size:13px"></div><button class="gbtn" type="submit" data-n="${esc(n)}">Entrar</button></form>`;setTimeout(()=>{const i=$('#idp');if(i)i.focus()},50);return}
-    try{localStorage.setItem(GK+'eu',n)}catch(_){}who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}wStart=false;rebuild();openGuide();return}
+    try{euSet(n)}catch(_){}who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}wStart=false;rebuild();openGuide();return}
   who=c.dataset.w;try{localStorage.setItem(PERS_KEY,who)}catch(_){}
   $('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);
 });
 $('#pgrid').addEventListener('submit',e=>{if(e.target.id!=='idpin')return;e.preventDefault();const n=e.target.querySelector('[data-n]').dataset.n,v=$('#idp').value.trim();
   if(pinHash(n,v)!==gPin[n]){$('#idperr').textContent='Senha errada.';$('#idp').value='';return}
-  try{localStorage.setItem(GK+'eu',n)}catch(_){}who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}wStart=false;rebuild();openGuide()});
+  try{euSet(n)}catch(_){}who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}wStart=false;rebuild();openGuide()});
 $('#icgrid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!icFor)return;avatars[icFor]={e:b.dataset.i};saveA();document.querySelectorAll('#icgrid button').forEach(x=>x.classList.toggle('on',x===b))});
 $('#ic_ok').addEventListener('click',closeIcon);$('#closeicon').addEventListener('click',closeIcon);
 $('#iconsheet').addEventListener('click',e=>{if(e.target.id==='iconsheet')closeIcon()});
@@ -1062,7 +1064,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     let cd='';{const diff=Math.round((new Date(start+'T12:00')-new Date(t+'T12:00'))/864e5);if(diff>1)cd=`Faltam ${diff} dias ✈️`;else if(diff===1)cd='É amanhã! ✈️';else if(GUIDE.days.some(x=>x.d===t))cd='Boa viagem! 🎢'}
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
     const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
-    const idn=(()=>{try{return localStorage.getItem(GK+'eu')}catch(e){return null}})();
+    const idn=(()=>{try{return euGet()}catch(e){return null}})();
     B.innerHTML=`<div class="idrow"><button class="idchip" id="idchip"><span class="av">${idn?avHtml(idn):'👤'}</span>${idn?esc(idn):'Quem é você?'} <small>▾</small></button></div><div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
@@ -1204,10 +1206,10 @@ $('#guide').addEventListener('click',e=>{
   const t=e.target;let b;
   if(t.closest('#idchip')){closeGuide();openWelcome(true);return}
   if(b=t.closest('[data-g]')){const g=b.dataset.g;
-    if(g==='compras'){const me=(()=>{try{return localStorage.getItem(GK+'eu')}catch(e){return null}})();if(!me||!GROUP.includes(me)){closeGuide();if(who==='Mercado')who='';openWelcome();return}
+    if(g==='compras'){const me=(()=>{try{return euGet()}catch(e){return null}})();if(!me||!GROUP.includes(me)){closeGuide();if(who==='Mercado')who='';openWelcome();return}
       closeGuide();who=me;try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
-    if(myForm&&myForm.id&&gImg['my:'+myForm.id]&&!Object.values(gMy).some(L=>L.some(x=>x.id===myForm.id))){delete gImg['my:'+myForm.id];gImgSave()}if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}gView=g;gForm=false;exForm=null;myWho=null;myForm=null;ckWho=null;ckAdd=null;{let me=null;try{me=localStorage.getItem(GK+'eu')}catch(_){}if(me&&GROUP.includes(me)){if(g==='ck')ckWho=me;if(g==='meus')myWho=me}}myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
+    if(myForm&&myForm.id&&gImg['my:'+myForm.id]&&!Object.values(gMy).some(L=>L.some(x=>x.id===myForm.id))){delete gImg['my:'+myForm.id];gImgSave()}if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}gView=g;gForm=false;exForm=null;myWho=null;myForm=null;ckWho=null;ckAdd=null;{let me=null;try{me=euGet()}catch(_){}if(me&&GROUP.includes(me)){if(g==='ck')ckWho=me;if(g==='meus')myWho=me}}myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
@@ -1279,7 +1281,7 @@ function eqSplit(total,names){const n=names.length,base=Math.floor(total/n);let 
 function balances(){const b={};GROUP.forEach(p=>b[p]=0);gEx.forEach(e=>{if(e.del)return;b[e.payer]=(b[e.payer]||0)+e.amt;Object.keys(e.split||{}).forEach(p=>{b[p]=(b[p]||0)-e.split[p]})});return b}
 function settle(b){const cr=[],db=[];Object.keys(b).forEach(p=>{if(b[p]>0)cr.push([p,b[p]]);else if(b[p]<0)db.push([p,-b[p]])});cr.sort((a,c)=>c[1]-a[1]);db.sort((a,c)=>c[1]-a[1]);
   const out=[];let i=0,j=0;while(i<db.length&&j<cr.length){const v=Math.min(db[i][1],cr[j][1]);if(v>0)out.push({from:db[i][0],to:cr[j][0],v});db[i][1]-=v;cr[j][1]-=v;if(!db[i][1])i++;if(!cr[j][1])j++}return out}
-function myName(){try{return localStorage.getItem(GK+'eu')||(who&&GROUP.includes(who)?who:'Bia')}catch(e){return 'Bia'}}
+function myName(){try{return euGet()||(who&&GROUP.includes(who)?who:'Bia')}catch(e){return 'Bia'}}
 function renderContas(B){
   const L=gEx.filter(e=>!e.del).sort((a,c)=>c.t-a.t);const b=balances();const st=settle(b);
   let h=gTop('💸 Contas do grupo');
@@ -1381,7 +1383,7 @@ function renderMeus(B){
   h+=`<p class="gnote">Fica só neste celular: os gastos pessoais não vão para o grupo. Despesas para dividir vão em 💸 Contas do grupo.</p>`;
   B.innerHTML=h}
 $('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.target;let b;
-  if(b=t.closest('[data-mywho]')){const n=b.dataset.mywho;let eu=null;try{eu=localStorage.getItem(GK+'eu')}catch(_){}if(gPin[n]&&n!==eu){myPinFor=n}else{myWho=n;try{localStorage.setItem(GK+'eu',n)}catch(_){}}renderGuide();return}
+  if(b=t.closest('[data-mywho]')){const n=b.dataset.mywho;let eu=null;try{eu=euGet()}catch(_){}if(gPin[n]&&n!==eu){myPinFor=n}else{myWho=n;try{euSet(n)}catch(_){}}renderGuide();return}
   if(t.closest('[data-myswitch]')){myWho=null;renderGuide();return}
   if(b=t.closest('[data-mypinset]')){myPinNew=b.dataset.mypinset;renderGuide();return}
   if(t.closest('[data-mypincancel]')){myPinNew=null;myPinFor=null;renderGuide();return}
@@ -1394,7 +1396,7 @@ $('#guide').addEventListener('click',e=>{if(gView!=='meus')return;const t=e.targ
   if(b=t.closest('[data-mydel]')){const me=myWho;const x=(gMy[me]||[]).find(z=>z.id===b.dataset.mydel);if(x){x.del=1;saveMy();renderGuide();showToast('Gasto apagado',()=>{x.del=0;saveMy();renderGuide()})}return}
 });
 $('#guide').addEventListener('submit',e=>{const fid=e.target.id;
-  if(fid==='myunlock'){e.preventDefault();const v=$('#mu_p').value.trim();if(pinHash(myPinFor,v)===gPin[myPinFor]){myWho=myPinFor;myPinFor=null;try{localStorage.setItem(GK+'eu',myWho)}catch(_){}renderGuide()}else{$('#mu_err').textContent='Senha errada.';$('#mu_p').value=''}return}
+  if(fid==='myunlock'){e.preventDefault();const v=$('#mu_p').value.trim();if(pinHash(myPinFor,v)===gPin[myPinFor]){myWho=myPinFor;myPinFor=null;try{euSet(myWho)}catch(_){}renderGuide()}else{$('#mu_err').textContent='Senha errada.';$('#mu_p').value=''}return}
   if(fid==='mypinf'){e.preventDefault();const a=$('#mp_1').value.trim(),c=$('#mp_2').value.trim();if(!/^\d{4}$/.test(a)){$('#mp_err').textContent='Use 4 números.';return}if(a!==c){$('#mp_err').textContent='As duas senhas não são iguais.';return}
     gPin[myPinNew]=pinHash(myPinNew,a);gsave('mypin',gPin);myPinNew=null;renderGuide();showToast('🔒 Senha criada');return}
   if(fid!=='myf')return;e.preventDefault();const d=$('#my_d').value.trim(),v=cents($('#my_v').value);
