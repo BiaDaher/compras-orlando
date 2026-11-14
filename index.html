@@ -273,7 +273,7 @@ header{position:sticky}
 .food .k{float:right;font-size:11.5px;background:var(--brand2);color:var(--brand);border-radius:999px;padding:2px 8px;font-weight:600}
 .food .w{font-size:12.5px;color:var(--muted)}
 .food .p{font-size:14px;margin-top:4px}
-.food .p::before{content:'🍽️ '}
+.food .p::before{content:'🍽️ O que pedir: ';font-weight:600;color:var(--brand)}
 .food .o{font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap}
 .food .nota{display:inline-block;margin-top:5px;font-weight:700;font-size:13px;background:#e6f2e8;color:#256b37;border-radius:8px;padding:1px 8px}
 .food .del{float:right;border:0;background:none;color:#b9aca2;font-size:17px;margin-left:6px}
@@ -936,7 +936,7 @@ function renderGuide(){
     let h=gTop(p.e+' '+esc(p.n),'parques')+`<div class="ptabs" id="ptabs"><button data-pt="rides" class="${gPTab==='rides'?'on':''}">🎢 Brinquedos</button><button data-pt="food" class="${gPTab==='food'?'on':''}">🍔 Onde comer</button></div>`;
     if(gPTab==='rides'){
       const cnt=p.rides.filter((r,i)=>dn[i]).length;
-      h+=(gImg['p:'+p.id]?`<img class="phero" src="${gImg['p:'+p.id]}" alt="" data-zoom="p:${p.id}">`:'')+(gImg['p:'+p.id]?phAct('p:'+p.id,p.n+' Orlando'):`<div class="pha"><a href="${gq(p.n+' Orlando')}" target="_blank" rel="noopener">🔎 Ver fotos</a><button type="button" data-ph="p:${p.id}">📷 Pôr foto de capa</button></div>`)+(p.party?`<div class="flag">${esc(p.party)}</div>`:'')+`<div class="pintro">🧭 ${esc(p.intro)}</div>`+(p.tips||[]).map(t=>`<div class="ptip">💡 ${esc(t)}</div>`).join('');
+      h+=(gImg['p:'+p.id]?`<img class="phero" src="${gImg['p:'+p.id]}" alt="" data-zoom="p:${p.id}">`:'')+(gImg['p:'+p.id]?phAct('p:'+p.id,p.n+' Orlando'):`<div class="pha"><button type="button" data-ph="p:${p.id}">📷 Pôr foto de capa</button></div>`)+(p.party?`<div class="flag">${esc(p.party)}</div>`:'')+`<div class="pintro">🧭 ${esc(p.intro)}</div>`+(p.tips||[]).map(t=>`<div class="ptip">💡 ${esc(t)}</div>`).join('');
       h+=`<div class="ifil" id="ifil">${['','Leve','Moderado','Radical'].map(l=>`<button data-lv="${l}" class="${gLv===l?'on':''}">${l||'Todos'}</button>`).join('')}</div><div class="prog2">${cnt} de ${p.rides.length} feitos · na ordem sugerida</div>`;
       h+=p.rides.map((r,i)=>(!gLv||r.i===gLv)?`<div class="ride${dn[i]?' done':''}"><div class="num">${i+1}</div>${phSlot('r:'+p.id+':'+i)}<div class="b"><b>${esc(r.n)}</b><div class="meta"><span class="lv ${LVC[r.i]}">${r.i}</span><span>📍 ${esc(r.a)}</span><span>📏 ${r.h?'mín. '+r.h:'sem altura mínima'}</span></div>${r.tip?`<div class="tip">${esc(r.tip)}</div>`:''}${phAct('r:'+p.id+':'+i,r.n+' '+p.n)}</div><button class="ck" data-ride="${i}" aria-label="Feito">${dn[i]?'✓':''}</button></div>`:'').join('');
       if(p.shows&&p.shows.length)h+=`<div class="gsec">🎭 Shows</div><div class="shows">${p.shows.map(s=>`<div>• ${esc(s)}</div>`).join('')}</div>`;
@@ -962,7 +962,7 @@ let gImg=gload('img',{}),gPhId=null;
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
 function phThumb(id){return gImg[id]?`<img class="gth" src="${gImg[id]}" alt="" data-zoom="${id}">`:''}
 function phSlot(id,cls){return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
-function phAct(id,q){return `<div class="pha">${q?`<a href="${gq(q)}" target="_blank" rel="noopener">🔎 Ver fotos</a>`:''}${id&&gImg[id]?`<button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button>`:''}</div>`}
+function phAct(id,q){if(!(id&&gImg[id]))return '';return `<div class="pha">${id&&gImg[id]?`<button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button>`:''}</div>`}
 function foodCard(e){const del=e.ui!=null?`<button class="del" data-delfood="${e.ui}" aria-label="Apagar">✕</button>`:'';
   const q=e.n+(e.qa?' '+e.qa:(e.a&&!e.park&&!e.fp?' '+e.a.split(',')[0]:''));
   return `<div class="food${e.pid?' fx':''}">${e.pid?phSlot(e.pid):''}<div class="fb">${del}${e.k?`<span class="k">${esc(e.k)}</span>`:''}<b>${esc(e.n)}</b>${e.a?`<div class="w">📍 ${esc(e.a)}</div>`:''}${e.p?`<div class="p">${esc(e.p)}</div>`:''}${e.o?`<div class="o">${esc(e.o)}</div>`:''}${e.nota?`<span class="nota">Nota ${esc(e.nota)}</span>`:''}${phAct(e.pid,q)}</div></div>`}
