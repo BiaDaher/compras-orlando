@@ -289,6 +289,11 @@ a.go{display:inline-block;text-decoration:none}
 .tile .timg{width:64px;height:64px;object-fit:cover;border-radius:12px;display:block;margin:0 auto 6px}
 .gzoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
 .gzoom.show{display:flex}.gzoom img{max-width:100%;max-height:100%;border-radius:12px}
+.gslot{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;display:block}
+button.gslot.empty{border:1.5px dashed #cdbcab;background:#faf6f1;color:var(--brand);font-size:20px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+button.gslot.empty small{font-size:10.5px;margin-top:4px;font-weight:600}
+.gslot.fr{float:right;margin:0 0 6px 8px}
+.food.fx{display:flex;gap:10px;align-items:flex-start}.food .fb{flex:1;min-width:0}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
 </style>
 </head>
@@ -899,7 +904,7 @@ function renderGuide(){
      <button class="tile" data-g="compras"><span class="e">🛍️</span><b>Compras</b><small>Listas de cada pessoa</small></button>
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="rest"><span class="e">🍔</span><b>Restaurantes</b><small>${nRest?nRest+' lugares':'O que pedir e onde'}</small></button>
-    </div><p class="gnote">Funciona sem internet. O que você marca fica salvo só neste celular.<br>Versão 14/11 · com fotos</p>`;
+    </div><p class="gnote">Funciona sem internet. O que você marca fica salvo só neste celular.<br>Versão 14/11 · fotos ao lado</p>`;
     return;
   }
   if(gView==='roteiro'){
@@ -911,7 +916,7 @@ function renderGuide(){
     const parkOpts=GUIDE.parks.map(p=>`<option value="${p.id}">${p.e} ${esc(p.n)}</option>`).join('');
     B.innerHTML=gTop('Roteiro')+`<div class="chips" id="dchips">${chips}</div>
      <div class="dayh">${dLabel(x)}${x.title?`<small class="dtit">${esc(x.title)}</small>`:''}</div>${x.flag?`<div class="flag">${esc(x.flag)}</div>`:''}
-     ${its.length?its.map(e=>{const p=e.park&&parkById(e.park);return `<div class="ev"><div class="h">${esc(e.h||'—')}</div><div class="b">${e.base?phThumb('e:'+gDay+':'+e.o):''}<b>${esc(e.t)}</b>${e.n?`<small>${esc(e.n)}</small>`:''}${(p||e.addr)?`<div class="evb">${p?`<button class="go" data-park="${p.id}">${p.e} Ver guia do ${esc(p.n)}</button>`:''}${e.addr?`<a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.addr)}" target="_blank" rel="noopener">📍 Mapa</a>`:''}</div>`:''}${e.base&&e.q?phAct('e:'+gDay+':'+e.o,e.q):''}</div>${e.base?'':`<button class="del" data-del="${e.ui}" aria-label="Apagar">✕</button>`}</div>`}).join(''):`<div class="gempty">Nada programado ainda para este dia.</div>`}
+     ${its.length?its.map(e=>{const p=e.park&&parkById(e.park);return `<div class="ev"><div class="h">${esc(e.h||'—')}</div><div class="b">${e.base&&e.q?phSlot('e:'+gDay+':'+e.o,'fr'):''}<b>${esc(e.t)}</b>${e.n?`<small>${esc(e.n)}</small>`:''}${(p||e.addr)?`<div class="evb">${p?`<button class="go" data-park="${p.id}">${p.e} Ver guia do ${esc(p.n)}</button>`:''}${e.addr?`<a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.addr)}" target="_blank" rel="noopener">📍 Mapa</a>`:''}</div>`:''}${e.base&&e.q?phAct('e:'+gDay+':'+e.o,e.q):''}</div>${e.base?'':`<button class="del" data-del="${e.ui}" aria-label="Apagar">✕</button>`}</div>`}).join(''):`<div class="gempty">Nada programado ainda para este dia.</div>`}
      ${gForm?`<form class="gform" id="evf" autocomplete="off"><div class="two"><div><label>Horário</label><input id="ev_h" type="time"></div><div><label>Parque (opcional)</label><select id="ev_p"><option value="">—</option>${parkOpts}</select></div></div>
        <label>O quê *</label><input id="ev_t" placeholder="Ex.: Magic Kingdom, Outlet, Jantar" required>
        <label>Observação</label><textarea id="ev_n" placeholder="Endereço, reserva, quem vai…"></textarea>
@@ -930,9 +935,9 @@ function renderGuide(){
     let h=gTop(p.e+' '+esc(p.n),'parques')+`<div class="ptabs" id="ptabs"><button data-pt="rides" class="${gPTab==='rides'?'on':''}">🎢 Brinquedos</button><button data-pt="food" class="${gPTab==='food'?'on':''}">🍔 Onde comer</button></div>`;
     if(gPTab==='rides'){
       const cnt=p.rides.filter((r,i)=>dn[i]).length;
-      h+=(gImg['p:'+p.id]?`<img class="phero" src="${gImg['p:'+p.id]}" alt="" data-zoom="p:${p.id}">`:'')+phAct('p:'+p.id,p.n+' Orlando')+(p.party?`<div class="flag">${esc(p.party)}</div>`:'')+`<div class="pintro">🧭 ${esc(p.intro)}</div>`+(p.tips||[]).map(t=>`<div class="ptip">💡 ${esc(t)}</div>`).join('');
+      h+=(gImg['p:'+p.id]?`<img class="phero" src="${gImg['p:'+p.id]}" alt="" data-zoom="p:${p.id}">`:'')+(gImg['p:'+p.id]?phAct('p:'+p.id,p.n+' Orlando'):`<div class="pha"><a href="${gq(p.n+' Orlando')}" target="_blank" rel="noopener">🔎 Ver fotos</a><button type="button" data-ph="p:${p.id}">📷 Pôr foto de capa</button></div>`)+(p.party?`<div class="flag">${esc(p.party)}</div>`:'')+`<div class="pintro">🧭 ${esc(p.intro)}</div>`+(p.tips||[]).map(t=>`<div class="ptip">💡 ${esc(t)}</div>`).join('');
       h+=`<div class="ifil" id="ifil">${['','Leve','Moderado','Radical'].map(l=>`<button data-lv="${l}" class="${gLv===l?'on':''}">${l||'Todos'}</button>`).join('')}</div><div class="prog2">${cnt} de ${p.rides.length} feitos · na ordem sugerida</div>`;
-      h+=p.rides.map((r,i)=>(!gLv||r.i===gLv)?`<div class="ride${dn[i]?' done':''}"><div class="num">${i+1}</div><div class="b">${phThumb('r:'+p.id+':'+i)}<b>${esc(r.n)}</b><div class="meta"><span class="lv ${LVC[r.i]}">${r.i}</span><span>📍 ${esc(r.a)}</span><span>📏 ${r.h?'mín. '+r.h:'sem altura mínima'}</span></div>${r.tip?`<div class="tip">${esc(r.tip)}</div>`:''}${phAct('r:'+p.id+':'+i,r.n+' '+p.n)}</div><button class="ck" data-ride="${i}" aria-label="Feito">${dn[i]?'✓':''}</button></div>`:'').join('');
+      h+=p.rides.map((r,i)=>(!gLv||r.i===gLv)?`<div class="ride${dn[i]?' done':''}"><div class="num">${i+1}</div>${phSlot('r:'+p.id+':'+i)}<div class="b"><b>${esc(r.n)}</b><div class="meta"><span class="lv ${LVC[r.i]}">${r.i}</span><span>📍 ${esc(r.a)}</span><span>📏 ${r.h?'mín. '+r.h:'sem altura mínima'}</span></div>${r.tip?`<div class="tip">${esc(r.tip)}</div>`:''}${phAct('r:'+p.id+':'+i,r.n+' '+p.n)}</div><button class="ck" data-ride="${i}" aria-label="Feito">${dn[i]?'✓':''}</button></div>`:'').join('');
       if(p.shows&&p.shows.length)h+=`<div class="gsec">🎭 Shows</div><div class="shows">${p.shows.map(s=>`<div>• ${esc(s)}</div>`).join('')}</div>`;
       if(p.closed&&p.closed.length)h+=`<div class="gsec">🚧 Fechados nas suas datas</div>`+p.closed.map(c=>`<div class="closed">${esc(c)}</div>`).join('');
       h+=`<p class="gnote">Alturas convertidas de polegadas. Situação conferida em ${GUIDE.updated}; na véspera, confira no app oficial do parque.</p>`;
@@ -955,10 +960,11 @@ function renderGuide(){
 let gImg=gload('img',{}),gPhId=null;
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
 function phThumb(id){return gImg[id]?`<img class="gth" src="${gImg[id]}" alt="" data-zoom="${id}">`:''}
-function phAct(id,q){return `<div class="pha">${q?`<a href="${gq(q)}" target="_blank" rel="noopener">🔎 Ver fotos</a>`:''}${id?`<button type="button" data-ph="${id}">📷 ${gImg[id]?'Trocar foto':'Pôr foto'}</button>${gImg[id]?`<button type="button" data-phdel="${id}">Remover</button>`:''}`:''}</div>`}
+function phSlot(id,cls){return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
+function phAct(id,q){return `<div class="pha">${q?`<a href="${gq(q)}" target="_blank" rel="noopener">🔎 Ver fotos</a>`:''}${id&&gImg[id]?`<button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button>`:''}</div>`}
 function foodCard(e){const del=e.ui!=null?`<button class="del" data-delfood="${e.ui}" aria-label="Apagar">✕</button>`:'';
   const q=e.n+(e.qa?' '+e.qa:(e.a&&!e.park&&!e.fp?' '+e.a.split(',')[0]:''));
-  return `<div class="food">${phThumb(e.pid)}${del}${e.k?`<span class="k">${esc(e.k)}</span>`:''}<b>${esc(e.n)}</b>${e.a?`<div class="w">📍 ${esc(e.a)}</div>`:''}${e.p?`<div class="p">${esc(e.p)}</div>`:''}${e.o?`<div class="o">${esc(e.o)}</div>`:''}${e.nota?`<span class="nota">Nota ${esc(e.nota)}</span>`:''}${phAct(e.pid,q)}</div>`}
+  return `<div class="food${e.pid?' fx':''}">${e.pid?phSlot(e.pid):''}<div class="fb">${del}${e.k?`<span class="k">${esc(e.k)}</span>`:''}<b>${esc(e.n)}</b>${e.a?`<div class="w">📍 ${esc(e.a)}</div>`:''}${e.p?`<div class="p">${esc(e.p)}</div>`:''}${e.o?`<div class="o">${esc(e.o)}</div>`:''}${e.nota?`<span class="nota">Nota ${esc(e.nota)}</span>`:''}${phAct(e.pid,q)}</div></div>`}
 function eatForm(inPark){return `<form class="gform" id="eatf" autocomplete="off"><label>Nome *</label><input id="ea_n" required placeholder="${inPark?'Ex.: Satu\'li Canteen':'Ex.: Cheesecake Factory'}">
   <div class="two"><div><label>Onde</label><input id="ea_a" placeholder="${inPark?'Área do parque':'Bairro / shopping'}"></div><div><label>Tipo</label><select id="ea_k"><option>Rápido</option><option>Mesa</option><option>Lanche</option><option>Buffet</option></select></div></div>
   <label>O que pedir</label><input id="ea_p" placeholder="Prato que vale a pena">
