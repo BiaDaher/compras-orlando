@@ -73,6 +73,7 @@ main{padding:6px 12px 80px}
 .nf input{font-size:16px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-width:0}
 .szbox{background:#fbf6f0;border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin-top:10px}
 .szout{font-size:14.5px;margin-top:8px}.szout small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.bfit{display:block;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 8px;margin-top:6px;font-weight:500}
 .szp{background:#fbf6f0;border-radius:8px;padding:6px 9px;font-weight:600}
 .nf .ns{flex:2 1 140px}.nf .np{flex:1 1 80px}.nf .nn{flex:1 1 100%}
 .nf button{flex:1 1 100%;border:0;background:var(--brand);color:#fff;font-weight:700;padding:10px;border-radius:8px;font-size:15px}
@@ -596,17 +597,32 @@ const SHOE_M={36:'4,5 a 5',37:'5,5 a 6',38:'6,5',39:'7 a 7,5',40:'8',41:'8,5',42
 const CL_L={PP:'XS',P:'S',M:'M',G:'L',GG:'XL',XG:'XXL',EG:'XXL',G1:'XL',G2:'XXL',G3:'3XL'};
 const CL_FN={34:'0 (XS)',36:'2 (XS/S)',38:'4 (S)',40:'6 (M)',42:'8 (M/L)',44:'10 (L)',46:'12 (L/XL)',48:'14 (XL)',50:'16 (XXL)',52:'18 (XXL)'};
 const CL_MN={36:'cintura 26',38:'cintura 28',40:'cintura 30',42:'cintura 32',44:'cintura 34',46:'cintura 36',48:'cintura 38',50:'cintura 40',52:'cintura 42'};
+const BRANDFIT=[
+ [/air\s*force|\baf1\b/i,'Nike Air Force 1',-0.5,'costuma vestir grande: ½ número a menos'],
+ [/air\s*max\s*(95|97)/i,'Nike Air Max 95/97',0.5,'costuma vestir pequeno: ½ número a mais'],
+ [/chuck|converse|all\s*star/i,'Converse',-0.5,'veste grande: ½ número a menos (há quem prefira 1 a menos)'],
+ [/samba|gazelle|campus/i,'Adidas Samba/Gazelle/Campus',-0.5,'costuma vestir grande: ½ número a menos'],
+ [/new\s*balance|\bnb\b|9060|\b550\b|\b530\b|\b574\b|1906/i,'New Balance',0,'forma mais larga: use o número habitual'],
+ [/nike|jordan|dunk|vomero|pegasus|air\s*max/i,'Nike',0,'forma mais estreita: se o pé for largo, ½ número a mais'],
+ [/adidas|ultraboost|superstar|forum/i,'Adidas',0,'use o número habitual'],
+ [/vans/i,'Vans',0,'use o número habitual'],
+ [/hoka|asics|on\s*running|\bon\s*cloud|puma|skechers|fila|mizuno|brooks/i,'',0,'use o número habitual']];
+function brandFit(txt){for(const b of BRANDFIT){const m=String(txt||'').match(b[0]);if(m)return {n:b[1]||m[0].replace(/^\w/,c=>c.toUpperCase()),adj:b[2],note:b[3]}}return null}
+function fmtHalf(x){return String(x).replace('.',',')}
+function shoeUS(sex,br,adj){const t=sex==='m'?SHOE_M:SHOE_F;const v=t[Math.round(parseFloat(String(br).replace(',','.')))];if(!v)return '';const nums=v.split(' a ').map(x=>parseFloat(x.replace(',','.'))+adj);return nums.map(fmtHalf).join(' a ')}
 function szKind(cat){cat=norm(cat||'');return /tenis|calcad|sapato|chinelo|sandalia/.test(cat)?'shoe':(/roupa|vestu|moda|camis|calca|vestido/.test(cat)?'cloth':'')}
 function convSize(kind,sex,v){v=String(v||'').trim().toUpperCase().replace(',','.');if(!v)return '';
   if(kind==='shoe'){const n=Math.round(parseFloat(v));const t=sex==='m'?SHOE_M:SHOE_F;return t[n]?t[n]+(sex==='m'?' masculino':' feminino'):''}
   if(kind==='cloth'){if(CL_L[v])return CL_L[v];const n=parseInt(v,10);if(sex==='m'&&CL_MN[n])return CL_MN[n]+' (calça)';if(sex!=='m'&&CL_FN[n])return CL_FN[n];return ''}
   return ''}
-function szLine(i){if(!i.brs)return '';const k=szKind(i.cat);const c=convSize(k,i.sex,i.brs);return `${k==='shoe'?'👟':'👕'} Brasil ${esc(i.brs)} → ${c?'EUA '+esc(c):'sem conversão automática'}`}
+function szLine(i){if(!i.brs)return '';const k=szKind(i.cat);const c=convSize(k,i.sex,i.brs);let h=`${k==='shoe'?'👟':'👕'} Brasil ${esc(i.brs)} → ${c?'EUA '+esc(c):'sem conversão automática'}`;
+  if(k==='shoe'&&c){const b=brandFit([i.t,i.mk].join(' '));if(b){const u=shoeUS(i.sex,i.brs,b.adj);h+=`<small class="bfit">${esc(b.n)}: <b>${esc(u)}</b> · ${esc(b.note)}</small>`}}return h}
 let szLastK=null;
 function updSz(){try{const k0=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);if(k0!==szLastK){if(szLastK!==null&&!editId)$('#a_brs').value='';szLastK=k0;const m=JSON.parse($('#a_brs').dataset.mem||'{}');if(k0&&!$('#a_brs').value&&m[k0]&&!editId){$('#a_brs').value=m[k0];if(m.sex)$('#a_sex').value=m.sex}}}catch(_){}
   const k=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);const box=$('#a_szbox');box.style.display=k?'block':'none';if(!k)return;
   $('#a_szl').textContent=k==='shoe'?'Quanto você calça no Brasil':'Seu tamanho de roupa no Brasil';$('#a_brs').placeholder=k==='shoe'?'Ex.: 37':'Ex.: M ou 40';
-  const c=convSize(k,$('#a_sex').value,$('#a_brs').value);$('#a_szout').innerHTML=$('#a_brs').value.trim()?(c?`🇺🇸 Nos EUA: <b>${esc(c)}</b><small>Aproximado: varia por marca e modelo. ${k==='shoe'?'Na dúvida, prove ou pegue meio número a mais.':'Roupa americana costuma vestir maior; muita gente desce um tamanho.'}</small>`:'<small>Não encontrei esse tamanho na tabela. Use número (ex.: 37, 40) ou letra (PP, P, M, G, GG).</small>'):''}
+  const c=convSize(k,$('#a_sex').value,$('#a_brs').value);const bf=k==='shoe'&&c?brandFit([$('#a_t').value,$('#a_mk').value].join(' ')):null;
+  $('#a_szout').innerHTML=$('#a_brs').value.trim()?(c?`🇺🇸 Nos EUA: <b>${esc(c)}</b>${bf?`<span class="bfit">${esc(bf.n)}: <b>${esc(shoeUS($('#a_sex').value,$('#a_brs').value,bf.adj))}</b> · ${esc(bf.note)}</span>`:''}<small>Aproximado: varia por marca e modelo. ${k==='shoe'?'Na dúvida, prove ou pegue meio número a mais.':'Roupa americana costuma vestir maior; muita gente desce um tamanho.'}</small>`:'<small>Não encontrei esse tamanho na tabela. Use número (ex.: 37, 40) ou letra (PP, P, M, G, GG).</small>'):''}
 function saveC(){try{localStorage.setItem(CKEY,JSON.stringify(custom));syncChanged();return true}catch(e){return false}}
 DATA.items.forEach(i=>{i.id=String(i.id)});
 let ITEMS=[],CATS=[];
@@ -1035,7 +1051,7 @@ function fillSubs(pre){const w=$('#a_who').value||'Bia',c=$('#a_catsel').value;
 $('#a_subsel').addEventListener('change',()=>{const o=$('#a_subsel').value==='__other';$('#a_sub').style.display=o?'block':'none';if(o)$('#a_sub').focus()});
 $('#a_catsel').addEventListener('change',()=>{setTimeout(updSz,0);const o=$('#a_catsel').value==='__other';$('#a_cat').style.display=o?'block':'none';if(o)$('#a_cat').focus();$('#a_err').textContent='';fillSubs('')});
 $('#a_who').addEventListener('change',()=>fillSubs());
-['#a_brs','#a_sex','#a_cat'].forEach(q=>{$(q).addEventListener('input',updSz);$(q).addEventListener('change',updSz)});
+['#a_brs','#a_sex','#a_cat','#a_t','#a_mk'].forEach(q=>{$(q).addEventListener('input',updSz);$(q).addEventListener('change',updSz)});
 function closeAdd(){$('#sheet').classList.remove('show')}
 $('#addbtn').addEventListener('click',openAdd);
 $('#qaf').addEventListener('submit',e=>{e.preventDefault();const v=$('#qa_t').value;addMkt(v,$('#qa_c').value);$('#qa_t').value='';$('#qa_t').focus()});
