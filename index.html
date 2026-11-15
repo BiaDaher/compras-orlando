@@ -388,6 +388,10 @@ button.gslot.empty small{font-size:10.5px;margin-top:4px;font-weight:600}
 .dish:last-of-type{border-bottom:0}
 .db{flex:1;min-width:0}.db b{font-size:14px;display:block;line-height:1.25}.db small{font-size:12.5px;color:var(--muted)}
 .gslot.sm{width:48px;height:48px;border-radius:9px}
+.gslot.ill{position:relative;border:0;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}
+.gslot.ill .ie{font-size:34px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.15))}
+.gslot.sm.ill .ie{font-size:26px}
+.gslot.ill .icam{position:absolute;right:3px;bottom:3px;font-size:10px;background:rgba(255,255,255,.85);border-radius:6px;padding:1px 3px;line-height:1.2}
 button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .nb{flex:none;font-weight:700;font-size:13px;border-radius:8px;padding:2px 7px;display:inline-block;min-width:34px;text-align:center}
 .nb.n1{background:#2f7a43;color:#fff}.nb.n2{background:#dcefe1;color:#1f6132}.nb.n3{background:#fdf0d3;color:#7a5a00}.nb.n4{background:#eee;color:#666}.nb.n5{background:#fbe1de;color:#a1231b}
@@ -1361,7 +1365,12 @@ function gImgSave(){if(persistImgs()){syncChanged();return true}const ok=gsave('
   try{SYNC.diff()}catch(e){}
 })();
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
-function phSlot(id,cls){return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
+const DISHE=[[/burger|smash|shack|cheeseburger|sliders?/i,'🍔'],[/pizza|slice|pepperoni/i,'🍕'],[/taco|burrito|quesadilla|nacho/i,'🌮'],[/fries|batata|tots?\b|waffle potato/i,'🍟'],[/chicken|frango|nugget|tender|wings?|asa/i,'🍗'],[/shake|milkshake|frappe|frapp/i,'🥤'],[/sorvete|ice cream|sundae|gelato|dole whip|soft serve|cone/i,'🍦'],[/donut|rosquinha/i,'🍩'],[/cheesecake|cake|bolo|torta|pie\b/i,'🍰'],[/cookie|brownie/i,'🍪'],[/pancake|panqueca|waffle|french toast|rabanada/i,'🥞'],[/coffee|café|latte|cappuccino|espresso/i,'☕'],[/butterbeer|cerveja|beer|chope/i,'🍺'],[/drink|coquetel|cocktail|margarita|mojito|soda|refri|limonada|lemonade|juice|suco/i,'🍹'],[/steak|bife|costela|rib|brisket|carne|picanha|pork|porco|bbq/i,'🥩'],[/fish|peixe|salm|shrimp|camar|lobster|lagosta|crab|sushi|poke/i,'🍤'],[/pasta|massa|spaghetti|lasanha|lasagna|fettuccine|ravioli|alfredo|mac ?(and|&|n) ?cheese/i,'🍝'],[/salad|salada/i,'🥗'],[/sandu|sandwich|sub\b|hot dog|cachorro|cuban|cubano|wrap|pretzel/i,'🥪'],[/soup|sopa|chili|ramen|noodle|lamen/i,'🍜'],[/rice|arroz|bowl|fried rice/i,'🍚'],[/egg|ovo|omelet|benedict|bacon|breakfast/i,'🍳'],[/bread|pão|biscuit|croissant|toast|torrada/i,'🥐'],[/churro|funnel/i,'🥨'],[/chocolate|cocoa/i,'🍫'],[/fruit|fruta|manga|mango|abacaxi|pineapple|morango|strawberr/i,'🍓'],[/turkey|peru/i,'🦃']];
+const PHGR=[['#ffd6a5','#ff9f68'],['#ffc6d9','#ff8fab'],['#c9f0d3','#7fd1a1'],['#cfe3ff','#8fb8ff'],['#fff1a8','#ffd166'],['#e3d0ff','#b794f6'],['#ffe0cc','#f4a261']];
+function phIll(id){let e='🍽️',t='';try{const m=/^(R|D):([^:]+)(?::(\d+):(\d+))?$/.exec(id);if(!m)return null;const r=GUIDE.rests.find(x=>x.id===m[2]);if(!r)return null;
+  if(m[1]==='R')e=r.e||'🍽️';else{const it=((r.groups||[])[+m[3]]||{}).items;const d=it&&it[+m[4]];t=d?d.n+' '+(d.d||''):'';const f=DISHE.find(z=>z[0].test(t));e=f?f[1]:(r.e||'🍽️')}}catch(_){return null}
+  let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))>>>0;const g=PHGR[h%PHGR.length];return {e,bg:`linear-gradient(135deg,${g[0]},${g[1]})`}}
+function phSlot(id,cls){if(!gImg[id]){const il=phIll(id);if(il)return `<button type="button" class="gslot ill ${cls||''}" data-ph="${id}" style="background:${il.bg}" aria-label="Pôr foto"><span class="ie">${il.e}</span><span class="icam">📷</span></button>`}return gImg[id]?`<img class="gslot ${cls||''}" src="${gImg[id]}" alt="" data-zoom="${id}">`:`<button type="button" class="gslot empty ${cls||''}" data-ph="${id}">📷<small>Pôr foto</small></button>`}
 function phAct(id,q){if(!(id&&gImg[id]))return '';return `<div class="pha"><button type="button" data-ph="${id}">📷 Trocar foto</button><button type="button" data-phdel="${id}">Remover</button></div>`}
 function parkPic(p,ro){const im=gImg['p:'+p.id];if(im)return `<img class="timg" src="${im}" alt="">`;return ro?`<span class="e">${p.e}</span>`:`<span class="timg empty" data-ph="p:${p.id}">📷<small>Pôr foto</small></span>`}
 const KL={'Rápido':'Balcão · quick service','Mesa':'Restaurante de mesa','Lanche':'Lanche · snack','Buffet':'Buffet','Casa':'Em casa'},KC={'Rápido':'q','Mesa':'m','Lanche':'s','Buffet':'m','Casa':'c'};
