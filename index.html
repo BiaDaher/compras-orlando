@@ -159,6 +159,10 @@ body.mkt main{padding-bottom:30px}
 .qty input{text-align:center}
 .ph{cursor:pointer;flex-direction:column;font-size:10.5px;color:var(--brand);font-weight:600;gap:2px;line-height:1.1;text-align:center}
 .ph span{font-size:22px}
+.thw{position:relative;flex:none}.phpen{position:absolute;right:-6px;top:-6px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:12px;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
+.ntprev{flex:1 1 100%;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:4px}.ntprev img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.ntprev span{flex:1}.ntprev button{border:0;background:none;color:#b9aca2;font-size:16px}
+.ntimg{width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--line);vertical-align:middle;margin-right:6px}
 .photobtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .photobtns button{border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:8px;padding:8px 12px;font-size:13px}
 .who{display:flex;gap:6px;overflow-x:auto;margin:2px 0 8px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
@@ -474,7 +478,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 <input type="file" id="gphoto" accept="image/*" style="display:none">
 <div class="gzoom" id="gzoom"><img id="gzimg" alt=""><div class="gzb"><button type="button" id="gz_ch">📷 Trocar foto</button><button type="button" id="gz_rm">🗑 Remover</button><button type="button" id="gz_x">Fechar</button></div></div>
 <datalist id="stl"></datalist>
-<input type="file" id="photoin" accept="image/*" style="display:none">
+<input type="file" id="photoin" accept="image/*" style="display:none"><input type="file" id="ntin" accept="image/*" style="display:none">
 <datalist id="catl"></datalist>
 <div class="sheet" id="mksheet">
  <form id="mkf" autocomplete="off">
@@ -495,6 +499,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <div class="live" id="b_live"></div>
   <label>Loja onde comprou</label>
   <input id="b_s" list="stl" placeholder="Ex.: Target">
+  <div class="ntprev" id="b_phbox"></div>
   <div class="ferr" id="b_err"></div>
   <div class="btns"><button type="button" class="skip" id="b_skip">Sem preço</button><button type="submit" class="save" id="b_ok">Confirmar compra</button></div>
  </form>
@@ -777,7 +782,7 @@ function card(i){
   if(i.who==='Mercado')return mkCard(i);
   const d=!!done[i.id];
   const src=photos[i.id]||i.img;
-  const img=src?`<img class="thumb" loading="lazy" src="${src}" alt="">`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
+  const img=src?`<div class="thw"><img class="thumb" loading="lazy" src="${src}" alt=""><button type="button" class="phpen setph" aria-label="Trocar foto">✏️</button></div>`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
   const L=i.lk,links=[];
   if(L.fotos)links.push(`<a href="${esc(L.fotos)}" target="_blank" rel="noopener">📷 Ver fotos</a>`);
   {
@@ -797,7 +802,6 @@ function card(i){
     ${i.faixa?`<ul class="faixas">${i.faixa.map(f=>`<li class="${/^VERDE/.test(f)?'g':/^AMARELO/.test(f)?'y':/^VERMELHO/.test(f)?'r':''}">${esc(f)}</li>`).join('')}</ul>`:''}
     ${i.brandLim?`<p><b>Limite por marca:</b> ${esc(i.brandLim)}</p>`:''}
     ${links.length?`<div class="links">${links.join('')}</div>`:''}
-    <div class="photobtns">${(photos[i.id]||i.img)?'<button class="setph">📷 Trocar foto</button>':'<button class="setph">📷 Adicionar foto</button>'}${photos[i.id]?`<button class="rmph">${i.img&&!i.mine?'Voltar à foto original':'Remover foto'}</button>`:''}</div>
     ${notesHtml(i)}
     ${mode==='excl'?'<div class="acts"><button class="rest">↩ Restaurar produto</button></div>':`<div class="acts">${done[i.id]?`<button class="editpaid">✏️ ${paidOf(i.id)?'Editar preço pago':'Informar preço pago'}</button>`:`<button class="skipb">${sk?'↩ Voltar para A comprar':'🚫 Não vou comprar'}</button>`}<button class="editp">✏️ Editar</button><button class="delp">🗑 Excluir produto</button></div>`}
    </div></div>`;
@@ -806,12 +810,13 @@ function paidOf(id){const v=done[id];return v&&typeof v==='object'&&v.p?v:null}
 function qtyOf(id){const v=done[id];return v&&typeof v==='object'&&v.q?v.q:1}
 function paidHtml(id){const v=paidOf(id),q=qtyOf(id);
   const it=getItem(id);
-  if(v)return `<div class="paid">💳 Paguei ${money(v.p)}${q>1?' × '+q+' = '+money(v.p*q):''}${v.s?' · '+esc(v.s):''}${it?ltag(it,v.p):''}</div>`;
+  if(v)return `<div class="paid">${gImg['my:pd:'+id]?`<img class="ntimg" src="${gImg['my:pd:'+id]}" data-z="my:pd:${id}" alt="">`:''}💳 Paguei ${money(v.p)}${q>1?' × '+q+' = '+money(v.p*q):''}${v.s?' · '+esc(v.s):''}${it?ltag(it,v.p):''}</div>`;
   return `<div class="paid none">💳 Preço pago não informado${q>1?' · '+q+' un.':''}</div>`}
+let ntPend={},ntFor=null,bPend=null;
 function notesHtml(i){
   const L=(notes[i.id]||[]).slice().sort((a,b)=>(a.p==null)-(b.p==null)||(a.p-b.p)||(a.d-b.d));
   const Lp=L.filter(n=>n.p!=null);const b=Lp.length>1?Lp[0]:null;
-  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${n.s?esc(n.s):(n.n?esc(n.n):'Anotação')}<small>${fmtD(n.d)}${n.n&&n.s?' · '+esc(n.n):''}</small></span><span class="p">${n.p!=null?money(n.p)+ltag(i,n.p):''}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
+  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${n.s?esc(n.s):(n.n?esc(n.n):'Anotação')}<small>${fmtD(n.d)}${n.n&&n.s?' · '+esc(n.n):''}</small></span><span class="p">${n.ph&&gImg[n.ph]?`<img class="ntimg" src="${gImg[n.ph]}" data-z="${n.ph}" alt="">`:''}${n.p!=null?money(n.p)+ltag(i,n.p):''}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
   return `<div class="notes"><h4>📝 Anotações e preços que eu vi</h4>
    ${L.length?`<ul class="nl">${lis}</ul>`:'<p class="np-empty">Nada anotado ainda. Anote abaixo um preço, uma loja ou só uma observação (marca, tamanho…).</p>'}
    <form class="nf" data-id="${i.id}">
@@ -819,6 +824,7 @@ function notesHtml(i){
     <input class="np" inputmode="decimal" placeholder="US$ (opcional)">
     ${i.meta!=null?'<div class="live nlive" style="flex:1 1 100%;margin:0"></div>':''}
     <input class="nn" placeholder="Observação: marca, tamanho, promoção…">
+    ${ntPend[i.id]?`<div class="ntprev"><img src="${ntPend[i.id]}" alt=""><span>📷 Foto da etiqueta pronta</span><button type="button" class="ntx" data-id="${i.id}">✕</button></div>`:`<button type="button" class="ntph" data-id="${i.id}">📷 Foto da etiqueta</button>`}
     <button type="submit">Salvar anotação</button>
    </form></div>`;
 }
@@ -888,10 +894,11 @@ function openBuy(id,edit){
   $('#b_s').value=v&&v.s?v.s:(b?b.s:(it.st[0]!=='Sem loja confirmada'?it.st[0]:''));
   $('#b_ok').textContent=edit?'Salvar':'Confirmar compra';
   $('#b_skip').textContent=edit?'Apagar preço':'Sem preço';
-  $('#buysheet').dataset.edit=edit?1:'';
+  $('#buysheet').dataset.edit=edit?1:'';bPend=null;bPhBox(id);
   buyLive();
   $('#buysheet').classList.add('show');
 }
+function bPhBox(id){const k='my:pd:'+id,src=bPend||gImg[k];$('#b_phbox').innerHTML=src?`<img src="${src}" alt=""><span>📷 Foto da etiqueta ou nota</span><button type="button" id="b_phx">✕</button>`:`<button type="button" class="ntph" id="b_ph">📷 Foto da etiqueta ou nota <small>(opcional)</small></button>`}
 function closeBuy(){$('#buysheet').classList.remove('show');buyId=null}
 function setDone(id,val){
   const it=getItem(id);if(!it)return;
@@ -940,6 +947,9 @@ function stats(){
 $('#list').addEventListener('click',e=>{
   const c=e.target.closest('.card');if(!c||e.target.closest('a'))return;
   const id=c.dataset.id;
+  {const b=e.target.closest('.ntph');if(b&&b.dataset.id){ntFor=b.dataset.id;$('#ntin').value='';$('#ntin').click();return}}
+  {const b=e.target.closest('.ntx');if(b){delete ntPend[b.dataset.id];render();return}}
+  {const z=e.target.closest('.ntimg');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id=z.dataset.z;$('#gzoom').classList.add('show');return}}
   if(e.target.closest('.addph')||e.target.closest('.setph')){phId=id;$('#photoin').value='';$('#photoin').click();return}
   if(e.target.closest('.rmph')){delete photos[id];saveP();render();return}
   if(e.target.closest('.editpaid')){openBuy(id,true);return}
@@ -1007,10 +1017,14 @@ $('#buysheet').addEventListener('click',e=>{if(e.target.id==='buysheet')closeBuy
 $('#b_minus').addEventListener('click',()=>{const q=Math.max(1,(parseInt($('#b_q').value)||1)-1);$('#b_q').value=q});
 $('#b_plus').addEventListener('click',()=>{const q=(parseInt($('#b_q').value)||1)+1;$('#b_q').value=q});
 $('#b_skip').addEventListener('click',()=>{const id=buyId;if(id===null)return;const q=Math.max(1,parseInt($('#b_q').value)||1);closeBuy();setDone(id,{q,d:Date.now()})});
+$('#b_phbox').addEventListener('click',e=>{if(e.target.closest('#b_ph')){ntFor='__buy';$('#ntin').value='';$('#ntin').click();return}if(e.target.closest('#b_phx')){bPend=null;$('#b_phbox').dataset.rm=1;$('#b_phbox').innerHTML=`<button type="button" class="ntph" id="b_ph">📷 Foto da etiqueta ou nota <small>(opcional)</small></button>`}});
+$('#ntin').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f||!ntFor)return;const who4=ntFor;
+  shrink(f,d=>{if(who4==='__buy'){bPend=d;$('#b_phbox').dataset.rm='';bPhBox(buyId)}else{const fm=document.querySelector(`.nf[data-id="${who4}"]`);const keep=fm?{s:fm.querySelector('.ns').value,p:fm.querySelector('.np').value,n:fm.querySelector('.nn').value}:null;ntPend[who4]=d;render();const f2=document.querySelector(`.nf[data-id="${who4}"]`);if(f2&&keep){f2.querySelector('.ns').value=keep.s;f2.querySelector('.np').value=keep.p;f2.querySelector('.nn').value=keep.n}}},()=>showToast('Não consegui abrir essa foto'),1400)});
 $('#buyf').addEventListener('submit',e=>{
   e.preventDefault();const id=buyId;if(id===null)return;
   const raw=$('#b_p').value.trim(),p=parsePrice(raw),q=Math.max(1,parseInt($('#b_q').value)||1),st=$('#b_s').value.trim();
   if(raw&&p===null){$('#b_err').textContent='O preço não ficou claro. Digite só números, ex.: 12,99';$('#b_p').focus();return}
+  {const k='my:pd:'+id;if(bPend){gImg[k]=bPend;if(!gImgSave())delete gImg[k]}else if($('#b_phbox').dataset.rm){delete gImg[k];gImgSave()}$('#b_phbox').dataset.rm=''}
   closeBuy();
   const val={q,d:Date.now()};if(p!==null){val.p=p;if(st)val.s=st}
   if(st){try{const u=JSON.parse(localStorage.getItem(NKEY+'-lojas')||'[]');if(!u.includes(st)){u.push(st);localStorage.setItem(NKEY+'-lojas',JSON.stringify(u));fillStores()}}catch(_){}}
@@ -1020,8 +1034,9 @@ $('#list').addEventListener('submit',e=>{
   const f=e.target.closest('.nf');if(!f)return;e.preventDefault();
   const id=f.dataset.id,st=f.querySelector('.ns').value.trim(),p=parsePrice(f.querySelector('.np').value),nn=f.querySelector('.nn').value.trim();
   const praw=f.querySelector('.np').value.trim();if(praw&&p===null){const x=f.querySelector('.np');x.value='';x.placeholder='Valor não ficou claro, ex.: 12,99';x.focus();return}
-  if(!st&&p===null&&!nn){f.querySelector('.nn').focus();return}
-  (notes[id]=notes[id]||[]).push({s:st,p:p,n:nn,d:Date.now()});saveN();
+  const pimg=ntPend[id];if(!st&&p===null&&!nn&&!pimg){f.querySelector('.nn').focus();return}
+  const nd=Date.now(),note={s:st,p:p,n:nn,d:nd};if(pimg){const k='my:nt:'+id+':'+nd;gImg[k]=pimg;if(gImgSave())note.ph=k;else delete gImg[k];delete ntPend[id]}
+  (notes[id]=notes[id]||[]).push(note);saveN();
   if(st)try{const u=JSON.parse(localStorage.getItem(NKEY+'-lojas')||'[]');if(!u.includes(st)){u.push(st);localStorage.setItem(NKEY+'-lojas',JSON.stringify(u))}}catch(_){}
   fillStores();render();
 });
@@ -1385,10 +1400,10 @@ $('#guide').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
     gForm=false;renderGuide();showToast('＋ '+it.n+' adicionado');return}
 });
 $('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPhId)return;const id=gPhId;const big=/^(nf|my):/.test(id);if(gView==='meus')myKeep();if(exForm)exSync();
-  shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast(big?'🧾 Nota anexada':'📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),big?1400:400)});
+  shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}if(!$('#guide').classList.contains('show')){try{render()}catch(_){}}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast(big?'🧾 Nota anexada':'📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),big?1400:400)});
 $('#gzoom').addEventListener('click',e=>{const z=$('#gzoom'),id=z.dataset.id;z.classList.remove('show');
   if(e.target.id==='gz_ch'&&id){gPhId=id;$('#gphoto').value='';$('#gphoto').click();return}
-  if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];gImgSave();const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
+  if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];gImgSave();if(!$('#guide').classList.contains('show')){try{render()}catch(_){}}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
 $('#homebtn').addEventListener('click',()=>openGuide());
 $('#guide').addEventListener('click',async e=>{if(!e.target.closest('#updbtn'))return;e.target.textContent='Atualizando…';
   try{if(navigator.onLine===false){showToast('Precisa de internet para atualizar');e.target.textContent='🔄 Atualizar app';return}
