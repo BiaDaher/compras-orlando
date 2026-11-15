@@ -526,8 +526,8 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <input id="a_mk" type="hidden">
   <label id="a_fll">Sabores ou cheiros recomendados <small>(opcional)</small></label>
   <input id="a_fl" placeholder="Ex.: baunilha, Sea Salt Orchid, cookies and cream">
-  <label>Tamanho / versão <small>(opcional)</small></label>
-  <input id="a_sz" placeholder="Ex.: 16 oz, cor Nude, tamanho M">
+  <div id="a_szv"><label>Tamanho / versão <small>(opcional)</small></label>
+  <input id="a_sz" placeholder="Ex.: 16 oz, cor Nude"></div>
   <label>O que oferece / observações <small>(opcional)</small></label>
   <textarea id="a_of" rows="2" placeholder="Para que serve, por que chamou atenção…"></textarea>
   <label>Link do produto <small>(opcional — site da loja ou foto)</small></label>
@@ -663,7 +663,7 @@ function szLine(i){if(!i.brs)return '';const k=szKind(i.cat);const c=convSize(k,
   if(k==='shoe'&&c){const b=brandFit([i.t,i.mk].join(' '));if(b){const u=shoeUS(i.sex,i.brs,b.adj);h+=`<small class="bfit">${esc(b.n)}: <b>${esc(u)}</b> · ${esc(b.note)}</small>`}}return h}
 let szLastK=null;
 function updSz(){try{const k0=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);if(k0!==szLastK){if(szLastK!==null&&!editId)$('#a_brs').value='';szLastK=k0;const m=JSON.parse($('#a_brs').dataset.mem||'{}');if(k0&&!$('#a_brs').value&&m[k0]&&!editId){$('#a_brs').value=m[k0];if(m.sex)$('#a_sex').value=m.sex}}}catch(_){}
-  const k=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);const box=$('#a_szbox');box.style.display=k?'block':'none';if(!k)return;
+  const k=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);const box=$('#a_szbox');box.style.display=k?'block':'none';$('#a_szv').style.display=k?'none':'';if(!k)return;
   $('#a_szl').textContent=k==='shoe'?'Quanto você calça no Brasil':'Seu tamanho de roupa no Brasil';$('#a_brs').placeholder=k==='shoe'?'Ex.: 37':'Ex.: M ou 40';
   const c=convSize(k,$('#a_sex').value,$('#a_brs').value);const bf=k==='shoe'&&c?brandFit([$('#a_t').value,mkGet()].join(' ')):null;
   $('#a_szout').innerHTML=$('#a_brs').value.trim()?(c?`🇺🇸 Nos EUA: <b>${esc(c)}</b>${bf?`<span class="bfit">${esc(bf.n)}: <b>${esc(shoeUS($('#a_sex').value,$('#a_brs').value,bf.adj))}</b> · ${esc(bf.note)}</span>`:''}<small>Aproximado: varia por marca e modelo. ${k==='shoe'?'Na dúvida, prove ou pegue meio número a mais.':'Roupa americana costuma vestir maior; muita gente desce um tamanho.'}</small>`:'<small>Não encontrei esse tamanho na tabela. Use número (ex.: 37, 40) ou letra (PP, P, M, G, GG).</small>'):''}
@@ -1119,7 +1119,7 @@ $('#addf').addEventListener('submit',e=>{
   if(!cat){$('#a_err').textContent=cs==='__other'?'Digite o nome da nova categoria.':'Escolha uma categoria.';(cs==='__other'?$('#a_cat'):$('#a_catsel')).focus();return}
   const st=$('#a_st').value.trim(),praw=$('#a_p').value.trim(),p=parsePrice(praw);
   if(praw&&p===null){$('#a_err').textContent='O preço não ficou claro. Digite só números, ex.: 12,99';$('#a_p').focus();return}
-  const sz=$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim(),mk=(mkAddTyped(),mkGet()),fl=$('#a_fl').value.trim(),brs=szKind(cat)?$('#a_brs').value.trim():'',sex=$('#a_sex').value;
+  const sz=szKind(cat)?'':$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim(),mk=(mkAddTyped(),mkGet()),fl=$('#a_fl').value.trim(),brs=szKind(cat)?$('#a_brs').value.trim():'',sex=$('#a_sex').value;
   if(brs){try{const key='orl-sz-'+($('#a_who').value||'');const m=JSON.parse(localStorage.getItem(key)||'{}');m[szKind(cat)]=brs;m.sex=sex;localStorage.setItem(key,JSON.stringify(m))}catch(_){}}
   if(editId){const id=editId,old=getItem(id);const sub=($('#a_subsel').value==='__other'?$('#a_sub').value.trim():$('#a_subsel').value);
     const us=p!==null?[money(p),sz,st].filter(Boolean).join(' · '):(old&&old.us&&old.usd==null&&!old.mine?old.us:(sz?'Não anotado · '+sz:'Não anotado'));
