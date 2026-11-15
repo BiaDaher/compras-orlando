@@ -160,8 +160,11 @@ body.mkt main{padding-bottom:30px}
 .ph{cursor:pointer;flex-direction:column;font-size:10.5px;color:var(--brand);font-weight:600;gap:2px;line-height:1.1;text-align:center}
 .ph span{font-size:22px}
 .thw{position:relative;flex:none}.phpen{position:absolute;right:-6px;top:-6px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:12px;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.det{position:relative}.det>p:first-of-type{padding-right:76px}.cornr{position:absolute;right:12px;top:8px;display:flex;gap:6px}
-.cornr button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:14px;padding:0;color:var(--muted)}
+.cornr{display:flex;justify-content:flex-end;margin:10px 0 2px}
+.cgrp{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+.cgrp button{border:0;background:none;margin:0;border-radius:0;line-height:1.2;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 12px}
+.cgrp button+button{border-left:1px solid var(--line)}
+.cgrp .delp{color:#a1231b}
 .ntopen{width:100%;margin-top:10px;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left}
 .nfbox h4{display:flex;justify-content:space-between;align-items:center}.ntclose{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600}
 .ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
@@ -798,7 +801,7 @@ function card(i){
    <div class="meta">${!who&&DATA.lists.length>1?`<span class="ownr">${esc(i.who)}</span>`:''}${i.mine?'<span class="mine">Adicionado por mim</span>':''}${i.tag?esc(i.tag):''}</div>
    ${i.meta!=null||i.faixa?`<div class="target">🎯 ${i.meta!=null?'Meta até '+money(i.meta):'Sem meta definida'}${i.teto!=null&&i.teto>i.meta?' · teto '+money(i.teto):''}</div>`:`<div class="price">${esc(short(i.us))}</div>`}${i.qty?`<div class="qtyl">🧺 ${esc(i.qty)}</div>`:''}${i.brs?`<div class="qtyl">${szLine(i)}</div>`:''}${done[i.id]?paidHtml(i.id):''}${sk?'<div class="skiptag">🚫 Não vou comprar</div>':''}${(()=>{const b=best(i.id),n=(notes[i.id]||[]).length;return b?`<div class="best-tag">📝 ${n} anotado${n>1?'s':''} · menor ${money(b.p)} (${esc(b.s)})${ltag(i,b.p)}</div>`:''})()}</div>
    <button class="chk" aria-label="Marcar como comprado"><span class="box">✓</span>${d?'Comprado':'Comprei'}</button></div>
-   <div class="det">${mode==='excl'?'':`<div class="cornr"><button type="button" class="editp" aria-label="Editar produto">✏️</button><button type="button" class="delp" aria-label="Excluir produto">✕</button></div>`}
+   <div class="det">${mode==='excl'?'':`<div class="cornr"><div class="cgrp"><button type="button" class="editp">✏️ Editar</button><button type="button" class="delp">🗑 Excluir</button></div></div>`}
     ${i.mk?`<p><b>🏷️ Marcas para procurar:</b> ${esc(i.mk)}</p>`:''}
     ${i.fl?`<p><b>😋 Sabores / cheiros:</b> ${esc(i.fl)}</p>`:''}
     ${i.of?`<p>${esc(i.of).replace(/\n/g,'<br>')}</p>`:''}
