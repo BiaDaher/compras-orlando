@@ -1303,7 +1303,6 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
   }
   if(gView==='parques'){
     B.innerHTML=gTop('🎢 Parques')+`<p class="ptip" style="margin-bottom:10px">Escolha o parque para ver a ordem dos brinquedos e onde comer. Situação conferida em ${GUIDE.updated}.</p>`+
-    `<details class="gdet"><summary>📋 Regras que mudam o resultado</summary>${GUIDE.rules.map((r,i)=>`<div class="lg2" style="font-size:13.5px;color:var(--ink)">${i+1}. ${esc(r)}</div>`).join('')}</details>`+
     orphanHtml()+`<div class="tiles">`+GUIDE.parks.slice().sort((x,y)=>dispOf(parkBase(x.id)||'').localeCompare(dispOf(parkBase(y.id)||''))).map(p=>{const dn=gRides[p.id]||{};const n=[...p.rides,...p.extras].filter(r=>r.act!==false&&dn[r.k]).length;const tot=p.rides.filter(r=>r.act).length+p.extras.length;return `<button class="tile" data-park="${p.id}">${parkPic(p)}<b>${esc(p.n)}</b><small>📅 ${esc(effDateLabel(p))}</small><small>${n?n+' de '+tot+' feitos':tot+' atrações'}</small></button>`}).join('')+`</div>`;
     return;
   }
