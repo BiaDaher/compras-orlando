@@ -80,6 +80,7 @@ main{padding:6px 12px 80px}
 .mkc{border:1px solid var(--line);background:#fbf6f0;color:var(--ink);border-radius:999px;padding:5px 10px;font:inherit;font-size:13px}
 .mkc.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 .mkadd{display:flex;gap:8px;margin-top:6px}.mkadd input{flex:1}.mkadd button{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:10px;padding:0 12px;font:inherit;font-weight:600;font-size:13px}
+.refv{display:inline-block;font-size:12.5px;background:#f3ece4;border-radius:999px;padding:4px 9px;color:var(--ink);font-weight:600}
 .szp{background:#fbf6f0;border-radius:8px;padding:6px 9px;font-weight:600}
 .nf .ns{flex:2 1 140px}.nf .np{flex:1 1 80px}.nf .nn{flex:1 1 100%}
 .nf button{flex:1 1 100%;border:0;background:var(--brand);color:#fff;font-weight:700;padding:10px;border-radius:8px;font-size:15px}
@@ -779,8 +780,8 @@ function card(i){
   const img=src?`<img class="thumb" loading="lazy" src="${src}" alt="">`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
   const L=i.lk,links=[];
   if(L.fotos)links.push(`<a href="${esc(L.fotos)}" target="_blank" rel="noopener">📷 Ver fotos</a>`);
-  if(L.us)links.push(`<a href="${esc(L.us)}" target="_blank" rel="noopener">🇺🇸 Preço EUA</a>`);
-  if(L.br)links.push(`<a href="${esc(L.br)}" target="_blank" rel="noopener">🇧🇷 Ref. Brasil</a>`);
+  {const u=i.usd!=null?money(i.usd):((String(i.us||'').match(/US\$\s?[\d.,]+(?:\s?[–-]\s?[\d.,]+)?/)||[])[0]||'');if(u)links.push(`<span class="refv">🇺🇸 ${esc(u.replace(/[.,]+$/,''))}</span>`);
+   let b=String(i.br||'');const bm=b.match(/R\$\s?[\d.,]+(?:\s?[–-]\s?[\d.,]+)?/);const bv=bm?bm[0]:(/^\s*[\d.,]+\b/.test(b)?'R$ '+b.match(/[\d.,]+/)[0]:'');if(bv)links.push(`<span class="refv">🇧🇷 ${esc(bv.replace(/[.,]+$/,''))}</span>`)}
   (L.lojas||[]).forEach(([n,u])=>links.push(`<a href="${esc(u)}" target="_blank" rel="noopener">📍 ${esc(n)}</a>`));
   const sk=!d&&!!skip[i.id];
   return `<div class="card${d?' done':''}${sk?' skipped':''}${openId===i.id?' open':''}" data-id="${i.id}">
@@ -795,9 +796,6 @@ function card(i){
     ${i.of?`<p>${esc(i.of).replace(/\n/g,'<br>')}</p>`:''}
     ${i.faixa?`<ul class="faixas">${i.faixa.map(f=>`<li class="${/^VERDE/.test(f)?'g':/^AMARELO/.test(f)?'y':/^VERMELHO/.test(f)?'r':''}">${esc(f)}</li>`).join('')}</ul>`:''}
     ${i.brandLim?`<p><b>Limite por marca:</b> ${esc(i.brandLim)}</p>`:''}
-    ${i.us&&i.us!=='Não informado'?`<p><b>Preço nos EUA:</b> ${esc(i.us)}</p>`:''}
-    ${i.br&&i.br!=='Não informado'?`<p><b>Preço no Brasil:</b> ${esc(i.br)}</p>`:''}
-    ${i.lj&&i.lj!=='Não informada'?`<p><b>Onde comprar:</b> ${esc(i.lj)}</p>`:''}
     ${links.length?`<div class="links">${links.join('')}</div>`:''}
     <div class="photobtns">${(photos[i.id]||i.img)?'<button class="setph">📷 Trocar foto</button>':'<button class="setph">📷 Adicionar foto</button>'}${photos[i.id]?`<button class="rmph">${i.img&&!i.mine?'Voltar à foto original':'Remover foto'}</button>`:''}</div>
     ${notesHtml(i)}
