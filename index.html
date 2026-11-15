@@ -596,6 +596,7 @@ const IDB={db:null,
   del(k){try{if(this.db)this.db.transaction('img','readwrite').objectStore('img').delete(k)}catch(e){}}};
 const imgSig=s=>s?s.length+':'+s.slice(-24):'';
 const _shadow={};
+window.IMG_READY=false;const IMG_DEL=new Set();
 function persistImgs(){ // grava diferenças dos dois mapas no IndexedDB
   if(!IDB.db)return false;const cur={};
   Object.keys(photos).forEach(k=>cur['c~'+k]=photos[k]);if(typeof gImg!=='undefined')Object.keys(gImg).forEach(k=>cur['g~'+k]=gImg[k]);
@@ -1001,7 +1002,7 @@ $('#list').addEventListener('click',e=>{
   {const z=e.target.closest('.ntimg');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id=z.dataset.z;$('#gzoom').classList.remove('ro');$('#gzoom').classList.add('show');return}}
   {const z=e.target.closest('img.thumb');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id='';$('#gzoom').classList.add('ro','show');return}}
   if(e.target.closest('.addph')||e.target.closest('.setph')){phId=id;$('#photoin').value='';$('#photoin').click();return}
-  if(e.target.closest('.rmph')){delete photos[id];saveP();render();return}
+  if(e.target.closest('.rmph')){delete photos[id];IMG_DEL.add('c~'+id);saveP();render();return}
   if(e.target.closest('.editpaid')){openBuy(id,true);return}
   if(e.target.closest('.mdel')){const it=getItem(id);
     if(it&&!it.mine){excl[id]=1;saveE();render();showToast('🗑 '+it.t+' excluído',()=>{delete excl[id];saveE();render()});return}
@@ -1355,7 +1356,7 @@ function gImgSave(){if(persistImgs()){syncChanged();return true}const ok=gsave('
 (async()=>{ // carrega fotos do IndexedDB e migra as antigas do localStorage
   if(!(await IDB.open()))return;const all=await IDB.all();
   Object.keys(all).forEach(k=>{_shadow[k]=imgSig(all[k]);if(k.startsWith('c~'))photos[k.slice(2)]=all[k];else if(k.startsWith('g~'))gImg[k.slice(2)]=all[k]});
-  migrateKeys();persistImgs();try{localStorage.removeItem(PKEY);localStorage.removeItem(GK+'img')}catch(e){}
+  window.IMG_READY=true;migrateKeys();persistImgs();try{localStorage.removeItem(PKEY);localStorage.removeItem(GK+'img')}catch(e){}
   try{rebuild();render()}catch(e){}if($('#guide').classList.contains('show')){const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y}
   try{SYNC.diff()}catch(e){}
 })();
@@ -1407,7 +1408,7 @@ $('#guide').addEventListener('click',e=>{
     if(g==='mercado'){closeGuide();who='Mercado';try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
     if(myForm&&myForm.id&&gImg['my:'+myForm.id]&&!Object.values(gMy).some(L=>L.some(x=>x.id===myForm.id))){delete gImg['my:'+myForm.id];gImgSave()}if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}gView=g;gForm=false;exForm=null;myWho=null;myForm=null;ckWho=null;ckAdd=null;{let me=null;try{me=euGet()}catch(_){}if(me&&GROUP.includes(me)){if(g==='ck')ckWho=me;if(g==='meus')myWho=me}}myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
-  if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
+  if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];IMG_DEL.add('g~'+id);gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
   if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.remove('ro');$('#gzoom').classList.add('show');return}
   if(b=t.closest('[data-ropen]')){const id=b.dataset.ropen;gOpenR[id]=!gOpenR[id];const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;return}
   if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;const rr=GUIDE.rests.find(x=>x.id===id);if(rr&&rr.park){gPark=rr.park;gPTab='food';gView='park';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
@@ -1455,7 +1456,7 @@ $('#gphoto').addEventListener('change',e=>{const f=e.target.files[0];if(!f||!gPh
   shrink(f,u=>{gImg[id]=u;if(!gImgSave()){delete gImg[id];showToast('Sem espaço para mais fotos neste celular');return}if(!$('#guide').classList.contains('show')){try{render()}catch(_){}}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast(big?'🧾 Nota anexada':'📷 Foto salva')},()=>showToast('Não consegui abrir essa imagem'),big?1400:400)});
 $('#gzoom').addEventListener('click',e=>{const z=$('#gzoom'),id=z.dataset.id;z.classList.remove('show');
   if(e.target.id==='gz_ch'&&id){gPhId=id;$('#gphoto').value='';$('#gphoto').click();return}
-  if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];gImgSave();if(!$('#guide').classList.contains('show')){try{render()}catch(_){}}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
+  if(e.target.id==='gz_rm'&&id){const old=gImg[id];delete gImg[id];IMG_DEL.add('g~'+id);gImgSave();if(!$('#guide').classList.contains('show')){try{render()}catch(_){}}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()})}});
 $('#homebtn').addEventListener('click',()=>openGuide());
 $('#guide').addEventListener('click',async e=>{if(!e.target.closest('#updbtn'))return;e.target.textContent='Atualizando…';
   try{if(navigator.onLine===false){showToast('Precisa de internet para atualizar');e.target.textContent='🔄 Atualizar app';return}
@@ -1684,9 +1685,9 @@ const SYNC=(()=>{
     // contas do grupo
     (gEx||[]).forEach(x=>{const tt=Math.max(x.t||0,x.t2||0);if((snap.ex[x.id]||0)!==tt){snap.ex[x.id]=tt;put('ex/'+x.id,x)}});
     // fotos (guia e compras)
-    if(IDB.db){const ci={};Object.keys(photos).forEach(k=>ci['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>{if(!k.startsWith('my:'))ci['g~'+k]=gImg[k]});
+    if(IDB.db&&window.IMG_READY){const ci={};Object.keys(photos).forEach(k=>ci['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>{if(!k.startsWith('my:'))ci['g~'+k]=gImg[k]});
       Object.keys(ci).forEach(k=>{const s=imgSig(ci[k]);if(snap.img[k]!==s){snap.img[k]=s;put('img/'+k,{ref:k});put('imgidx/'+k,{s,t:now})}});
-      Object.keys(snap.img).forEach(k=>{if(snap.img[k]&&!(k in ci)){snap.img[k]='';put('img/'+k,null);put('imgidx/'+k,{del:1,t:now})}});}
+      Object.keys(snap.img).forEach(k=>{if(snap.img[k]&&!(k in ci)&&IMG_DEL.has(k)){snap.img[k]='';put('img/'+k,null);put('imgidx/'+k,{del:1,t:now})}});IMG_DEL.clear();}
     // mercado: excluídos e edições (quantidade/valor/loja)
     ITEMS.filter(i=>i.who==='Mercado'&&!i.mine).forEach(i=>{const v=excl[i.id]?1:0;if((snap.mx[i.id]||0)!==v){snap.mx[i.id]=v;put('mx/'+i.id,{v,t:now})}});
     Object.keys(mEdit).forEach(id=>{const e=mEdit[id];const sg=JSON.stringify(e);if(snap.me[id]!==sg){snap.me[id]=sg;put('me/'+id,e)}});
