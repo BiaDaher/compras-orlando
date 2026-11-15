@@ -812,13 +812,14 @@ function paidOf(id){const v=done[id];return v&&typeof v==='object'&&v.p?v:null}
 function qtyOf(id){const v=done[id];return v&&typeof v==='object'&&v.q?v.q:1}
 function paidHtml(id){const v=paidOf(id),q=qtyOf(id);
   const it=getItem(id);
-  if(v)return `<div class="paid">${gImg['my:pd:'+id]?`<img class="ntimg" src="${gImg['my:pd:'+id]}" data-z="my:pd:${id}" alt="">`:''}💳 Paguei ${money(v.p)}${q>1?' × '+q+' = '+money(v.p*q):''}${v.s?' · '+esc(v.s):''}${it?ltag(it,v.p):''}</div>`;
+  if(v)return `<div class="paid">${gI('my:pd:'+id)?`<img class="ntimg" src="${gI('my:pd:'+id)}" data-z="my:pd:${id}" alt="">`:''}💳 Paguei ${money(v.p)}${q>1?' × '+q+' = '+money(v.p*q):''}${v.s?' · '+esc(v.s):''}${it?ltag(it,v.p):''}</div>`;
   return `<div class="paid none">💳 Preço pago não informado${q>1?' · '+q+' un.':''}</div>`}
 let ntPend={},ntOpen={},ntFor=null,bPend=null;
+function gI(k){try{return gImg[k]||null}catch(e){return null}}
 function notesHtml(i){
   const L=(notes[i.id]||[]).slice().sort((a,b)=>(a.p==null)-(b.p==null)||(a.p-b.p)||(a.d-b.d));
   const Lp=L.filter(n=>n.p!=null);const b=Lp.length>1?Lp[0]:null;
-  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${n.s?esc(n.s):(n.n?esc(n.n):'Anotação')}<small>${fmtD(n.d)}${n.n&&n.s?' · '+esc(n.n):''}</small></span><span class="p">${n.ph&&gImg[n.ph]?`<img class="ntimg" src="${gImg[n.ph]}" data-z="${n.ph}" alt="">`:''}${n.p!=null?money(n.p)+ltag(i,n.p):''}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
+  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${n.s?esc(n.s):(n.n?esc(n.n):'Anotação')}<small>${fmtD(n.d)}${n.n&&n.s?' · '+esc(n.n):''}</small></span><span class="p">${n.ph&&gI(n.ph)?`<img class="ntimg" src="${gI(n.ph)}" data-z="${n.ph}" alt="">`:''}${n.p!=null?money(n.p)+ltag(i,n.p):''}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
   const open=!!ntOpen[i.id]||!!ntPend[i.id];
   return `${L.length?`<div class="notes"><h4>📝 Preços e anotações (${L.length})</h4><ul class="nl">${lis}</ul></div>`:''}
    ${open?`<div class="notes nfbox"><h4>✍️ Nova anotação <button type="button" class="ntclose" data-id="${i.id}">Cancelar</button></h4>
@@ -901,7 +902,7 @@ function openBuy(id,edit){
   buyLive();
   $('#buysheet').classList.add('show');
 }
-function bPhBox(id){const k='my:pd:'+id,src=bPend||gImg[k];$('#b_phbox').innerHTML=src?`<img src="${src}" alt=""><span>📷 Foto da etiqueta ou nota</span><button type="button" id="b_phx">✕</button>`:`<button type="button" class="ntph" id="b_ph">📷 Foto da etiqueta ou nota <small>(opcional)</small></button>`}
+function bPhBox(id){const k='my:pd:'+id,src=bPend||gI(k);$('#b_phbox').innerHTML=src?`<img src="${src}" alt=""><span>📷 Foto da etiqueta ou nota</span><button type="button" id="b_phx">✕</button>`:`<button type="button" class="ntph" id="b_ph">📷 Foto da etiqueta ou nota <small>(opcional)</small></button>`}
 function closeBuy(){$('#buysheet').classList.remove('show');buyId=null}
 function setDone(id,val){
   const it=getItem(id);if(!it)return;
