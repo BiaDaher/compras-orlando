@@ -165,6 +165,8 @@ body.mkt main{padding-bottom:30px}
 .cgrp button{border:0;background:none;margin:0;border-radius:0;line-height:1.2;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 12px}
 .cgrp button+button{border-left:1px solid var(--line)}
 .cgrp .delp{color:#a1231b}
+.sbtns{display:flex;gap:6px;flex:none}.sett .sbtns button.alt{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.sett{flex-wrap:wrap}.partf{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin-top:8px}.partf input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:15px;background:#fff}.sett .partf button{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:0 14px;font:inherit;font-weight:700;font-size:13.5px}
 .ntopen{width:100%;margin-top:10px;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left}
 .nfbox h4{display:flex;justify-content:space-between;align-items:center}.ntclose{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600}
 .ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
@@ -1441,7 +1443,7 @@ function renderContas(B){
   if(exForm){h+=exFormHtml();B.innerHTML=h;exUpd();return}
   h+=`<button class="gbtn" data-exnew="1">+ Nova despesa</button><div class="syncst sst" style="margin-top:6px"></div>`;
   h+=`<div class="gsec">💰 Saldo de cada um</div><div class="bal">${GROUP.map(p=>{const v=b[p]||0;return `<div class="r"><span>${esc(p)}</span><span class="amt ${v>0?'pos':v<0?'neg':'zero'}">${v>0?'recebe '+usd(v):v<0?'deve '+usd(-v):'em dia'}</span></div>`}).join('')}</div>`;
-  h+=`<div class="gsec">🤝 Como acertar</div>`+(st.length?st.map(s=>`<div class="sett"><span class="tx"><b>${esc(s.from)}</b> paga <b>${usd(s.v)}</b> para <b>${esc(s.to)}</b></span><button data-settle="${esc(s.from)}|${esc(s.to)}|${s.v}">Já pagou</button></div>`).join(''):`<div class="gempty">Ninguém deve nada a ninguém 🎉</div>`);
+  h+=`<div class="gsec">🤝 Como acertar</div>`+(st.length?st.map(s=>{const key=s.from+'|'+s.to;return `<div class="sett"><span class="tx"><b>${esc(s.from)}</b> paga <b>${usd(s.v)}</b> para <b>${esc(s.to)}</b></span><span class="sbtns"><button data-settle="${esc(s.from)}|${esc(s.to)}|${s.v}">Pagou tudo</button><button class="alt" data-part="${esc(key)}">Pagou parte</button></span>${payPart===key?`<form class="partf" data-k="${esc(key)}|${s.v}"><input id="part_v" inputmode="decimal" placeholder="Quanto pagou (US$)"><button type="submit">Registrar</button><div id="part_err" style="color:#a1231b;font-size:12.5px;flex:1 1 100%"></div></form>`:''}</div>`}).join(''):`<div class="gempty">Ninguém deve nada a ninguém 🎉</div>`);
   h+=`<div class="gsec">🧾 Despesas (${L.filter(e=>e.kind!=='pay').length})</div>`+(L.length?L.map(e=>{const ps=Object.keys(e.split||{});const dt=new Date(e.t);const ds=dt.getDate()+'/'+(dt.getMonth()+1);
     if(e.kind==='pay')return `<div class="exp pay"><span class="ic">💸</span><div class="b"><b>${esc(e.payer)} pagou ${esc(ps[0]||'')}</b><small>Acerto de contas · ${ds}</small></div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`;
     const all=ps.length===GROUP.length;const allNow=!all&&ps.length===GROUP.length-Object.keys(JOIN).length&&Object.keys(JOIN).every(p=>!ps.includes(p));const eq=ps.every(p=>Math.abs(e.split[p]-e.amt/ps.length)<1);
@@ -1498,6 +1500,10 @@ $('#guide').addEventListener('click',e=>{if(gView!=='ck')return;const t=e.target
 $('#guide').addEventListener('submit',e=>{if(e.target.id!=='ckaddf')return;e.preventDefault();const v=$('#ck_n').value.trim();const y=$('#guide').scrollTop;
   if(v){const o=ckOf(ckWho);o.add.push({id:'cu'+Date.now()+Math.floor(Math.random()*99),c:ckAdd,n:v});ckSave(ckWho)}ckAdd=null;renderGuide();$('#guide').scrollTop=y},true);
 
+let payPart=null;
+$('#guide').addEventListener('submit',e=>{const f=e.target.closest('.partf');if(!f)return;e.preventDefault();e.stopImmediatePropagation();const [fr,to,max]=f.dataset.k.split('|');const v=cents($('#part_v').value);
+  if(isNaN(v)||v<=0){$('#part_err').textContent='Digite o valor pago, ex.: 50,00';return}if(v>+max){$('#part_err').textContent='Maior que a dívida ('+usd(+max)+'). Use "Pagou tudo".';return}
+  const now=Date.now();gEx.push({id:'x'+now+Math.floor(Math.random()*999),kind:'pay',desc:'Acerto parcial',amt:v,payer:fr,split:{[to]:v},t:now});saveEx();payPart=null;renderGuide();showToast(`💸 ${fr} pagou ${usd(v)} para ${to} · falta ${usd(+max-v)}`)},true);
 const EXIC=['🛒','🍔','🍦','🎢','🚗','⛽','🅿️','🏠','🎁','🧾'];
 let gMy=gload('my',{}),myForm=null,myWho=null,myPinFor=null,myPinNew=null,gPin=gload('mypin',{});
 function pinHash(n,p){let h=5381;const t=n+'|'+p+'|orl26';for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))>>>0;return h.toString(36)}
@@ -1590,6 +1596,7 @@ $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   if(t.closest('[data-exnew]')){exForm={id:'x'+Date.now()+Math.floor(Math.random()*999),day:myDefDay(),pl:'',other:false,otherv:'',desc:'',v:'',ic:'🧾',payer:myName(),who:presentNow(),mode:'eq',vals:{}};renderGuide();$('#guide').scrollTop=0;setTimeout(()=>{const i=$('#ex_d');if(i)i.focus()},50);e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-exdel]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Apagar?';b.style.color='#a1231b';b.style.fontSize='12.5px';b.style.fontWeight='700';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='✕';b.removeAttribute('style')}},3500);e.stopImmediatePropagation();return}
     const ex=gEx.find(x=>x.id===b.dataset.exdel);if(ex){ex.del=1;ex.t2=Date.now();saveEx();renderGuide();showToast('Despesa apagada',()=>{ex.del=0;ex.t2=Date.now();saveEx();renderGuide()})}e.stopImmediatePropagation();return}
+  if(!exForm&&(b=t.closest('[data-part]'))){payPart=payPart===b.dataset.part?null:b.dataset.part;renderGuide();const i=$('#part_v');if(i)i.focus();e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-settle]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Confirmar?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Já pagou'}},3500);e.stopImmediatePropagation();return}const [fr,to,v]=b.dataset.settle.split('|');const now=Date.now();
     gEx.push({id:'x'+now+Math.floor(Math.random()*999),kind:'pay',desc:'Acerto',amt:+v,payer:fr,split:{[to]:+v},t:now});saveEx();renderGuide();showToast(`💸 ${fr} pagou ${usd(+v)} para ${to}`);e.stopImmediatePropagation();return}
   if(!exForm)return;
