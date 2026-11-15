@@ -160,6 +160,8 @@ body.mkt main{padding-bottom:30px}
 .ph{cursor:pointer;flex-direction:column;font-size:10.5px;color:var(--brand);font-weight:600;gap:2px;line-height:1.1;text-align:center}
 .ph span{font-size:22px}
 .thw{position:relative;flex:none}.phpen{position:absolute;right:-6px;top:-6px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:12px;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.det{position:relative}.det>p:first-of-type{padding-right:76px}.cornr{position:absolute;right:12px;top:8px;display:flex;gap:6px}
+.cornr button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:14px;padding:0;color:var(--muted)}
 .ntopen{width:100%;margin-top:10px;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left}
 .nfbox h4{display:flex;justify-content:space-between;align-items:center}.ntclose{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600}
 .ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
@@ -448,7 +450,6 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <div class="seg" id="seg">
     <button data-v="todo" class="on">A comprar <span id="ntodo"></span></button>
     <button data-v="done">Comprados <span id="ndone"></span></button>
-    <button data-v="skip">Não comprar <span id="nskip"></span></button>
     <button data-v="all">Todos</button>
   </div>
   <button class="addbtn" id="addbtn">+ Adicionar produto</button>
@@ -543,7 +544,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <label>Preço no Brasil <small>(opcional)</small></label>
   <input id="a_br" placeholder="Ex.: R$ 120 na Sephora">
   <label>Foto <small>(opcional)</small></label>
-  <div class="photo"><img id="a_prev" alt=""><label class="pick" for="a_img">📷 Tirar ou escolher foto</label><input type="file" id="a_img" accept="image/*"></div>
+  <div class="photo"><img id="a_prev" alt=""><label class="pick" for="a_img" id="a_pick">📷 Tirar ou escolher foto</label><input type="file" id="a_img" accept="image/*"></div>
   <div class="ferr" id="a_err"></div>
   <button class="save" type="submit" id="a_save">Adicionar à lista</button>
  </form>
@@ -599,7 +600,7 @@ try{skip=JSON.parse(localStorage.getItem(SKEY)||'{}')||{}}catch(e){skip={}}
 try{excl=JSON.parse(localStorage.getItem(EKEY)||'{}')||{}}catch(e){excl={}}
 function saveS(){try{localStorage.setItem(SKEY,JSON.stringify(skip))}catch(e){}}
 function saveE(){try{localStorage.setItem(EKEY,JSON.stringify(excl))}catch(e){}syncChanged()}
-const status=i=>done[i.id]?'done':(skip[i.id]?'skip':'todo');
+const status=i=>done[i.id]?'done':'todo';
 let undoFn=null;
 function showToast(msg,fn){$('#tmsg').textContent=msg;undoFn=fn||null;$('#undo').style.display=fn?'':'none';$('#toast').classList.add('show');clearTimeout(undoT);undoT=setTimeout(()=>{$('#toast').classList.remove('show');undoFn=null},4500)}
 const CKEY='lista-orlando-2026-meus-produtos-v1';
@@ -784,7 +785,7 @@ function card(i){
   if(i.who==='Mercado')return mkCard(i);
   const d=!!done[i.id];
   const src=photos[i.id]||i.img;
-  const img=src?`<div class="thw"><img class="thumb" loading="lazy" src="${src}" alt=""><button type="button" class="phpen setph" aria-label="Trocar foto">✏️</button></div>`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
+  const img=src?`<div class="thw"><img class="thumb" loading="lazy" src="${src}" alt=""></div>`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
   const L=i.lk,links=[];
   if(L.fotos)links.push(`<a href="${esc(L.fotos)}" target="_blank" rel="noopener">📷 Ver fotos</a>`);
   {
@@ -797,7 +798,7 @@ function card(i){
    <div class="meta">${!who&&DATA.lists.length>1?`<span class="ownr">${esc(i.who)}</span>`:''}${i.mine?'<span class="mine">Adicionado por mim</span>':''}${i.tag?esc(i.tag):''}</div>
    ${i.meta!=null||i.faixa?`<div class="target">🎯 ${i.meta!=null?'Meta até '+money(i.meta):'Sem meta definida'}${i.teto!=null&&i.teto>i.meta?' · teto '+money(i.teto):''}</div>`:`<div class="price">${esc(short(i.us))}</div>`}${i.qty?`<div class="qtyl">🧺 ${esc(i.qty)}</div>`:''}${i.brs?`<div class="qtyl">${szLine(i)}</div>`:''}${done[i.id]?paidHtml(i.id):''}${sk?'<div class="skiptag">🚫 Não vou comprar</div>':''}${(()=>{const b=best(i.id),n=(notes[i.id]||[]).length;return b?`<div class="best-tag">📝 ${n} anotado${n>1?'s':''} · menor ${money(b.p)} (${esc(b.s)})${ltag(i,b.p)}</div>`:''})()}</div>
    <button class="chk" aria-label="Marcar como comprado"><span class="box">✓</span>${d?'Comprado':'Comprei'}</button></div>
-   <div class="det">
+   <div class="det">${mode==='excl'?'':`<div class="cornr"><button type="button" class="editp" aria-label="Editar produto">✏️</button><button type="button" class="delp" aria-label="Excluir produto">✕</button></div>`}
     ${i.mk?`<p><b>🏷️ Marcas para procurar:</b> ${esc(i.mk)}</p>`:''}
     ${i.fl?`<p><b>😋 Sabores / cheiros:</b> ${esc(i.fl)}</p>`:''}
     ${i.of?`<p>${esc(i.of).replace(/\n/g,'<br>')}</p>`:''}
@@ -805,7 +806,7 @@ function card(i){
     ${i.brandLim?`<p><b>Limite por marca:</b> ${esc(i.brandLim)}</p>`:''}
     ${links.length?`<div class="links">${links.join('')}</div>`:''}
     ${notesHtml(i)}
-    ${mode==='excl'?'<div class="acts"><button class="rest">↩ Restaurar produto</button></div>':`<div class="acts">${done[i.id]?`<button class="editpaid">✏️ ${paidOf(i.id)?'Editar preço pago':'Informar preço pago'}</button>`:`<button class="skipb">${sk?'↩ Voltar para A comprar':'🚫 Não vou comprar'}</button>`}<button class="editp">✏️ Editar</button><button class="delp">🗑 Excluir produto</button></div>`}
+    ${mode==='excl'?'<div class="acts"><button class="rest">↩ Restaurar produto</button></div>':(done[i.id]?`<div class="acts"><button class="editpaid">✏️ ${paidOf(i.id)?'Editar preço pago':'Informar preço pago'}</button></div>`:'')}
    </div></div>`;
 }
 function paidOf(id){const v=done[id];return v&&typeof v==='object'&&v.p?v:null}
@@ -939,7 +940,7 @@ function stats(){
   const n=V.length-sc,c=V.filter(i=>done[i.id]).length;
   $('#count').textContent=c+' de '+n+' comprados';
   $('#prog').style.width=(n?100*c/n:0)+'%';
-  $('#ntodo').textContent='('+(n-c)+')';$('#ndone').textContent='('+c+')';$('#nskip').textContent='('+sc+')';
+  $('#ntodo').textContent='('+(n-c)+')';$('#ndone').textContent='('+c+')';{const ns=$('#nskip');if(ns)ns.textContent='('+sc+')'}
   const ec=ITEMS.filter(i=>inWho(i)&&excl[i.id]).length;
   $('#exclbtn').style.display=ec&&mode!=='excl'?'inline-block':'none';$('#exclbtn').textContent='🗑 Produtos excluídos ('+ec+') — ver ou restaurar';
   $('#exclhead').classList.toggle('show',mode==='excl');
@@ -969,7 +970,6 @@ $('#list').addEventListener('click',e=>{
   const ep=e.target.closest('.editp');if(ep){const c=ep.closest('.card');if(c)openEdit(c.dataset.id);return}
   const dp=e.target.closest('.delp');
   if(dp){
-    if(!dp.dataset.sure){dp.dataset.sure=1;dp.textContent='Toque de novo para confirmar';setTimeout(()=>{if(dp.isConnected){delete dp.dataset.sure;dp.textContent='🗑 Excluir produto'}},4000);return}
     excl[id]=1;saveE();openId=null;render();
     showToast('🗑 '+nm+' excluído',()=>{delete excl[id];saveE();render()});return;
   }
@@ -1078,7 +1078,7 @@ function showMsg(t){showToast(t)}
 let newImg=null;
 function openAdd(){
   editId=null;$('#a_h').textContent='Novo produto';$('#a_save').textContent='Adicionar à lista';
-  $('#addf').reset();newImg=null;$('#a_prev').style.display='none';$('#a_err').textContent='';
+  $('#addf').reset();newImg=null;$('#a_prev').style.display='none';$('#a_pick').textContent='📷 Tirar ou escolher foto';$('#a_err').textContent='';
   $('#a_who').value=who||'Bia';{const f=$('#fcat').value||'';if(f.startsWith('sub:')){const [c,x]=f.slice(4).split('|');fillCats(c,x)}else fillCats(f)}
   const q=$('#q').value.trim();if(q)$('#a_t').value=q;
   mkSel=[];renderMk();$('#a_mkn').value='';
@@ -1086,7 +1086,7 @@ function openAdd(){
   updSz();
   $('#sheet').classList.add('show');setTimeout(()=>$('#a_t').focus(),50);
 }
-function openEdit(id){const i=getItem(id);if(!i)return;openAdd();editId=id;$('#a_h').textContent='Editar produto';$('#a_save').textContent='Salvar alterações';
+function openEdit(id){const i=getItem(id);if(!i)return;openAdd();editId=id;{const src=photos[id]||i.img;if(src){$('#a_prev').src=src;$('#a_prev').style.display='block'}$('#a_pick').textContent=src?'📷 Trocar foto':'📷 Tirar ou escolher foto'}$('#a_h').textContent='Editar produto';$('#a_save').textContent='Salvar alterações';
   $('#a_who').value=i.who||'Bia';fillCats(i.cat,i.sub||'');$('#a_t').value=i.t||'';
   const lj=i.lj&&i.lj!=='Não informada'?i.lj:'';$('#a_st').value=lj;$('#a_p').value=i.usd!=null?String(i.usd).replace('.',','):'';
   mkSet(i.mk||'');$('#a_fl').value=i.fl||'';$('#a_sex').value=i.sex||'f';$('#a_brs').value=i.brs||'';updSz();$('#a_sz').value=i.sz||'';$('#a_of').value=i.of||'';$('#a_br').value=i.br&&i.br!=='Não informado'?i.br:'';}
