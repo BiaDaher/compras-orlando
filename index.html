@@ -258,11 +258,19 @@ header{position:sticky}
 .ckadd{display:flex;gap:8px;padding:8px 0}.ckadd input{flex:1}.ckadd .gbtn{width:auto;margin:0;padding:0 14px}
 .minirow{text-align:center;margin:14px 0 0}
 .mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:600}
-.idbar{display:flex;align-items:center;gap:12px;width:100%;max-width:520px;margin:4px auto 14px;min-height:60px;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:8px 14px 8px 8px;font:inherit;color:var(--ink);text-align:left;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.idbar .av{width:44px;height:44px;font-size:26px}
-.idbar .idt{flex:1;font-size:17px;font-weight:700;line-height:1.2}
-.idbar .idt small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
-.idbar .idgo{color:var(--brand);font-weight:700;font-size:15px;white-space:nowrap}
+.idwrap{max-width:520px;margin:4px auto 14px}
+.idbar{display:flex;align-items:center;gap:10px;min-height:62px;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:8px 8px 8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.idav{position:relative;border:0;background:none;padding:0;cursor:pointer}
+.idbar .av{width:46px;height:46px;font-size:27px}
+.idpen{position:absolute;right:-4px;top:-4px;width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid var(--line);font-size:11px;display:flex;align-items:center;justify-content:center}
+.idtog{flex:1;display:flex;align-items:center;gap:8px;border:0;background:none;font:inherit;color:var(--ink);text-align:left;padding:6px 4px;cursor:pointer;min-height:48px}
+.idt{flex:1;font-size:17px;font-weight:700;line-height:1.2}.idt small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.idgo{color:var(--brand);font-size:26px;line-height:1;padding:0 6px}
+.idlist{background:#fff;border:1.5px solid var(--line);border-top:0;border-radius:0 0 16px 16px;margin:-10px 4px 0;padding:10px 6px 4px}
+.idopt{display:flex;align-items:center;gap:12px;width:100%;border:0;border-bottom:1px solid #f1e9e1;background:none;font:inherit;color:var(--ink);padding:9px 8px;text-align:left;cursor:pointer}
+.idopt:last-of-type{border-bottom:0}.idopt .av{width:36px;height:36px;font-size:21px}.idopt b{flex:1;font-size:15.5px}.idopt i{font-style:normal;color:#4c8a5a;font-weight:800}
+.idopt.on{background:#f7f1ea;border-radius:10px}
+.idpinf{display:flex;flex-wrap:wrap;gap:8px;padding:6px 8px 10px}.idpinf input{flex:1}.idpinf .gbtn{width:auto;margin:0;padding:0 16px}
 .ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
 .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center}
 .ev .edt{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 2px}
@@ -883,7 +891,7 @@ $('#who').addEventListener('click',e=>{if(e.target.closest('#mebtn'))openWelcome
 let icFor=null;
 function openIcon(n){icFor=n;$('#ic_t').textContent='Ícone de '+n;const cur=(avatars[n]&&avatars[n].e)||(!(avatars[n]&&avatars[n].img)&&DEFAV[n]);
   $('#icgrid').innerHTML=ICONS.map(x=>`<button type="button" data-i="${x}" class="${x===cur?'on':''}">${x}</button>`).join('');$('#iconsheet').classList.add('show')}
-function closeIcon(){$('#iconsheet').classList.remove('show');icFor=null;renderWelcome();renderWho()}
+function closeIcon(){$('#iconsheet').classList.remove('show');icFor=null;renderWelcome();renderWho();if($('#guide').classList.contains('show'))renderGuide()}
 $('#pgrid').addEventListener('click',e=>{
   const ed=e.target.closest('.edit');if(ed){openIcon(ed.dataset.e);return}
   const c=e.target.closest('.pcard');if(!c)return;
@@ -1056,6 +1064,12 @@ function ovOf(d){return gPlan['~'+srcOf(d)]||{}}
 function dayItems(x){x=Object.assign({},dayBase(srcOf(x.d)),{d:x.d});const ov=ovOf(x.d);return (x.items||[]).map((e,i)=>{const o=ov['b'+i];if(o&&o.del)return null;const r=Object.assign({base:1,k:'b'+i,o:i,bi:i},e);if(o){r.h=o.h;r.t=o.t;r.n=o.n;r.edited=1;const v=hm(o.h);if(v!==1500)r.s=v}return r}).filter(Boolean).concat((gPlan[x.d]||[]).map((e,i)=>Object.assign({k:'u'+i,ui:i,s:hm(e.h),o:999},e))).sort((a,b)=>(a.s-b.s)||(a.o-b.o))}
 function parkById(id){return GUIDE.parks.find(p=>p.id===id)}
 function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
+let idOpen=false,idPinFor=null;
+function idHtml(idn){
+  let h=`<div class="idwrap"><div class="idbar">${idn?`<button type="button" class="idav" data-idedit="1" aria-label="Trocar avatar"><span class="av">${avHtml(idn)}</span><span class="idpen">✏️</span></button>`:`<span class="av idav0">👤</span>`}<button type="button" class="idtog" data-idtog="1"><span class="idt"><small>${idn?'Usando como':'Primeiro passo'}</small>${idn?esc(idn):'Escolha quem é você'}</span><span class="idgo">${idOpen?'▴':'▾'}</span></button></div>`;
+  if(idOpen){h+=`<div class="idlist">${GROUP.map(n=>`<button type="button" class="idopt${n===idn?' on':''}" data-idpick="${esc(n)}"><span class="av">${avHtml(n)}</span><b>${esc(n)}</b>${n===idn?'<i>✓</i>':(gPin[n]?'<i>🔒</i>':'')}</button>${idPinFor===n?`<form class="idpinf" id="idpinf"><input id="idp2" type="password" inputmode="numeric" maxlength="4" placeholder="Senha de ${esc(n)}"><button class="gbtn" type="submit">Entrar</button><div id="idperr2" style="color:#a1231b;font-size:13px;width:100%"></div></form>`:''}`).join('')}</div>`}
+  return h+`</div>`}
+function idChoose(n){euSet(n);who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}idOpen=false;idPinFor=null;try{rebuild()}catch(_){}renderGuide();showToast('Usando o app como '+n)}
 function openIdPick(){closeGuide();openWelcome(true)}
 function closeGuide(){$('#guide').classList.remove('show')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
@@ -1067,7 +1081,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
     const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
     const idn=(()=>{try{return euGet()}catch(e){return null}})();
-    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}<button type="button" class="idbar" id="idchip" onclick="openIdPick()"><span class="av">${idn?avHtml(idn):'👤'}</span><span class="idt"><small>${idn?'Usando como':'Primeiro passo'}</small>${idn?esc(idn):'Toque aqui e escolha quem é você'}</span><span class="idgo">${idn?'Trocar ▾':'▾'}</span></button>
+    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}${idHtml(idn)}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
@@ -1327,6 +1341,13 @@ function renderCk(B){
       ${ckAdd===c?`<form class="ckadd" id="ckaddf"><input id="ck_n" placeholder="Novo item" autocomplete="off"><button class="gbtn" type="submit">Adicionar</button></form>`:`<button type="button" class="ckplus" data-ckadd="${c}">+ Adicionar item</button>`}</div>`});
   if(nrm)h+=`<button class="restore" data-ckrestore="1">↩ Voltar ${nrm} ${nrm>1?'sugestões tiradas':'sugestão tirada'}</button>`;
   B.innerHTML=h;if(ckAdd){const i=$('#ck_n');if(i)i.focus()}}
+$('#guide').addEventListener('click',e=>{if(gView!=='home')return;const t=e.target;let b;
+  if(t.closest('[data-idedit]')){const n=euGet();if(n)openIcon(n);return}
+  if(t.closest('[data-idtog]')){idOpen=!idOpen;idPinFor=null;renderGuide();return}
+  if(b=t.closest('[data-idpick]')){const n=b.dataset.idpick,cur=euGet();if(n===cur){idOpen=false;renderGuide();return}
+    if(gPin[n]){idPinFor=n;renderGuide();const i=$('#idp2');if(i)i.focus();return}idChoose(n);return}
+});
+$('#guide').addEventListener('submit',e=>{if(e.target.id!=='idpinf')return;e.preventDefault();const v=$('#idp2').value.trim();if(pinHash(idPinFor,v)===gPin[idPinFor])idChoose(idPinFor);else{$('#idperr2').textContent='Senha errada.';$('#idp2').value=''}},true);
 $('#guide').addEventListener('click',e=>{if(gView!=='ck')return;const t=e.target;let b;const keepY=()=>{const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y};
   if(b=t.closest('[data-ckwho]')){ckWho=b.dataset.ckwho;ckAdd=null;renderGuide();$('#guide').scrollTop=0;return}
   if(t.closest('[data-ckswitch]')){ckWho=null;ckAdd=null;renderGuide();return}
