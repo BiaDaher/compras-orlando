@@ -1395,7 +1395,12 @@ function orphanHtml(){const used=new Set();GUIDE.parks.forEach(p=>{used.add('p:'
 let gOpenR={};
 function nc(n){const v=parseFloat(String(n).replace(',','.'));return v>=9.5?'n1':v>=9?'n2':v>=8?'n3':v>=7?'n4':'n5'}
 function rBest(r){let b=null;r.groups.forEach(g=>g.items.forEach(i=>{const v=parseFloat(i.nota.replace(',','.'));if(!b||v>b.v)b={i,v}}));return b&&b.i}
-function wazeUrl(q){return 'https://waze.com/ul?q='+encodeURIComponent(q)+'&navigate=yes'}
+function wazeUrl(q){return 'https://www.waze.com/ul?q='+encodeURIComponent(q)+'&navigate=yes'}
+document.addEventListener('click',e=>{const a=e.target.closest('a.waze');if(!a)return;e.preventDefault();e.stopPropagation();
+  const web=a.href,q=new URL(web).searchParams.get('q')||'';const app='waze://?q='+encodeURIComponent(q)+'&navigate=yes';
+  let left=false;const onHide=()=>{left=true};document.addEventListener('visibilitychange',onHide,{once:true});window.addEventListener('pagehide',onHide,{once:true});
+  try{window.location.href=app}catch(_){}
+  setTimeout(()=>{if(!left&&!document.hidden){window.open(web,'_blank')}},1600)},true);
 function rCard(r,showDay){const op=gOpenR[r.id];const b=rBest(r);
   let h=`<div class="rc${op?' open':''}" id="rc-${r.id}"><div class="rh" data-ropen="${r.id}">${phSlot('R:'+r.id)}<div class="rb"><b>${r.e} ${esc(r.n)}</b><span class="kchip k${KC[r.k]||''}">${esc(KL[r.k]||r.k)}</span><div class="w">📍 ${esc(r.a)}${showDay?' · '+dShort(r.day):''}</div>${!op&&b?`<div class="best">⭐ ${esc(b.n)} <span class="nb ${nc(b.nota)}">${esc(b.nota)}</span></div>`:''}</div><span class="chev">${op?'▴':'▾'}</span></div>`;
   if(op){h+=`<div class="rmenu">`+(!r.park?`<div class="rnav"><a class="go" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.n+' '+r.a)}" target="_blank" rel="noopener">📍 Mapa</a><a class="go waze" href="${wazeUrl(r.n+' '+r.a)}" target="_blank" rel="noopener">🚗 Waze</a></div>`:'')+r.groups.map((g,gi)=>`<div class="rgt">${esc(g.t)}</div>`+g.items.map((it,ii)=>`<div class="dish">${phSlot('D:'+r.id+':'+gi+':'+ii,'sm')}<div class="db"><b>${esc(it.n)}</b>${it.d?`<small>${esc(it.d)}</small>`:''}</div><span class="nb ${nc(it.nota)}">${esc(it.nota)}</span></div>`).join('')).join('')
