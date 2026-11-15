@@ -591,8 +591,8 @@ try{custom=JSON.parse(localStorage.getItem(CKEY)||'[]')||[]}catch(e){custom=[]}
 const EDKEY='lista-orlando-2026-edicoes-v1';let cedit={};try{cedit=JSON.parse(localStorage.getItem(EDKEY)||'{}')||{}}catch(e){cedit={}}
 function saveE2(){try{localStorage.setItem(EDKEY,JSON.stringify(cedit));return true}catch(e){return false}}
 let editId=null;
-const SHOE_F={33:'5',34:'5,5',35:'6,5',36:'7,5',37:'8',38:'9',39:'9,5',40:'10,5',41:'11',42:'12',43:'12,5',44:'13'};
-const SHOE_M={36:'6',37:'6,5',38:'7,5',39:'8',40:'9',41:'9,5',42:'10,5',43:'11,5',44:'12',45:'13',46:'14',47:'14,5',48:'15'};
+const SHOE_F={33:'4,5 a 5',34:'5 a 5,5',35:'6',36:'6,5',37:'7 a 7,5',38:'8',39:'8,5 a 9',40:'9,5',41:'10',42:'10,5 a 11',43:'11,5',44:'12'};
+const SHOE_M={36:'4,5 a 5',37:'5,5 a 6',38:'6,5',39:'7 a 7,5',40:'8',41:'8,5',42:'9 a 9,5',43:'10',44:'10,5 a 11',45:'11,5 a 12',46:'12,5 a 13',47:'13,5',48:'14'};
 const CL_L={PP:'XS',P:'S',M:'M',G:'L',GG:'XL',XG:'XXL',EG:'XXL',G1:'XL',G2:'XXL',G3:'3XL'};
 const CL_FN={34:'0 (XS)',36:'2 (XS/S)',38:'4 (S)',40:'6 (M)',42:'8 (M/L)',44:'10 (L)',46:'12 (L/XL)',48:'14 (XL)',50:'16 (XXL)',52:'18 (XXL)'};
 const CL_MN={36:'cintura 26',38:'cintura 28',40:'cintura 30',42:'cintura 32',44:'cintura 34',46:'cintura 36',48:'cintura 38',50:'cintura 40',52:'cintura 42'};
