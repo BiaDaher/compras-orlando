@@ -167,6 +167,14 @@ body.mkt main{padding-bottom:30px}
 .cgrp .delp{color:#a1231b}
 .sbtns{display:flex;gap:6px;flex:none}.sett .sbtns button.alt{background:#fff;color:var(--brand);border:1px solid var(--brand)}
 .sett{flex-wrap:wrap}.partf{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin-top:8px}.partf input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:15px;background:#fff}.sett .partf button{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:0 14px;font:inherit;font-weight:700;font-size:13.5px}
+.cota{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:4px 0 14px}
+.cota .ch{font-weight:700;font-size:15px;margin-bottom:8px}
+.cbar{height:10px;background:#efe7de;border-radius:99px;overflow:hidden;margin-bottom:8px}.cbar i{display:block;height:100%;border-radius:99px}
+.cbar.g i{background:#4c8a5a}.cbar.y i{background:#d9a21b}.cbar.r i{background:#b3261e}
+.crow{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}.crow.y b{color:#9a6b00}.crow.r b{color:#b3261e}
+.calert{font-size:13px;border-radius:8px;padding:6px 9px;margin:6px 0}.calert.y{background:#fdf3d9;color:#7a5800}.calert.r{background:#fbe5e3;color:#8e1f18}
+.cnote2{font-size:12.5px;color:var(--muted);margin-top:6px}
+.cmore{margin-top:8px;font-size:13px}.cmore summary{color:var(--brand);font-weight:600;cursor:pointer}.cmore ul{padding-left:18px;margin:6px 0 0}.cmore li{margin:3px 0}
 .ntopen{width:100%;margin-top:10px;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left}
 .nfbox h4{display:flex;justify-content:space-between;align-items:center}.ntclose{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600}
 .ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
@@ -861,6 +869,28 @@ function addMkt(raw,cat){
   rebuild();render();
   showToast('🛒 '+t+' → '+it.cat,()=>{custom=custom.filter(x=>x.id!==it.id);saveC();rebuild();render()});
 }
+function cotaHtml(w){
+  const L=ITEMS.filter(i=>i.who===w&&done[i.id]&&!excl[i.id]);
+  let tot=0,semP=0,uBig=0,uSmall=0;const over=[];
+  L.forEach(i=>{const v=paidOf(i.id),q=qtyOf(i.id);const p=v?v.p:null;if(p==null){semP++;uBig+=q;return}tot+=p*q;if(p>=10){uBig+=q;if(q>3)over.push(`${i.t}: ${q} iguais (limite 3 para itens acima de US$ 10)`)}else{uSmall+=q;if(q>10)over.push(`${i.t}: ${q} iguais (limite 10 para itens abaixo de US$ 10)`)}});
+  const pct=Math.min(100,Math.round(tot/10));const lvl=tot>1000?'r':(tot>=800?'y':'g');
+  const exc=Math.max(0,tot-1000);
+  const uLine=(n,lab)=>{const c=n>20?'r':(n>=16?'y':'g');return `<div class="crow ${c}"><span>${lab}</span><b>${n} de 20</b></div>`};
+  return `<div class="cota"><div class="ch">🛃 Cota da Receita Federal · ${esc(w)}</div>
+   <div class="cbar ${lvl}"><i style="width:${pct}%"></i></div>
+   <div class="crow ${lvl}"><span>Valor comprado</span><b>${money(tot)} de US$ 1.000</b></div>
+   ${exc>0?`<div class="calert r">Passou ${money(exc)} da cota. O excedente paga 50% de imposto (≈ ${money(exc*0.5)}).</div>`:(tot>=800?`<div class="calert y">Faltam ${money(1000-tot)} para a cota.</div>`:'')}
+   ${uLine(uBig,'Unidades acima de US$ 10')}${uLine(uSmall,'Unidades abaixo de US$ 10')}
+   ${over.map(x=>`<div class="calert r">${esc(x)}</div>`).join('')}
+   ${semP?`<div class="cnote2">⚠️ ${semP} ${semP>1?'compras':'compra'} sem preço informado: o valor real pode ser maior.</div>`:''}
+   <details class="cmore"><summary>Regras e bagagem LATAM</summary><ul>
+    <li>Cota individual de US$ 1.000 por viagem aérea, a cada 30 dias. Não soma com a de outra pessoa.</li>
+    <li>Itens acima de US$ 10: até 20 unidades, no máximo 3 iguais. Abaixo de US$ 10: até 20 unidades, no máximo 10 iguais.</li>
+    <li>Bebidas alcoólicas: até 12 litros. Cigarros: 10 maços.</li>
+    <li>Roupas e objetos de uso pessoal já usados não entram na cota.</li>
+    <li>Free shop na chegada ao Brasil: cota extra de US$ 1.000, separada.</li>
+    <li>LATAM: mala despachada de até 23 kg e 158 cm (altura + largura + comprimento); a quantidade de malas depende da tarifa (Standard e Full incluem 1). Mala de mão de até 12 kg (55×35×25 cm) + item pessoal.</li>
+   </ul></details></div>`}
 function render(){
   renderMkt();
   const q=norm($('#q').value.trim()),fc=$('#fcat').value,fs=$('#fst').value;
@@ -888,6 +918,7 @@ function render(){
      <ul><li>📷 Foto (tirar na hora ou escolher da galeria)</li><li>💵 Preço nos EUA e loja</li><li>🇧🇷 Preço no Brasil, para comparar</li><li>📝 Tamanho, versão e observações</li><li>🔗 Link do produto</li></ul>
      <button id="startadd">+ Adicionar o primeiro produto</button></div>`;
   }
+  if(mode==='done'&&who&&who!=='Mercado'&&!terms.length&&!fc&&!fs)html=cotaHtml(who)+html;
   $('#list').innerHTML=html||'<div class="empty">'+emptyMsg+'</div>';
   $('#shown').textContent=res.length+(res.length===1?' produto exibido':' produtos exibidos');
   stats();
