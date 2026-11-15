@@ -1252,7 +1252,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
     const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
     const idn=(()=>{try{return euGet()}catch(e){return null}})();
-    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}${idHtml(idn)}
+    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 04/12</p>${cd?`<div class="gcount">${cd}</div>`:''}${idHtml(idn)}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
