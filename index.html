@@ -1259,6 +1259,22 @@ function idHtml(idn){
   if(idOpen){h+=`<div class="idlist">${GROUP.map(n=>`<button type="button" class="idopt${n===idn?' on':''}" data-idpick="${esc(n)}"><span class="av">${avHtml(n)}</span><b>${esc(n)}</b>${n===idn?'<i>✓</i>':(gPin[n]?'<i>🔒</i>':'')}</button>${idPinFor===n?`<form class="idpinf" id="idpinf"><input id="idp2" type="password" inputmode="numeric" maxlength="4" placeholder="Senha de ${esc(n)}"><button class="gbtn" type="submit">Entrar</button><div id="idperr2" style="color:#a1231b;font-size:13px;width:100%"></div></form>`:''}`).join('')}</div>`}
   return h+`</div>`}
 function idChoose(n){euSet(n);who=n;try{localStorage.setItem(PERS_KEY,who)}catch(_){}idOpen=false;idPinFor=null;try{rebuild()}catch(_){}renderGuide();showToast('Usando o app como '+n)}
+const FB='https://orlando-2026-a171b-default-rtdb.firebaseio.com/trips/orl26-646c3697a123f642';
+function allPhotoEntries(){const o={};Object.keys(photos).forEach(k=>o['c~'+k]=photos[k]);Object.keys(gImg||{}).forEach(k=>{if(!k.startsWith('my:'))o['g~'+k]=gImg[k]});return o}
+async function uploadPhotos(btn){const all=allPhotoEntries(),keys=Object.keys(all);if(!keys.length){showToast('Não há fotos neste link');return}
+  btn.disabled=true;let ok=0;const now=Date.now();
+  try{for(const k of keys){btn.textContent=`☁️ Enviando ${ok+1} de ${keys.length}…`;
+      const r1=await fetch(FB+'/img/'+encodeURIComponent(k)+'.json',{method:'PUT',body:JSON.stringify(all[k])});if(!r1.ok)throw 0;
+      await fetch(FB+'/imgidx/'+encodeURIComponent(k)+'.json',{method:'PUT',body:JSON.stringify({s:imgSig(all[k]),t:now})});ok++}
+    await fetch(FB+'/rev.json',{method:'PUT',body:JSON.stringify(Date.now())});btn.textContent=`✅ ${ok} fotos enviadas para o app`;showToast(`✅ ${ok} fotos enviadas. Abra o app instalado com internet.`)}
+  catch(e){btn.disabled=false;btn.textContent='☁️ Enviar as fotos deste link para o app';if(ok)showToast(`Enviei ${ok} de ${keys.length}. Tente de novo para o resto.`);else{downloadPhotos();}}}
+function downloadPhotos(){const all=allPhotoEntries();const blob=new Blob([JSON.stringify({v:1,fotos:all})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotos-orlando-2026.json';document.body.appendChild(a);a.click();a.remove();
+  showToast('O link não conseguiu enviar. Baixei um arquivo com as fotos: importe no app em “📥 Importar arquivo de fotos”.')}
+function importPhotos(file){const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);const f=d.fotos||{};let n=0;
+    Object.keys(f).forEach(k=>{const v=f[k];if(typeof v!=='string'||!v.startsWith('data:image'))return;if(k.startsWith('c~')){if(!photos[k.slice(2)]){photos[k.slice(2)]=v;n++}}else if(k.startsWith('g~')){if(!gImg[k.slice(2)]){gImg[k.slice(2)]=v;n++}}});
+    saveP();gImgSave();try{rebuild();render()}catch(_){}renderGuide();showToast(n?`📥 ${n} fotos importadas e enviadas para o grupo`:'Nenhuma foto nova no arquivo')}catch(e){showToast('Arquivo inválido')}};fr.readAsText(file)}
+document.addEventListener('click',e=>{const t=e.target;if(t.closest('#phup')){uploadPhotos(t.closest('#phup'));return}
+  if(t.closest('#phimp')){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{if(i.files[0])importPhotos(i.files[0])};i.click()}});
 function openIdPick(){closeGuide();openWelcome(true)}
 function closeGuide(){$('#guide').classList.remove('show')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
@@ -1279,7 +1295,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
      <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
-    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 14/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button>${window.PREVIEW?`<button class="mini" id="phup">☁️ Enviar as fotos deste link para o app</button>`:`<button class="mini" id="phimp">📥 Importar arquivo de fotos</button>`}</div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 14/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
@@ -1364,7 +1380,7 @@ function gImgSave(){if(persistImgs()){syncChanged();return true}const ok=gsave('
   Object.keys(all).forEach(k=>{_shadow[k]=imgSig(all[k]);if(k.startsWith('c~'))photos[k.slice(2)]=all[k];else if(k.startsWith('g~'))gImg[k.slice(2)]=all[k]});
   window.IMG_READY=true;migrateKeys();persistImgs();try{localStorage.removeItem(PKEY);localStorage.removeItem(GK+'img')}catch(e){}
   try{rebuild();render()}catch(e){}if($('#guide').classList.contains('show')){const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y}
-  try{SYNC.diff()}catch(e){}
+  try{SYNC.diff();SYNC.pull()}catch(e){}
 })();
 function gq(q){return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(q)}
 const DISHE=[[/burger|smash|shack|cheeseburger|sliders?/i,'🍔'],[/pizza|slice|pepperoni/i,'🍕'],[/taco|burrito|quesadilla|nacho/i,'🌮'],[/fries|batata|tots?\b|waffle potato/i,'🍟'],[/chicken|frango|nugget|tender|wings?|asa/i,'🍗'],[/shake|milkshake|frappe|frapp/i,'🥤'],[/sorvete|ice cream|sundae|gelato|dole whip|soft serve|cone/i,'🍦'],[/donut|rosquinha/i,'🍩'],[/cheesecake|cake|bolo|torta|pie\b/i,'🍰'],[/cookie|brownie/i,'🍪'],[/pancake|panqueca|waffle|french toast|rabanada/i,'🥞'],[/coffee|café|latte|cappuccino|espresso/i,'☕'],[/butterbeer|cerveja|beer|chope/i,'🍺'],[/drink|coquetel|cocktail|margarita|mojito|soda|refri|limonada|lemonade|juice|suco/i,'🍹'],[/steak|bife|costela|rib|brisket|carne|picanha|pork|porco|bbq/i,'🥩'],[/fish|peixe|salm|shrimp|camar|lobster|lagosta|crab|sushi|poke/i,'🍤'],[/pasta|massa|spaghetti|lasanha|lasagna|fettuccine|ravioli|alfredo|mac ?(and|&|n) ?cheese/i,'🍝'],[/salad|salada/i,'🥗'],[/sandu|sandwich|sub\b|hot dog|cachorro|cuban|cubano|wrap|pretzel/i,'🥪'],[/soup|sopa|chili|ramen|noodle|lamen/i,'🍜'],[/rice|arroz|bowl|fried rice/i,'🍚'],[/egg|ovo|omelet|benedict|bacon|breakfast/i,'🍳'],[/bread|pão|biscuit|croissant|toast|torrada/i,'🥐'],[/churro|funnel/i,'🥨'],[/chocolate|cocoa/i,'🍫'],[/fruit|fruta|manga|mango|abacaxi|pineapple|morango|strawberr/i,'🍓'],[/turkey|peru/i,'🦃']];
@@ -1808,7 +1824,7 @@ const SYNC=(()=>{
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){flush();pull();live()}});
     setInterval(()=>{if(document.visibilityState==='visible'){flush();if(!es)pull()}},20000);
   }
-  return {diff,start,status};
+  return {diff,start,status,pull:()=>{if(!window.PREVIEW)pull()}};
 })();
 function syncChanged(){try{clearTimeout(window._sct);window._sct=setTimeout(()=>SYNC.diff(),60)}catch(e){}}
 
