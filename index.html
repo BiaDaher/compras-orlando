@@ -780,17 +780,17 @@ function card(i){
   const img=src?`<img class="thumb" loading="lazy" src="${src}" alt="">`:`<div class="ph addph" role="button" aria-label="Adicionar foto"><span>📷</span>Pôr foto</div>`;
   const L=i.lk,links=[];
   if(L.fotos)links.push(`<a href="${esc(L.fotos)}" target="_blank" rel="noopener">📷 Ver fotos</a>`);
-  {const u=i.usd!=null?money(i.usd):((String(i.us||'').match(/US\$\s?[\d.,]+(?:\s?[–-]\s?[\d.,]+)?/)||[])[0]||'');if(u)links.push(`<span class="refv">🇺🇸 ${esc(u.replace(/[.,]+$/,''))}</span>`);
+  {
    let b=String(i.br||'');const bm=b.match(/R\$\s?[\d.,]+(?:\s?[–-]\s?[\d.,]+)?/);const bv=bm?bm[0]:(/^\s*[\d.,]+\b/.test(b)?'R$ '+b.match(/[\d.,]+/)[0]:'');if(bv)links.push(`<span class="refv">🇧🇷 ${esc(bv.replace(/[.,]+$/,''))}</span>`)}
   (L.lojas||[]).forEach(([n,u])=>links.push(`<a href="${esc(u)}" target="_blank" rel="noopener">📍 ${esc(n)}</a>`));
+  if(!(L.lojas||[]).length&&i.lj&&i.lj!=='Não informada')links.push(`<span class="refv">📍 ${esc(i.lj.split(/[;—]/)[0].trim())}</span>`);
   const sk=!d&&!!skip[i.id];
   return `<div class="card${d?' done':''}${sk?' skipped':''}${openId===i.id?' open':''}" data-id="${i.id}">
    <div class="top">${img}<div class="info"><div class="t">${esc(i.t)}</div>
-   <div class="meta">${!who&&DATA.lists.length>1?`<span class="ownr">${esc(i.who)}</span>`:''}${i.mine?'<span class="mine">Adicionado por mim</span>':''}${i.st.filter(s=>s!=='Sem loja definida').map(s=>`<span class="pill">${esc(s)}</span>`).join('')}${i.tag?esc(i.tag):''}</div>
+   <div class="meta">${!who&&DATA.lists.length>1?`<span class="ownr">${esc(i.who)}</span>`:''}${i.mine?'<span class="mine">Adicionado por mim</span>':''}${i.tag?esc(i.tag):''}</div>
    ${i.meta!=null||i.faixa?`<div class="target">🎯 ${i.meta!=null?'Meta até '+money(i.meta):'Sem meta definida'}${i.teto!=null&&i.teto>i.meta?' · teto '+money(i.teto):''}</div>`:`<div class="price">${esc(short(i.us))}</div>`}${i.qty?`<div class="qtyl">🧺 ${esc(i.qty)}</div>`:''}${i.brs?`<div class="qtyl">${szLine(i)}</div>`:''}${done[i.id]?paidHtml(i.id):''}${sk?'<div class="skiptag">🚫 Não vou comprar</div>':''}${(()=>{const b=best(i.id),n=(notes[i.id]||[]).length;return b?`<div class="best-tag">📝 ${n} anotado${n>1?'s':''} · menor ${money(b.p)} (${esc(b.s)})${ltag(i,b.p)}</div>`:''})()}</div>
    <button class="chk" aria-label="Marcar como comprado"><span class="box">✓</span>${d?'Comprado':'Comprei'}</button></div>
    <div class="det">
-    ${i.brs?`<p class="szp">${szLine(i)}</p>`:''}
     ${i.mk?`<p><b>🏷️ Marcas para procurar:</b> ${esc(i.mk)}</p>`:''}
     ${i.fl?`<p><b>😋 Sabores / cheiros:</b> ${esc(i.fl)}</p>`:''}
     ${i.of?`<p>${esc(i.of).replace(/\n/g,'<br>')}</p>`:''}
