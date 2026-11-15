@@ -185,7 +185,7 @@ body.mkt main{padding-bottom:30px}
 .wtop{margin:-10px 0 4px}
 .welcome p.lead{text-align:center;color:var(--muted);margin:0 0 20px;font-size:14.5px}
 .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:520px;margin:0 auto}
-.pcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 10px 12px;text-align:center;position:relative}
+.pcard{cursor:pointer;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 10px 12px;text-align:center;position:relative}
 .pcard .av{width:84px;height:84px;font-size:46px;margin:0 auto 8px}
 .pcard b{display:block;font-size:16px}
 .pcard small{color:var(--muted);font-size:12.5px}
@@ -258,11 +258,11 @@ header{position:sticky}
 .ckadd{display:flex;gap:8px;padding:8px 0}.ckadd input{flex:1}.ckadd .gbtn{width:auto;margin:0;padding:0 14px}
 .minirow{text-align:center;margin:14px 0 0}
 .mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:600}
-.idrow{display:flex;justify-content:flex-start;margin:0 0 8px}
-.idchip{display:flex;align-items:center;gap:10px;min-height:52px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 18px 6px 6px;font:inherit;font-size:17px;font-weight:700;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.idchip *{pointer-events:none}
-.idchip .av{width:42px;height:42px;font-size:25px}
-.idchip small{color:var(--brand);font-size:20px;line-height:1;margin-left:2px}
+.idbar{display:flex;align-items:center;gap:12px;width:100%;max-width:520px;margin:4px auto 14px;min-height:60px;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:8px 14px 8px 8px;font:inherit;color:var(--ink);text-align:left;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.idbar .av{width:44px;height:44px;font-size:26px}
+.idbar .idt{flex:1;font-size:17px;font-weight:700;line-height:1.2}
+.idbar .idt small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.idbar .idgo{color:var(--brand);font-weight:700;font-size:15px;white-space:nowrap}
 .ev .del{border:0;background:none;color:#b9aca2;font-size:18px;padding:0 2px}
 .ev .acts{display:flex;flex-direction:column;gap:6px;align-items:center}
 .ev .edt{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 2px}
@@ -1056,6 +1056,7 @@ function ovOf(d){return gPlan['~'+srcOf(d)]||{}}
 function dayItems(x){x=Object.assign({},dayBase(srcOf(x.d)),{d:x.d});const ov=ovOf(x.d);return (x.items||[]).map((e,i)=>{const o=ov['b'+i];if(o&&o.del)return null;const r=Object.assign({base:1,k:'b'+i,o:i,bi:i},e);if(o){r.h=o.h;r.t=o.t;r.n=o.n;r.edited=1;const v=hm(o.h);if(v!==1500)r.s=v}return r}).filter(Boolean).concat((gPlan[x.d]||[]).map((e,i)=>Object.assign({k:'u'+i,ui:i,s:hm(e.h),o:999},e))).sort((a,b)=>(a.s-b.s)||(a.o-b.o))}
 function parkById(id){return GUIDE.parks.find(p=>p.id===id)}
 function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
+function openIdPick(){closeGuide();openWelcome(true)}
 function closeGuide(){$('#guide').classList.remove('show')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
 function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
@@ -1066,7 +1067,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
     const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
     const idn=(()=>{try{return euGet()}catch(e){return null}})();
-    B.innerHTML=`<div class="idrow"><button class="idchip" id="idchip"><span class="av">${idn?avHtml(idn):'👤'}</span>${idn?esc(idn):'Quem é você?'} <small>▾</small></button></div><div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}
+    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 01/12 (Yuri e Serena até 04/12)</p>${cd?`<div class="gcount">${cd}</div>`:''}<button type="button" class="idbar" id="idchip" onclick="openIdPick()"><span class="av">${idn?avHtml(idn):'👤'}</span><span class="idt"><small>${idn?'Usando como':'Primeiro passo'}</small>${idn?esc(idn):'Toque aqui e escolha quem é você'}</span><span class="idgo">${idn?'Trocar ▾':'▾'}</span></button>
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
@@ -1205,7 +1206,6 @@ function eatForm(inPark){return `<form class="gform" id="eatf" autocomplete="off
   <button class="gbtn" type="submit">Salvar</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
 $('#guide').addEventListener('click',e=>{
   const t=e.target;let b;
-  if(t.closest('#idchip')){closeGuide();openWelcome(true);return}
   if(b=t.closest('[data-g]')){const g=b.dataset.g;
     if(g==='compras'){const me=(()=>{try{return euGet()}catch(e){return null}})();if(!me||!GROUP.includes(me)){closeGuide();if(who==='Mercado')who='';openWelcome();return}
       closeGuide();who=me;try{localStorage.setItem(PERS_KEY,who)}catch(_){}$('#welcome').classList.remove('show');$('#q').value='';$('#fcat').value='';$('#fst').value='';openId=null;rebuild();render();window.scrollTo(0,0);return}
