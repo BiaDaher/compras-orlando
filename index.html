@@ -1278,6 +1278,41 @@ function importPhotos(file){const fr=new FileReader();fr.onload=()=>{try{const d
     saveP();gImgSave();try{rebuild();render()}catch(_){}renderGuide();showToast(n?`📥 ${n} fotos importadas e enviadas para o grupo`:'Nenhuma foto nova no arquivo')}catch(e){showToast('Arquivo inválido')}};fr.readAsText(file)}
 document.addEventListener('click',e=>{const t=e.target;if(t.closest('#phup')){uploadPhotos(t.closest('#phup'));return}
   if(t.closest('#phimp')){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{if(i.files[0])importPhotos(i.files[0])};i.click()}});
+// ===== Backup online pessoal (dados das compras, meus gastos e fotos que ficam só no celular) =====
+const BK=(()=>{
+  const LS=['lista-orlando-2026-v1','lista-orlando-2026-meus-produtos-v1','lista-orlando-2026-precos-v1','lista-orlando-2026-edicoes-v1','lista-orlando-2026-naocomprar-v1','lista-orlando-2026-avatares-v1','orl-guia-my','orl-guia-mypin'];
+  const SNK='orl-bk-snap';let snapB={};try{snapB=JSON.parse(localStorage.getItem(SNK)||'{}')||{}}catch(e){}
+  const svB=()=>{try{localStorage.setItem(SNK,JSON.stringify(snapB))}catch(e){}};
+  const me=()=>{const n=euGet();return n&&GROUP.includes(n)?n:null};
+  const base=()=>FB+'/bk/'+encodeURIComponent(me());
+  function payload(){const d={};LS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!=null)d[k.replace(/\./g,'_')]=v}catch(e){}});return d}
+  let busy=false;
+  async function push(){if(window.PREVIEW||busy||!me()||!navigator.onLine||!window.IMG_READY)return;busy=true;
+    try{const d=payload();const sg=imgSig(JSON.stringify(d));if(snapB.data!==sg){const r=await fetch(base()+'/data.json',{method:'PUT',body:JSON.stringify({d,t:Date.now()})});if(r.ok){snapB.data=sg;svB()}}
+      const im=snapB.img=snapB.img||{};
+      for(const k of Object.keys(gImg)){if(!k.startsWith('my:'))continue;const sgi=imgSig(gImg[k]);if(im[k]===sgi)continue;
+        const r=await fetch(base()+'/img/'+encodeURIComponent(k.replace(/:/g,'|'))+'.json',{method:'PUT',body:JSON.stringify(gImg[k])});if(r.ok){im[k]=sgi;svB()}}
+    }catch(e){}busy=false}
+  async function restore(manual){if(window.PREVIEW||!me())return 0;let n=0;
+    try{const r=await fetch(base()+'/data.json',{cache:'no-store'});const j=r.ok?await r.json():null;
+      if(j&&j.d){LS.forEach(k=>{const v=j.d[k];if(v==null)return;let cur=null;try{cur=localStorage.getItem(k)}catch(e){}
+          let lo=null,re=null;try{lo=cur?JSON.parse(cur):null;re=JSON.parse(v)}catch(e){return}
+          let out=lo;
+          if(lo==null||(typeof lo==='object'&&!Array.isArray(lo)&&!Object.keys(lo).length)||(Array.isArray(lo)&&!lo.length))out=re;
+          else if(Array.isArray(lo)&&Array.isArray(re)){const ids=new Set(lo.map(x=>x&&x.id));out=lo.concat(re.filter(x=>x&&!ids.has(x.id)))}
+          else if(typeof lo==='object'&&typeof re==='object'){out=Object.assign({},re,lo)}
+          if(JSON.stringify(out)!==cur){try{localStorage.setItem(k,JSON.stringify(out));n++}catch(e){}}})}
+      const ri=await fetch(base()+'/img.json?shallow=true',{cache:'no-store'});const ks=ri.ok?await ri.json():null;
+      if(ks)for(const kk of Object.keys(ks)){const k=decodeURIComponent(kk).replace(/\|/g,':');if(gImg[k])continue;const x=await fetch(base()+'/img/'+kk+'.json',{cache:'no-store'});const v=x.ok?await x.json():null;if(typeof v==='string'){gImg[k]=v;n++}}
+      if(n){persistImgs();showToast('♻️ Backup restaurado. Recarregando…');setTimeout(()=>location.reload(),1200)}else if(manual)showToast('Nada para restaurar: o celular já tem tudo do backup.')}
+    catch(e){if(manual)showToast('Não consegui acessar o backup. Confira a internet.')}return n}
+  function start(){if(window.PREVIEW)return;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+    setTimeout(()=>{const empty=['lista-orlando-2026-v1','lista-orlando-2026-precos-v1','lista-orlando-2026-meus-produtos-v1'].every(k=>{try{const v=localStorage.getItem(k);return !v||v==='{}'||v==='[]'}catch(e){return true}});if(empty)restore(false);push()},4000);
+    setInterval(()=>{if(document.visibilityState==='visible')push()},30000);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')push()})}
+  return {start,push,restore};
+})();
+document.addEventListener('click',e=>{if(e.target.closest('#bkrest')){BK.restore(true)}});
 function openIdPick(){closeGuide();openWelcome(true)}
 function closeGuide(){$('#guide').classList.remove('show')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
@@ -1298,7 +1333,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
      <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
-    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button>${window.PREVIEW?`<button class="mini" id="phup">☁️ Enviar as fotos deste link para o app</button>`:`<button class="mini" id="phimp">📥 Importar arquivo de fotos</button>`}</div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 14/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button>${window.PREVIEW?`<button class="mini" id="phup">☁️ Enviar as fotos deste link para o app</button>`:`<button class="mini" id="phimp">📥 Importar arquivo de fotos</button><button class="mini" id="bkrest">♻️ Restaurar meu backup</button>`}</div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 14/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
@@ -1840,7 +1875,7 @@ $('#mkf').addEventListener('submit',e=>{e.preventDefault();if(!mkId)return;const
   mEdit[id]={q:q===(it.qty||'')?null:q,p:pv,s:s||null,t:Date.now()};if(mEdit[id].q==null&&mEdit[id].p==null&&!mEdit[id].s)mEdit[id]={t:Date.now()};
   saveMEdit();closeMEdit();render();showToast('✓ '+it.t+' atualizado')});
 openGuide();
-SYNC.start();
+SYNC.start();try{BK.start()}catch(e){}
 </script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update().catch(()=>{})})}).catch(()=>{})})}
