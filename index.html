@@ -459,9 +459,11 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <div class="bar"><i id="prog"></i></div>
   <div class="search"><input id="q" type="text" inputmode="search" enterkeyhint="search" placeholder="Buscar produto, marca ou loja…" autocomplete="off"><button id="clr" aria-label="Limpar">×</button></div>
   <div class="row">
-    <select id="fcat"><option value="">Todas as categorias</option></select>
+    <input type="hidden" id="fcat" value="">
+    <select id="fcatv"><option value="">Todas as categorias</option></select>
     <select id="fst"><option value="">Todas as lojas</option></select>
   </div>
+  <div class="row" id="fsubrow" style="display:none"><select id="fsub"><option value="">Todas as subcategorias</option></select></div>
   <div class="seg" id="seg">
     <button data-v="todo" class="on">A comprar <span id="ntodo"></span></button>
     <button data-v="done">Comprados <span id="ndone"></span></button>
@@ -784,7 +786,8 @@ function rebuild(){
   $('#fcat').innerHTML='<option value="">Todas as categorias</option>'+fopts.join('');
   const stc={};VIS.forEach(i=>i.st.forEach(s=>stc[s]=(stc[s]||0)+1));
   $('#fst').innerHTML='<option value="">Todas as lojas</option>'+Object.keys(stc).sort((a,b)=>stc[b]-stc[a]).map(s=>`<option value="${esc(s)}">${esc(s)} (${stc[s]})</option>`).join('');
-  if(vc.includes(fc)||fc.startsWith('sub:'))$('#fcat').value=fc;if($('#fcat').value!==fc)$('#fcat').value=''; if(stc[fs])$('#fst').value=fs;
+  {let ok=vc.includes(fc)||(fc.startsWith('sub:')&&vc.includes(fc.slice(4).split('|')[0]));$('#fcat').value=ok?fc:''} if(stc[fs])$('#fst').value=fs;
+  $('#fcatv').innerHTML='<option value="">Todas as categorias</option>'+vc.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');syncCatUI();
   $('#catl').innerHTML=['Novos achados',...CATS].filter((v,k,a)=>a.indexOf(v)===k).map(c=>`<option value="${esc(c)}">`).join('');
 }
 rebuild();
@@ -894,6 +897,7 @@ function cotaHtml(w){
     <li>LATAM: mala despachada de até 23 kg e 158 cm (altura + largura + comprimento); a quantidade de malas depende da tarifa (Standard e Full incluem 1). Mala de mão de até 12 kg (55×35×25 cm) + item pessoal.</li>
    </ul></details></div>`}
 function render(){
+  try{syncCatUI()}catch(_){}
   renderMkt();
   const q=norm($('#q').value.trim()),fc=$('#fcat').value,fs=$('#fst').value;
   $('#clr').style.display=q?'block':'none';
@@ -1208,7 +1212,11 @@ $('#exclbtn').addEventListener('click',()=>{mode='excl';document.querySelectorAl
 $('#exclback').addEventListener('click',()=>{mode='todo';document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x.dataset.v==='todo'));openId=null;render();window.scrollTo(0,0)});
 $('#q').addEventListener('input',render);
 $('#clr').addEventListener('click',()=>{$('#q').value='';render();$('#q').focus()});
-$('#fcat').addEventListener('change',render);$('#fst').addEventListener('change',render);
+function syncCatUI(){const f=$('#fcat').value||'';let c=f,x='';if(f.startsWith('sub:')){[c,x]=f.slice(4).split('|')}$('#fcatv').value=c;
+  const VIS=ITEMS.filter(inWho);const ss=c?SUBS.filter(y=>VIS.some(i=>i.cat===c&&i.sub===y)):[];
+  if(ss.length>1){$('#fsub').innerHTML='<option value="">Todas as subcategorias</option>'+ss.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join('');$('#fsub').value=x;$('#fsubrow').style.display=''}else{$('#fsub').innerHTML='';$('#fsubrow').style.display='none'}}
+$('#fcatv').addEventListener('change',()=>{$('#fcat').value=$('#fcatv').value;syncCatUI();render()});
+$('#fsub').addEventListener('change',()=>{const c=$('#fcatv').value,x=$('#fsub').value;$('#fcat').value=x?'sub:'+c+'|'+x:c;render()});$('#fst').addEventListener('change',render);
 $('#seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.v;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));render()});
 render();
 if(who===null)who='';
