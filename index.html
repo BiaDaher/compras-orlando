@@ -74,6 +74,12 @@ main{padding:6px 12px 80px}
 .szbox{background:#fbf6f0;border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin-top:10px}
 .szout{font-size:14.5px;margin-top:8px}.szout small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
 .bfit{display:block;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 8px;margin-top:6px;font-weight:500}
+.mkbox{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:6px 8px 8px;background:#fff}
+.mkg{font-size:11.5px;color:var(--muted);font-weight:600;margin:6px 2px 4px}
+.mkr{display:flex;flex-wrap:wrap;gap:6px}
+.mkc{border:1px solid var(--line);background:#fbf6f0;color:var(--ink);border-radius:999px;padding:5px 10px;font:inherit;font-size:13px}
+.mkc.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.mkadd{display:flex;gap:8px;margin-top:6px}.mkadd input{flex:1}.mkadd button{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:10px;padding:0 12px;font:inherit;font-weight:600;font-size:13px}
 .szp{background:#fbf6f0;border-radius:8px;padding:6px 9px;font-weight:600}
 .nf .ns{flex:2 1 140px}.nf .np{flex:1 1 80px}.nf .nn{flex:1 1 100%}
 .nf button{flex:1 1 100%;border:0;background:var(--brand);color:#fff;font-weight:700;padding:10px;border-radius:8px;font-size:15px}
@@ -514,8 +520,10 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
    <div class="two"><div><select id="a_sex"><option value="f">Feminino</option><option value="m">Masculino</option></select></div><div><input id="a_brs" placeholder="Ex.: 37" autocapitalize="characters"></div></div>
    <div class="szout" id="a_szout"></div>
   </div>
-  <label>Marcas para procurar <small>(opcional)</small></label>
-  <input id="a_mk" placeholder="Ex.: CeraVe, La Roche-Posay, Neutrogena">
+  <label>Marcas <small>(toque para escolher · opcional)</small></label>
+  <div id="a_mkbox" class="mkbox"></div>
+  <div class="mkadd"><input id="a_mkn" placeholder="Outra marca"><button type="button" id="a_mkb">+ Adicionar</button></div>
+  <input id="a_mk" type="hidden">
   <label id="a_fll">Sabores ou cheiros recomendados <small>(opcional)</small></label>
   <input id="a_fl" placeholder="Ex.: baunilha, Sea Salt Orchid, cookies and cream">
   <label>Tamanho / versão <small>(opcional)</small></label>
@@ -592,6 +600,42 @@ try{custom=JSON.parse(localStorage.getItem(CKEY)||'[]')||[]}catch(e){custom=[]}
 const EDKEY='lista-orlando-2026-edicoes-v1';let cedit={};try{cedit=JSON.parse(localStorage.getItem(EDKEY)||'{}')||{}}catch(e){cedit={}}
 function saveE2(){try{localStorage.setItem(EDKEY,JSON.stringify(cedit));return true}catch(e){return false}}
 let editId=null;
+const BRANDS={
+ 'Tênis':['Nike','Jordan','Adidas','New Balance','Converse','Vans','Asics','Hoka','On','Puma','Skechers','Reebok','Brooks','Saucony','Under Armour','Fila','Crocs','UGG','Timberland','Allbirds'],
+ 'Roupas':['Nike','Adidas','Levi\'s','Gap','Old Navy','Abercrombie & Fitch','Hollister','American Eagle','Aéropostale','Tommy Hilfiger','Calvin Klein','Ralph Lauren','Lacoste','Columbia','The North Face','Under Armour','Lululemon','Victoria\'s Secret','Champion','Carter\'s'],
+ 'Bolsas':['Michael Kors','Coach','Kate Spade','Tory Burch','Calvin Klein','Guess','Tommy Hilfiger','Marc Jacobs','Longchamp','Steve Madden','Fossil','Vera Bradley','Kipling','Samsonite'],
+ 'Cintos':['Calvin Klein','Tommy Hilfiger','Levi\'s','Guess','Michael Kors','Coach','Ralph Lauren','Fossil','Lacoste'],
+ 'Acessórios':['Pandora','Swarovski','Ray-Ban','Oakley','Kate Spade','Michael Kors','Fossil','Coach','Claire\'s','Herschel','Vera Bradley'],
+ 'Relógios':['Apple','Garmin','Samsung','Fossil','Michael Kors','Casio','G-Shock','Tissot','Citizen','Seiko','Timex','Armani Exchange'],
+ 'Maquiagem':['Sephora Collection','e.l.f.','NYX','Maybelline','L\'Oréal','Revlon','Milani','Too Faced','Urban Decay','Benefit','Fenty Beauty','Rare Beauty','Charlotte Tilbury','MAC','NARS','Huda Beauty','Anastasia Beverly Hills','Tarte','Laura Mercier','Makeup Forever','Dior','Glossier','Kylie Cosmetics','Morphe'],
+ 'Skincare':['CeraVe','Cetaphil','La Roche-Posay','Neutrogena','The Ordinary','Olay','Aveeno','Eucerin','Bioderma','Vaseline','Drunk Elephant','Clinique','Kiehl\'s','Paula\'s Choice','Tatcha','Glow Recipe','Sol de Janeiro','Supergoop!','Laneige','First Aid Beauty'],
+ 'Produtos de cabelo':['Olaplex','Redken','Moroccanoil','Kérastase','Paul Mitchell','OGX','SheaMoisture','Garnier Fructis','Pantene','Dove','It\'s a 10','Amika','Briogeo','Bumble and bumble','Living Proof','K18','Ouai','Dyson','Revlon','Conair'],
+ 'Eletrônicos':['Apple','Samsung','Sony','Bose','JBL','Beats','Canon','GoPro','Nintendo','PlayStation','Xbox','Dell','HP','Lenovo','Microsoft','Amazon Kindle','Google','Anker','Logitech','Garmin'],
+ 'Itens de casa':['Bath & Body Works','Yankee Candle','Stanley','Owala','Yeti','Hydro Flask','KitchenAid','Ninja','Cuisinart','Instant Pot','Le Creuset','OXO','Pyrex','Keurig','Dyson'],
+ 'Alimentos':['Hershey\'s','Reese\'s','M&M\'s','Ghirardelli','Lindt','Kirkland','Trader Joe\'s','Oreo','Pop-Tarts','Doritos','Cheetos','Lay\'s','Goldfish','Jif','Skippy','Kellogg\'s','Starbucks','Jelly Belly','Sour Patch Kids'],
+ 'Vitaminas e suplementos':['Centrum','Nature Made','Kirkland','Nature\'s Bounty','One A Day','Olly','Vitafusion','Garden of Life','Optimum Nutrition','Premier Protein','Quest','Vital Proteins','Emergen-C','Metamucil','Nature\'s Way'],
+ 'Presentes':['Disney','Universal','Lego','Funko','Squishmallows','Hot Wheels','Barbie','Bath & Body Works','Victoria\'s Secret','Starbucks','Hallmark'],
+ 'Perfumes':['Victoria\'s Secret','Bath & Body Works','Sol de Janeiro','Carolina Herrera','Dior','Chanel','Yves Saint Laurent','Paco Rabanne','Lancôme','Calvin Klein','Ariana Grande','Versace','Prada','Valentino','Tom Ford','Jo Malone','Kayali','Glossier'],
+ 'Lembrancinhas':['Disney','Universal','Harry Potter','Super Nintendo World','Star Wars','Marvel','Minions','Coca-Cola','M&M\'s','Funko','Lego','Jelly Belly']};
+const ALLBR=[...new Set(Object.values(BRANDS).flat())];
+function brNorm(x){return norm(x).replace(/[^a-z0-9]/g,'')}
+function brandsFromLists(cat){const out=[];const add=b=>{if(b&&!out.some(x=>brNorm(x)===brNorm(b)))out.push(b)};
+  ITEMS.filter(i=>i.cat===cat&&i.who!=='Mercado').forEach(i=>{const t=' '+brNorm(i.t)+' ';ALLBR.forEach(b=>{const n=brNorm(b);if(n.length>=3&&brNorm(i.t).includes(n))add(b)});String(i.mk||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(add)});
+  return out}
+let mkSel=[];
+function mkGet(){return mkSel.join(', ')}
+function mkSet(v){mkSel=String(v||'').split(',').map(x=>x.trim()).filter(Boolean);renderMk()}
+function renderMk(){const box=$('#a_mkbox');if(!box)return;const cs=$('#a_catsel').value,cat=cs==='__other'?$('#a_cat').value.trim():cs;
+  const fromL=cat?brandsFromLists(cat):[];const fam=(BRANDS[cat]||[]).filter(b=>!fromL.some(x=>brNorm(x)===brNorm(b)));
+  const extra=mkSel.filter(b=>!fromL.concat(fam).some(x=>brNorm(x)===brNorm(b)));
+  const chip=b=>`<button type="button" class="mkc${mkSel.some(x=>brNorm(x)===brNorm(b))?' on':''}" data-mk="${esc(b)}">${esc(b)}</button>`;
+  let h='';
+  if(extra.length)h+=`<div class="mkg">Escolhidas</div><div class="mkr">${extra.map(chip).join('')}</div>`;
+  if(fromL.length)h+=`<div class="mkg">Já nas listas da viagem</div><div class="mkr">${fromL.map(chip).join('')}</div>`;
+  if(fam.length)h+=`<div class="mkg">Mais famosas nos EUA</div><div class="mkr">${fam.map(chip).join('')}</div>`;
+  if(!cat)h=`<div class="mkg">Escolha a categoria para ver as marcas</div>`;
+  box.innerHTML=h;$('#a_mk').value=mkGet();try{updSz()}catch(_){}}
+
 const SHOE_F={33:'4,5 a 5',34:'5 a 5,5',35:'6',36:'6,5',37:'7 a 7,5',38:'8',39:'8,5 a 9',40:'9,5',41:'10',42:'10,5 a 11',43:'11,5',44:'12'};
 const SHOE_M={36:'4,5 a 5',37:'5,5 a 6',38:'6,5',39:'7 a 7,5',40:'8',41:'8,5',42:'9 a 9,5',43:'10',44:'10,5 a 11',45:'11,5 a 12',46:'12,5 a 13',47:'13,5',48:'14'};
 const CL_L={PP:'XS',P:'S',M:'M',G:'L',GG:'XL',XG:'XXL',EG:'XXL',G1:'XL',G2:'XXL',G3:'3XL'};
@@ -621,7 +665,7 @@ let szLastK=null;
 function updSz(){try{const k0=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);if(k0!==szLastK){if(szLastK!==null&&!editId)$('#a_brs').value='';szLastK=k0;const m=JSON.parse($('#a_brs').dataset.mem||'{}');if(k0&&!$('#a_brs').value&&m[k0]&&!editId){$('#a_brs').value=m[k0];if(m.sex)$('#a_sex').value=m.sex}}}catch(_){}
   const k=szKind($('#a_catsel').value==='__other'?$('#a_cat').value:$('#a_catsel').value);const box=$('#a_szbox');box.style.display=k?'block':'none';if(!k)return;
   $('#a_szl').textContent=k==='shoe'?'Quanto você calça no Brasil':'Seu tamanho de roupa no Brasil';$('#a_brs').placeholder=k==='shoe'?'Ex.: 37':'Ex.: M ou 40';
-  const c=convSize(k,$('#a_sex').value,$('#a_brs').value);const bf=k==='shoe'&&c?brandFit([$('#a_t').value,$('#a_mk').value].join(' ')):null;
+  const c=convSize(k,$('#a_sex').value,$('#a_brs').value);const bf=k==='shoe'&&c?brandFit([$('#a_t').value,mkGet()].join(' ')):null;
   $('#a_szout').innerHTML=$('#a_brs').value.trim()?(c?`🇺🇸 Nos EUA: <b>${esc(c)}</b>${bf?`<span class="bfit">${esc(bf.n)}: <b>${esc(shoeUS($('#a_sex').value,$('#a_brs').value,bf.adj))}</b> · ${esc(bf.note)}</span>`:''}<small>Aproximado: varia por marca e modelo. ${k==='shoe'?'Na dúvida, prove ou pegue meio número a mais.':'Roupa americana costuma vestir maior; muita gente desce um tamanho.'}</small>`:'<small>Não encontrei esse tamanho na tabela. Use número (ex.: 37, 40) ou letra (PP, P, M, G, GG).</small>'):''}
 function saveC(){try{localStorage.setItem(CKEY,JSON.stringify(custom));syncChanged();return true}catch(e){return false}}
 DATA.items.forEach(i=>{i.id=String(i.id)});
@@ -1018,6 +1062,7 @@ function openAdd(){
   $('#addf').reset();newImg=null;$('#a_prev').style.display='none';$('#a_err').textContent='';
   $('#a_who').value=who||'Bia';{const f=$('#fcat').value||'';if(f.startsWith('sub:')){const [c,x]=f.slice(4).split('|');fillCats(c,x)}else fillCats(f)}
   const q=$('#q').value.trim();if(q)$('#a_t').value=q;
+  mkSel=[];renderMk();$('#a_mkn').value='';
   szLastK=null;try{const m=JSON.parse(localStorage.getItem('orl-sz-'+($('#a_who').value||''))||'{}');$('#a_sex').value=m.sex||'f';$('#a_brs').value='';$('#a_brs').dataset.mem=JSON.stringify(m)}catch(_){}
   updSz();
   $('#sheet').classList.add('show');setTimeout(()=>$('#a_t').focus(),50);
@@ -1025,7 +1070,7 @@ function openAdd(){
 function openEdit(id){const i=getItem(id);if(!i)return;openAdd();editId=id;$('#a_h').textContent='Editar produto';$('#a_save').textContent='Salvar alterações';
   $('#a_who').value=i.who||'Bia';fillCats(i.cat,i.sub||'');$('#a_t').value=i.t||'';
   const lj=i.lj&&i.lj!=='Não informada'?i.lj:'';$('#a_st').value=lj;$('#a_p').value=i.usd!=null?String(i.usd).replace('.',','):'';
-  $('#a_mk').value=i.mk||'';$('#a_fl').value=i.fl||'';$('#a_sex').value=i.sex||'f';$('#a_brs').value=i.brs||'';updSz();$('#a_sz').value=i.sz||'';$('#a_of').value=i.of||'';$('#a_br').value=i.br&&i.br!=='Não informado'?i.br:'';}
+  mkSet(i.mk||'');$('#a_fl').value=i.fl||'';$('#a_sex').value=i.sex||'f';$('#a_brs').value=i.brs||'';updSz();$('#a_sz').value=i.sz||'';$('#a_of').value=i.of||'';$('#a_br').value=i.br&&i.br!=='Não informado'?i.br:'';}
 function fillCats(sel,sub){
   const extra=CATS.filter(c=>!PRESET.includes(c));
   let h='<option value="">Escolha uma categoria…</option>'+PRESET.concat(extra).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')+'<option value="__other">➕ Outra categoria…</option>';
@@ -1049,8 +1094,12 @@ function fillSubs(pre){const w=$('#a_who').value||'Bia',c=$('#a_catsel').value;
   else{$('#a_subsel').value='';$('#a_sub').style.display='none';$('#a_sub').value=''}
 }
 $('#a_subsel').addEventListener('change',()=>{const o=$('#a_subsel').value==='__other';$('#a_sub').style.display=o?'block':'none';if(o)$('#a_sub').focus()});
-$('#a_catsel').addEventListener('change',()=>{setTimeout(updSz,0);const o=$('#a_catsel').value==='__other';$('#a_cat').style.display=o?'block':'none';if(o)$('#a_cat').focus();$('#a_err').textContent='';fillSubs('')});
+$('#a_catsel').addEventListener('change',()=>{setTimeout(()=>{renderMk();updSz()},0);const o=$('#a_catsel').value==='__other';$('#a_cat').style.display=o?'block':'none';if(o)$('#a_cat').focus();$('#a_err').textContent='';fillSubs('')});
 $('#a_who').addEventListener('change',()=>fillSubs());
+$('#a_mkbox').addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;const v=b.dataset.mk;const i=mkSel.findIndex(x=>brNorm(x)===brNorm(v));if(i>=0)mkSel.splice(i,1);else mkSel.push(v);renderMk()});
+function mkAddTyped(){const v=$('#a_mkn').value.trim();if(!v)return;v.split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>{if(!mkSel.some(y=>brNorm(y)===brNorm(x)))mkSel.push(x)});$('#a_mkn').value='';renderMk()}
+$('#a_mkb').addEventListener('click',mkAddTyped);$('#a_mkn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();mkAddTyped()}});
+$('#a_cat').addEventListener('input',()=>renderMk());
 ['#a_brs','#a_sex','#a_cat','#a_t','#a_mk'].forEach(q=>{$(q).addEventListener('input',updSz);$(q).addEventListener('change',updSz)});
 function closeAdd(){$('#sheet').classList.remove('show')}
 $('#addbtn').addEventListener('click',openAdd);
@@ -1070,7 +1119,7 @@ $('#addf').addEventListener('submit',e=>{
   if(!cat){$('#a_err').textContent=cs==='__other'?'Digite o nome da nova categoria.':'Escolha uma categoria.';(cs==='__other'?$('#a_cat'):$('#a_catsel')).focus();return}
   const st=$('#a_st').value.trim(),praw=$('#a_p').value.trim(),p=parsePrice(praw);
   if(praw&&p===null){$('#a_err').textContent='O preço não ficou claro. Digite só números, ex.: 12,99';$('#a_p').focus();return}
-  const sz=$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim(),mk=$('#a_mk').value.trim(),fl=$('#a_fl').value.trim(),brs=szKind(cat)?$('#a_brs').value.trim():'',sex=$('#a_sex').value;
+  const sz=$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim(),mk=(mkAddTyped(),mkGet()),fl=$('#a_fl').value.trim(),brs=szKind(cat)?$('#a_brs').value.trim():'',sex=$('#a_sex').value;
   if(brs){try{const key='orl-sz-'+($('#a_who').value||'');const m=JSON.parse(localStorage.getItem(key)||'{}');m[szKind(cat)]=brs;m.sex=sex;localStorage.setItem(key,JSON.stringify(m))}catch(_){}}
   if(editId){const id=editId,old=getItem(id);const sub=($('#a_subsel').value==='__other'?$('#a_sub').value.trim():$('#a_subsel').value);
     const us=p!==null?[money(p),sz,st].filter(Boolean).join(' · '):(old&&old.us&&old.usd==null&&!old.mine?old.us:(sz?'Não anotado · '+sz:'Não anotado'));
