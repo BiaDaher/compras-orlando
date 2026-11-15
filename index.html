@@ -175,6 +175,8 @@ body.mkt main{padding-bottom:30px}
 .calert{font-size:13px;border-radius:8px;padding:6px 9px;margin:6px 0}.calert.y{background:#fdf3d9;color:#7a5800}.calert.r{background:#fbe5e3;color:#8e1f18}
 .cnote2{font-size:12.5px;color:var(--muted);margin-top:6px}
 .cmore{margin-top:8px;font-size:13px}.cmore summary{color:var(--brand);font-weight:600;cursor:pointer}.cmore ul{padding-left:18px;margin:6px 0 0}.cmore li{margin:3px 0}
+.gzoom.ro #gz_ch,.gzoom.ro #gz_rm{display:none}
+.szv{font-size:12.5px;color:var(--muted);margin:1px 0 2px}
 .ntopen{width:100%;margin-top:10px;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;font-weight:600;text-align:left}
 .nfbox h4{display:flex;justify-content:space-between;align-items:center}.ntclose{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:600}
 .ntph{flex:1 1 100%;border:1px dashed var(--line);background:#fffaf5;color:var(--brand);border-radius:8px;padding:9px;font:inherit;font-size:14px;font-weight:600;text-align:left}.ntph small{color:var(--muted);font-weight:400}
@@ -807,7 +809,7 @@ function card(i){
   if(!(L.lojas||[]).length&&i.lj&&i.lj!=='Não informada')links.push(`<span class="refv">📍 ${esc(i.lj.split(/[;—]/)[0].trim())}</span>`);
   const sk=!d&&!!skip[i.id];
   return `<div class="card${d?' done':''}${sk?' skipped':''}${openId===i.id?' open':''}" data-id="${i.id}">
-   <div class="top">${img}<div class="info"><div class="t">${esc(i.t)}</div>
+   <div class="top">${img}<div class="info"><div class="t">${esc(i.t)}</div>${i.sz?`<div class="szv">${esc(i.sz)}</div>`:''}
    <div class="meta">${!who&&DATA.lists.length>1?`<span class="ownr">${esc(i.who)}</span>`:''}${i.mine?'<span class="mine">Adicionado por mim</span>':''}${i.tag?esc(i.tag):''}</div>
    ${i.meta!=null||i.faixa?`<div class="target">🎯 ${i.meta!=null?'Meta até '+money(i.meta):'Sem meta definida'}${i.teto!=null&&i.teto>i.meta?' · teto '+money(i.teto):''}</div>`:`<div class="price">${esc(short(i.us))}</div>`}${i.qty?`<div class="qtyl">🧺 ${esc(i.qty)}</div>`:''}${i.brs?`<div class="qtyl">${szLine(i)}</div>`:''}${done[i.id]?paidHtml(i.id):''}${sk?'<div class="skiptag">🚫 Não vou comprar</div>':''}${(()=>{const b=best(i.id),n=(notes[i.id]||[]).length;return b?`<div class="best-tag">📝 ${n} anotado${n>1?'s':''} · menor ${money(b.p)} (${esc(b.s)})${ltag(i,b.p)}</div>`:''})()}</div>
    <button class="chk" aria-label="Marcar como comprado"><span class="box">✓</span>${d?'Comprado':'Comprei'}</button></div>
@@ -992,7 +994,8 @@ $('#list').addEventListener('click',e=>{
   {const b=e.target.closest('.ntx');if(b){delete ntPend[b.dataset.id];render();return}}
   {const b=e.target.closest('.ntopen');if(b){ntOpen[b.dataset.id]=1;render();const f=document.querySelector(`.nf[data-id="${b.dataset.id}"] .ns`);if(f)f.focus();return}}
   {const b=e.target.closest('.ntclose');if(b){delete ntOpen[b.dataset.id];delete ntPend[b.dataset.id];render();return}}
-  {const z=e.target.closest('.ntimg');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id=z.dataset.z;$('#gzoom').classList.add('show');return}}
+  {const z=e.target.closest('.ntimg');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id=z.dataset.z;$('#gzoom').classList.remove('ro');$('#gzoom').classList.add('show');return}}
+  {const z=e.target.closest('img.thumb');if(z){$('#gzimg').src=z.getAttribute('src');$('#gzoom').dataset.id='';$('#gzoom').classList.add('ro','show');return}}
   if(e.target.closest('.addph')||e.target.closest('.setph')){phId=id;$('#photoin').value='';$('#photoin').click();return}
   if(e.target.closest('.rmph')){delete photos[id];saveP();render();return}
   if(e.target.closest('.editpaid')){openBuy(id,true);return}
@@ -1398,7 +1401,7 @@ $('#guide').addEventListener('click',e=>{
     if(myForm&&myForm.id&&gImg['my:'+myForm.id]&&!Object.values(gMy).some(L=>L.some(x=>x.id===myForm.id))){delete gImg['my:'+myForm.id];gImgSave()}if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}gView=g;gForm=false;exForm=null;myWho=null;myForm=null;ckWho=null;ckAdd=null;{let me=null;try{me=euGet()}catch(_){}if(me&&GROUP.includes(me)){if(g==='ck')ckWho=me;if(g==='meus')myWho=me}}myPinFor=null;myPinNew=null;renderGuide();$('#guide').scrollTop=0;return}
   if(b=t.closest('[data-ph]')){gPhId=b.dataset.ph;$('#gphoto').value='';$('#gphoto').click();return}
   if(b=t.closest('[data-phdel]')){const id=b.dataset.phdel,old=gImg[id];delete gImg[id];gImgSave();renderGuide();showToast('Foto removida',()=>{gImg[id]=old;gImgSave();renderGuide()});return}
-  if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.add('show');return}
+  if(b=t.closest('[data-zoom]')){$('#gzimg').src=b.getAttribute('src');$('#gzoom').dataset.id=b.dataset.zoom;$('#gzoom').classList.remove('ro');$('#gzoom').classList.add('show');return}
   if(b=t.closest('[data-ropen]')){const id=b.dataset.ropen;gOpenR[id]=!gOpenR[id];const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;return}
   if(b=t.closest('[data-rgo]')){const id=b.dataset.rgo;gOpenR[id]=true;const rr=GUIDE.rests.find(x=>x.id===id);if(rr&&rr.park){gPark=rr.park;gPTab='food';gView='park';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}gView='rest';gForm=false;renderGuide();const el=$('#rc-'+id);if(el)el.scrollIntoView({block:'start'});return}
   if(t.closest('[data-meswap]')){closeGuide();openWelcome(true);return}
