@@ -1268,8 +1268,11 @@ async function uploadPhotos(btn){const all=allPhotoEntries(),keys=Object.keys(al
       await fetch(FB+'/imgidx/'+encodeURIComponent(k)+'.json',{method:'PUT',body:JSON.stringify({s:imgSig(all[k]),t:now})});ok++}
     await fetch(FB+'/rev.json',{method:'PUT',body:JSON.stringify(Date.now())});btn.textContent=`✅ ${ok} fotos enviadas para o app`;showToast(`✅ ${ok} fotos enviadas. Abra o app instalado com internet.`)}
   catch(e){btn.disabled=false;btn.textContent='☁️ Enviar as fotos deste link para o app';if(ok)showToast(`Enviei ${ok} de ${keys.length}. Tente de novo para o resto.`);else{downloadPhotos();}}}
-function downloadPhotos(){const all=allPhotoEntries();const blob=new Blob([JSON.stringify({v:1,fotos:all})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotos-orlando-2026.json';document.body.appendChild(a);a.click();a.remove();
-  showToast('O link não conseguiu enviar. Baixei um arquivo com as fotos: importe no app em “📥 Importar arquivo de fotos”.')}
+async function downloadPhotos(){const all=allPhotoEntries();const data=JSON.stringify({v:1,fotos:all});
+  try{const d=window.claude&&window.claude.use?await window.claude.use('downloads'):null;
+    if(d){await d.save({filename:'fotos-orlando-2026.json',data});showToast('💾 Arquivo salvo. No app instalado, toque em “📥 Importar arquivo de fotos” e escolha esse arquivo.');return}}catch(e){showToast('O arquivo não foi salvo.');return}
+  const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fotos-orlando-2026.json';document.body.appendChild(a);a.click();a.remove();
+  showToast('Arquivo com as fotos baixado. Importe no app em “📥 Importar arquivo de fotos”.')}
 function importPhotos(file){const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);const f=d.fotos||{};let n=0;
     Object.keys(f).forEach(k=>{const v=f[k];if(typeof v!=='string'||!v.startsWith('data:image'))return;if(k.startsWith('c~')){if(!photos[k.slice(2)]){photos[k.slice(2)]=v;n++}}else if(k.startsWith('g~')){if(!gImg[k.slice(2)]){gImg[k.slice(2)]=v;n++}}});
     saveP();gImgSave();try{rebuild();render()}catch(_){}renderGuide();showToast(n?`📥 ${n} fotos importadas e enviadas para o grupo`:'Nenhuma foto nova no arquivo')}catch(e){showToast('Arquivo inválido')}};fr.readAsText(file)}
