@@ -490,7 +490,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 </div>
 <div class="sheet" id="sheet">
  <form id="addf" autocomplete="off">
-  <h2>Novo produto <button type="button" id="closeadd" aria-label="Fechar">×</button></h2>
+  <h2><span id="a_h">Novo produto</span> <button type="button" id="closeadd" aria-label="Fechar">×</button></h2>
   <label>Lista de quem?</label>
   <select id="a_who"></select>
   <label>Nome do produto *</label>
@@ -505,6 +505,8 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
    <div><label>Loja</label><input id="a_st" list="stl" placeholder="Ex.: Walmart"></div>
    <div><label>Preço (US$)</label><input id="a_p" inputmode="decimal" placeholder="0,00"></div>
   </div>
+  <label>Marcas para procurar <small>(opcional)</small></label>
+  <input id="a_mk" placeholder="Ex.: CeraVe, La Roche-Posay, Neutrogena">
   <label>Tamanho / versão <small>(opcional)</small></label>
   <input id="a_sz" placeholder="Ex.: 16 oz, cor Nude, tamanho M">
   <label>O que oferece / observações <small>(opcional)</small></label>
@@ -516,7 +518,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
   <label>Foto <small>(opcional)</small></label>
   <div class="photo"><img id="a_prev" alt=""><label class="pick" for="a_img">📷 Tirar ou escolher foto</label><input type="file" id="a_img" accept="image/*"></div>
   <div class="ferr" id="a_err"></div>
-  <button class="save" type="submit">Adicionar à lista</button>
+  <button class="save" type="submit" id="a_save">Adicionar à lista</button>
  </form>
 </div>
 <footer><button class="exclbtn" id="exclbtn" style="display:none"></button><br><button class="backup" id="backup">📋 Copiar minhas anotações (backup)</button><br><br>Preços dos EUA consultados em 06/11/2026, antes do sales tax. Confirme estoque, cor e tamanho na loja antes de ir. Toque num produto para ver detalhes e links.</footer>
@@ -535,7 +537,7 @@ function saveN(){try{localStorage.setItem(NKEY,JSON.stringify(notes))}catch(e){}
 function parsePrice(v){v=(v||'').replace(/[^\d,\.]/g,'');if(!v)return null;
   if(v.includes(',')&&v.includes('.'))v=v.replace(/\./g,'').replace(',','.');else v=v.replace(',','.');
   const n=parseFloat(v);return isFinite(n)&&n>0?n:null}
-function best(id){const L=notes[id]||[];return L.length?L.reduce((a,b)=>b.p<a.p?b:a):null}
+function best(id){const L=(notes[id]||[]).filter(n=>n.p!=null);return L.length?L.reduce((a,b)=>b.p<a.p?b:a):null}
 const fmtD=t=>{try{return new Date(t).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}catch(e){return ''}}
 const $=s=>document.querySelector(s);
 const norm=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/['’`´.\-]/g,'');
@@ -576,6 +578,9 @@ function showToast(msg,fn){$('#tmsg').textContent=msg;undoFn=fn||null;$('#undo')
 const CKEY='lista-orlando-2026-meus-produtos-v1';
 let custom=[];
 try{custom=JSON.parse(localStorage.getItem(CKEY)||'[]')||[]}catch(e){custom=[]}
+const EDKEY='lista-orlando-2026-edicoes-v1';let cedit={};try{cedit=JSON.parse(localStorage.getItem(EDKEY)||'{}')||{}}catch(e){cedit={}}
+function saveE2(){try{localStorage.setItem(EDKEY,JSON.stringify(cedit));return true}catch(e){return false}}
+let editId=null;
 function saveC(){try{localStorage.setItem(CKEY,JSON.stringify(custom));syncChanged();return true}catch(e){return false}}
 DATA.items.forEach(i=>{i.id=String(i.id)});
 let ITEMS=[],CATS=[];
@@ -655,9 +660,9 @@ const SUBPRESET={
  'Lembrancinhas':['Disney','Universal','Chaveiros','Canecas','Camisetas','Ímãs','Pelúcias','Doces']};
 function rebuild(){
   custom.forEach(c=>{if(!PRESET.includes(c.cat)&&!c.sub){const om=(DATA.oldmap||{})[c.cat];if(om){c.sub=c.cat;c.cat=om}else if(/^Cabelos · /.test(c.cat)){c.sub=c.cat.replace(/^Cabelos · /,'');c.cat='Produtos de cabelo'}}});
-  ITEMS=DATA.items.concat(custom);
+  ITEMS=DATA.items.map(i=>cedit[i.id]?Object.assign({},i,cedit[i.id]):i).concat(custom);
   SUBS=(DATA.subs||[]).slice();custom.forEach(c=>{if(c.sub&&!SUBS.includes(c.sub))SUBS.push(c.sub)});
-  ITEMS.forEach(i=>{if(!i.who)i.who='Bia';i.k=norm([i.t,i.cat,i.sub||'',i.of,i.lj,i.us,i.br,i.tag,i.qty||'',i.st.join(' ')].join(' '))});
+  ITEMS.forEach(i=>{if(!i.who)i.who='Bia';i.k=norm([i.t,i.cat,i.sub||'',i.mk||'',i.of,i.lj,i.us,i.br,i.tag,i.qty||'',i.st.join(' ')].join(' '))});
   CATS=DATA.cats.slice();
   const cc=[...new Set(custom.map(c=>c.cat))].filter(c=>!CATS.includes(c));
   const ORD=PRESET.concat(GROC);cc.sort((a,b)=>{const ia=ORD.indexOf(a),ib=ORD.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib)});CATS.push(...cc);
@@ -698,6 +703,7 @@ function card(i){
    ${i.meta!=null||i.faixa?`<div class="target">🎯 ${i.meta!=null?'Meta até '+money(i.meta):'Sem meta definida'}${i.teto!=null&&i.teto>i.meta?' · teto '+money(i.teto):''}</div>`:`<div class="price">${esc(short(i.us))}</div>`}${i.qty?`<div class="qtyl">🧺 ${esc(i.qty)}</div>`:''}${done[i.id]?paidHtml(i.id):''}${sk?'<div class="skiptag">🚫 Não vou comprar</div>':''}${(()=>{const b=best(i.id),n=(notes[i.id]||[]).length;return b?`<div class="best-tag">📝 ${n} anotado${n>1?'s':''} · menor ${money(b.p)} (${esc(b.s)})${ltag(i,b.p)}</div>`:''})()}</div>
    <button class="chk" aria-label="Marcar como comprado"><span class="box">✓</span>${d?'Comprado':'Comprei'}</button></div>
    <div class="det">
+    ${i.mk?`<p><b>🏷️ Marcas para procurar:</b> ${esc(i.mk)}</p>`:''}
     ${i.of?`<p>${esc(i.of).replace(/\n/g,'<br>')}</p>`:''}
     ${i.faixa?`<ul class="faixas">${i.faixa.map(f=>`<li class="${/^VERDE/.test(f)?'g':/^AMARELO/.test(f)?'y':/^VERMELHO/.test(f)?'r':''}">${esc(f)}</li>`).join('')}</ul>`:''}
     ${i.brandLim?`<p><b>Limite por marca:</b> ${esc(i.brandLim)}</p>`:''}
@@ -707,7 +713,7 @@ function card(i){
     ${links.length?`<div class="links">${links.join('')}</div>`:''}
     <div class="photobtns">${(photos[i.id]||i.img)?'<button class="setph">📷 Trocar foto</button>':'<button class="setph">📷 Adicionar foto</button>'}${photos[i.id]?`<button class="rmph">${i.img&&!i.mine?'Voltar à foto original':'Remover foto'}</button>`:''}</div>
     ${notesHtml(i)}
-    ${mode==='excl'?'<div class="acts"><button class="rest">↩ Restaurar produto</button></div>':`<div class="acts">${done[i.id]?`<button class="editpaid">✏️ ${paidOf(i.id)?'Editar preço pago':'Informar preço pago'}</button>`:`<button class="skipb">${sk?'↩ Voltar para A comprar':'🚫 Não vou comprar'}</button>`}<button class="delp">🗑 Excluir produto</button></div>`}
+    ${mode==='excl'?'<div class="acts"><button class="rest">↩ Restaurar produto</button></div>':`<div class="acts">${done[i.id]?`<button class="editpaid">✏️ ${paidOf(i.id)?'Editar preço pago':'Informar preço pago'}</button>`:`<button class="skipb">${sk?'↩ Voltar para A comprar':'🚫 Não vou comprar'}</button>`}<button class="editp">✏️ Editar</button><button class="delp">🗑 Excluir produto</button></div>`}
    </div></div>`;
 }
 function paidOf(id){const v=done[id];return v&&typeof v==='object'&&v.p?v:null}
@@ -717,17 +723,17 @@ function paidHtml(id){const v=paidOf(id),q=qtyOf(id);
   if(v)return `<div class="paid">💳 Paguei ${money(v.p)}${q>1?' × '+q+' = '+money(v.p*q):''}${v.s?' · '+esc(v.s):''}${it?ltag(it,v.p):''}</div>`;
   return `<div class="paid none">💳 Preço pago não informado${q>1?' · '+q+' un.':''}</div>`}
 function notesHtml(i){
-  const L=(notes[i.id]||[]).slice().sort((a,b)=>a.p-b.p);
-  const b=L.length>1?L[0]:null;
-  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${esc(n.s)}<small>${fmtD(n.d)}${n.n?' · '+esc(n.n):''}</small></span><span class="p">${money(n.p)}${ltag(i,n.p)}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
-  return `<div class="notes"><h4>📝 Preços que eu vi nas lojas</h4>
-   ${L.length?`<ul class="nl">${lis}</ul>`:'<p class="np-empty">Nenhum preço anotado ainda. Anote abaixo o preço que você encontrar em cada loja.</p>'}
+  const L=(notes[i.id]||[]).slice().sort((a,b)=>(a.p==null)-(b.p==null)||(a.p-b.p)||(a.d-b.d));
+  const Lp=L.filter(n=>n.p!=null);const b=Lp.length>1?Lp[0]:null;
+  const lis=L.map(n=>`<li class="${b&&n===b?'best':''}"><span class="s">${n.s?esc(n.s):(n.n?esc(n.n):'Anotação')}<small>${fmtD(n.d)}${n.n&&n.s?' · '+esc(n.n):''}</small></span><span class="p">${n.p!=null?money(n.p)+ltag(i,n.p):''}</span><button class="ndel" data-d="${n.d}" aria-label="Apagar">🗑</button></li>`).join('');
+  return `<div class="notes"><h4>📝 Anotações e preços que eu vi</h4>
+   ${L.length?`<ul class="nl">${lis}</ul>`:'<p class="np-empty">Nada anotado ainda. Anote abaixo um preço, uma loja ou só uma observação (marca, tamanho…).</p>'}
    <form class="nf" data-id="${i.id}">
-    <input class="ns" list="stl" placeholder="Loja (ex.: Target)" required>
-    <input class="np" inputmode="decimal" placeholder="US$ 0,00" required>
+    <input class="ns" list="stl" placeholder="Loja (opcional)">
+    <input class="np" inputmode="decimal" placeholder="US$ (opcional)">
     ${i.meta!=null?'<div class="live nlive" style="flex:1 1 100%;margin:0"></div>':''}
-    <input class="nn" placeholder="Observação (opcional): tamanho, promoção…">
-    <button type="submit">Salvar preço</button>
+    <input class="nn" placeholder="Observação: marca, tamanho, promoção…">
+    <button type="submit">Salvar anotação</button>
    </form></div>`;
 }
 let mEdit=(()=>{try{return JSON.parse(localStorage.getItem('orl-mkt-edit')||'{}')||{}}catch(e){return {}}})();
@@ -858,6 +864,7 @@ $('#list').addEventListener('click',e=>{
   if(e.target.closest('.mrest')){delete excl[id];saveE();render();showToast('↩ Item restaurado');return}
   if(e.target.closest('.medit')){openMEdit(id);return}
   const it0=getItem(id),nm=it0?(it0.t.length>34?it0.t.slice(0,32)+'…':it0.t):'';
+  const ep=e.target.closest('.editp');if(ep){const c=ep.closest('.card');if(c)openEdit(c.dataset.id);return}
   const dp=e.target.closest('.delp');
   if(dp){
     if(!dp.dataset.sure){dp.dataset.sure=1;dp.textContent='Toque de novo para confirmar';setTimeout(()=>{if(dp.isConnected){delete dp.dataset.sure;dp.textContent='🗑 Excluir produto'}},4000);return}
@@ -926,10 +933,10 @@ $('#buyf').addEventListener('submit',e=>{
 $('#list').addEventListener('submit',e=>{
   const f=e.target.closest('.nf');if(!f)return;e.preventDefault();
   const id=f.dataset.id,st=f.querySelector('.ns').value.trim(),p=parsePrice(f.querySelector('.np').value),nn=f.querySelector('.nn').value.trim();
-  if(!st){f.querySelector('.ns').focus();return}
-  if(p===null){const x=f.querySelector('.np');x.value='';x.placeholder='Digite um valor, ex.: 12,99';x.focus();return}
+  const praw=f.querySelector('.np').value.trim();if(praw&&p===null){const x=f.querySelector('.np');x.value='';x.placeholder='Valor não ficou claro, ex.: 12,99';x.focus();return}
+  if(!st&&p===null&&!nn){f.querySelector('.nn').focus();return}
   (notes[id]=notes[id]||[]).push({s:st,p:p,n:nn,d:Date.now()});saveN();
-  try{const u=JSON.parse(localStorage.getItem(NKEY+'-lojas')||'[]');if(!u.includes(st)){u.push(st);localStorage.setItem(NKEY+'-lojas',JSON.stringify(u))}}catch(_){}
+  if(st)try{const u=JSON.parse(localStorage.getItem(NKEY+'-lojas')||'[]');if(!u.includes(st)){u.push(st);localStorage.setItem(NKEY+'-lojas',JSON.stringify(u))}}catch(_){}
   fillStores();render();
 });
 function fillStores(){
@@ -944,7 +951,7 @@ $('#backup').addEventListener('click',async()=>{
   const byW=w=>ITEMS.filter(i=>i.who===w);
   const mine=custom.filter(inWho).map(i=>'  '+i.t+' — '+i.cat+(i.lj?' — '+i.lj:'')+(i.usd?' — '+money(i.usd):'')+(i.sz?' — '+i.sz:''));
   if(mine.length)lines.push('Produtos que adicionei:',...mine,'');
-  ITEMS.filter(inWho).forEach(i=>{const L=notes[i.id];if(L&&L.length){lines.push((!who?'['+i.who+'] ':'')+i.t);L.slice().sort((a,b)=>a.p-b.p).forEach(n=>lines.push('  '+n.s+': '+money(n.p)+(n.n?' ('+n.n+')':'')+' · '+fmtD(n.d)))}});
+  ITEMS.filter(inWho).forEach(i=>{const L=notes[i.id];if(L&&L.length){lines.push((!who?'['+i.who+'] ':'')+i.t);L.slice().sort((a,b)=>(a.p==null)-(b.p==null)||(a.p-b.p)).forEach(n=>lines.push('  '+(n.s||'Anotação')+': '+(n.p!=null?money(n.p):'')+(n.n?' ('+n.n+')':'')+' · '+fmtD(n.d)))}});
   const bought=ITEMS.filter(i=>inWho(i)&&done[i.id]).map(i=>{const v=paidOf(i.id),q=qtyOf(i.id);return '  '+i.t+(q>1?' ('+q+' un.)':'')+(v?' — '+money(v.p)+(q>1?' cada':'')+(v.s?' na '+v.s:''):' — preço não informado')});
   if(bought.length)lines.push('','Comprados:',...bought);
   const sk=ITEMS.filter(i=>inWho(i)&&!excl[i.id]&&status(i)==='skip').map(i=>'  '+i.t);
@@ -963,11 +970,16 @@ $('#photoin').addEventListener('change',e=>{
 function showMsg(t){showToast(t)}
 let newImg=null;
 function openAdd(){
+  editId=null;$('#a_h').textContent='Novo produto';$('#a_save').textContent='Adicionar à lista';
   $('#addf').reset();newImg=null;$('#a_prev').style.display='none';$('#a_err').textContent='';
   $('#a_who').value=who||'Bia';{const f=$('#fcat').value||'';if(f.startsWith('sub:')){const [c,x]=f.slice(4).split('|');fillCats(c,x)}else fillCats(f)}
   const q=$('#q').value.trim();if(q)$('#a_t').value=q;
   $('#sheet').classList.add('show');setTimeout(()=>$('#a_t').focus(),50);
 }
+function openEdit(id){const i=getItem(id);if(!i)return;openAdd();editId=id;$('#a_h').textContent='Editar produto';$('#a_save').textContent='Salvar alterações';
+  $('#a_who').value=i.who||'Bia';fillCats(i.cat,i.sub||'');$('#a_t').value=i.t||'';
+  const lj=i.lj&&i.lj!=='Não informada'?i.lj:'';$('#a_st').value=lj;$('#a_p').value=i.usd!=null?String(i.usd).replace('.',','):'';
+  $('#a_mk').value=i.mk||'';$('#a_sz').value=i.sz||'';$('#a_of').value=i.of||'';$('#a_br').value=i.br&&i.br!=='Não informado'?i.br:'';}
 function fillCats(sel,sub){
   const extra=CATS.filter(c=>!PRESET.includes(c));
   let h='<option value="">Escolha uma categoria…</option>'+PRESET.concat(extra).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')+'<option value="__other">➕ Outra categoria…</option>';
@@ -1011,10 +1023,17 @@ $('#addf').addEventListener('submit',e=>{
   if(!cat){$('#a_err').textContent=cs==='__other'?'Digite o nome da nova categoria.':'Escolha uma categoria.';(cs==='__other'?$('#a_cat'):$('#a_catsel')).focus();return}
   const st=$('#a_st').value.trim(),praw=$('#a_p').value.trim(),p=parsePrice(praw);
   if(praw&&p===null){$('#a_err').textContent='O preço não ficou claro. Digite só números, ex.: 12,99';$('#a_p').focus();return}
-  const sz=$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim();
+  const sz=$('#a_sz').value.trim(),of=$('#a_of').value.trim(),br=$('#a_br').value.trim(),mk=$('#a_mk').value.trim();
+  if(editId){const id=editId,old=getItem(id);const sub=($('#a_subsel').value==='__other'?$('#a_sub').value.trim():$('#a_subsel').value);
+    const us=p!==null?[money(p),sz,st].filter(Boolean).join(' · '):(old&&old.us&&old.usd==null&&!old.mine?old.us:(sz?'Não anotado · '+sz:'Não anotado'));
+    const ch={who:$('#a_who').value||old.who,t,cat,sub,mk,sz,of,us,usd:p,br:br||'Não informado',lj:st||'Não informada',st:st?[st]:(old.mine?['Sem loja confirmada']:old.st)};
+    const c=custom.find(x=>x.id===id);
+    if(c){Object.assign(c,ch);if(newImg)c.img=newImg;if(!saveC()){$('#a_err').textContent='Não foi possível salvar neste navegador.';return}}
+    else{cedit[id]=Object.assign(cedit[id]||{},ch);if(!saveE2()){$('#a_err').textContent='Não foi possível salvar neste navegador.';return}if(newImg){photos[id]=newImg;try{saveP()}catch(_){}}}
+    editId=null;closeAdd();rebuild();openId=id;render();showToast('✏️ Produto atualizado');return}
   const id='c'+Date.now();
   const us=p!==null?[money(p),sz,st].filter(Boolean).join(' · '):(sz?'Não anotado · '+sz:'Não anotado');
-  const it={id,mine:1,who:$('#a_who').value||'Bia',cat,sub:($('#a_subsel').value==='__other'?$('#a_sub').value.trim():$('#a_subsel').value),t,tag:'',of,sz,us,usd:p,br:br||'Não informado',lj:st||'Não informada',st:[st||'Sem loja confirmada'],img:newImg,lk:{fotos:'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(t),us:(()=>{let u=$('#a_link').value.trim();if(!u)return null;if(!/^https?:\/\//i.test(u))u='https://'+u;return u})(),br:null,lojas:[]}};
+  const it={id,mine:1,mk,who:$('#a_who').value||'Bia',cat,sub:($('#a_subsel').value==='__other'?$('#a_sub').value.trim():$('#a_subsel').value),t,tag:'',of,sz,us,usd:p,br:br||'Não informado',lj:st||'Não informada',st:[st||'Sem loja confirmada'],img:newImg,lk:{fotos:'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(t),us:(()=>{let u=$('#a_link').value.trim();if(!u)return null;if(!/^https?:\/\//i.test(u))u='https://'+u;return u})(),br:null,lojas:[]}};
   custom.push(it);
   if(!saveC()){custom.pop();
     if(newImg){it.img=null;custom.push(it);if(!saveC()){custom.pop();$('#a_err').textContent='Não foi possível salvar neste navegador.';return}$('#a_err').textContent='';}
