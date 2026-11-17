@@ -1495,7 +1495,7 @@ function rPass(r){if(!rMatch(r))return false;if(gCz&&r.coz!==gCz)return false;co
   if(f==='drink')return r.k==='Bar'||r.groups.some(g=>g.items.some(i=>i.alc!=null));return true}
 function rFil(L){const F=[['','Todos'],['T','🏆 Só os Top'],['TM','⭐ Top + Muito rec.'],['meal','🍽️ Refeições'],['snack','🍿 Lanches'],['drink','🍹 Bebidas']];
   const cz=[...new Set((L||[]).map(r=>r.coz).filter(Boolean))].sort((a,b)=>a.replace(/^\S+\s/,'').localeCompare(b.replace(/^\S+\s/,'')));
-  return `<div class="ifil">${F.map(([v,l])=>`<button data-rf="${v}" class="${gRf===v?'on':''}">${l}</button>`).join('')}</div>`+(cz.length?`<select class="czsel" id="czsel"><option value="">🍽️ Todos os tipos de cozinha</option>${cz.map(c=>`<option ${c===gCz?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'')}
+  return (cz.length?`<select class="czsel" id="czsel"><option value="">🍽️ Todos os tipos de cozinha</option>${cz.map(c=>`<option ${c===gCz?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'')}
 function rLegend(){return `<details class="gdet"><summary>⭐ Como ler as notas e os símbolos</summary>
   <div class="lg2" style="margin-top:6px">Recomendação do guia (consenso de Disney Food Blog, AllEars, TouringPlans, Disney Tourist Blog e outros):</div>
   ${(GUIDE.rlegend||[]).map(l=>`<div class="lg">${rkChip(l[0])} ${esc(l[2])}</div>`).join('')}
