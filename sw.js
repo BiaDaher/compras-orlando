@@ -1,4 +1,4 @@
-const CACHE='compras-orlando-v85';
+const CACHE='compras-orlando-v86';
 const IMGC='orl-img-v1';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>precacheImgs()).then(()=>self.skipWaiting()))});
