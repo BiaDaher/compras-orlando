@@ -1355,7 +1355,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
      <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
-    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 17/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+    </div><div class="tiles" style="margin-top:12px"><button class="tile wide" data-g="ck"><span class="e">🧳</span><span><b>Checklist pré-viagem</b><small>O que levar e o que resolver antes de embarcar</small></span></button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 17/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
