@@ -476,6 +476,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .orph{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}.orph figure{margin:0;width:84px;font-size:10.5px;color:var(--muted);text-align:center}.orph .gslot{width:84px;height:84px}
 .fila{background:#f1ece6!important;color:#5b4a3c!important;font-weight:600}
 .gnote{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
+#gbody{position:relative}.cfgw{position:absolute;top:2px;right:0;z-index:20}.cfgbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:18px;line-height:1;padding:0;opacity:.75}.cfgmenu{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px;min-width:240px;display:flex;flex-direction:column;gap:6px}.cfgmenu[hidden]{display:none}.cfgmenu b{font-size:13px;color:var(--muted);padding:2px 6px}.cfgitem{text-align:left;border:0;background:transparent;font:inherit;font-size:14px;padding:10px 8px;border-radius:10px;color:inherit}.cfgitem:active{background:var(--line)}
 </style>
 </head>
 <body>
@@ -1345,7 +1346,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
     const nP=GUIDE.parks.length,nR=GUIDE.parks.reduce((s,p)=>s+p.rides.filter(r=>r.act).length+p.extras.length,0);
     const nRest=GUIDE.rests.filter(r=>!r.park).length+gRest.length;
     const idn=(()=>{try{return euGet()}catch(e){return null}})();
-    B.innerHTML=`<div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 04/12</p>${cd?`<div class="gcount">${cd}</div>`:''}${idHtml(idn)}
+    B.innerHTML=`<div class="cfgw"><button class="cfgbtn" id="cfgbtn" aria-label="Configurações" title="Configurações">⚙️</button><div class="cfgmenu" id="cfgmenu" hidden><b>Configurações</b>${window.PREVIEW?`<button class="cfgitem" id="phup">☁️ Enviar as fotos deste link para o app</button>`:`<button class="cfgitem" id="phimp">📥 Importar arquivo de fotos</button><button class="cfgitem" id="bkrest">♻️ Restaurar meu backup</button>`}</div></div><div class="gh">Orlando 2026</div><p class="glead">Guia da viagem · 20/11 a 04/12</p>${cd?`<div class="gcount">${cd}</div>`:''}${idHtml(idn)}
     <div class="tiles">
      <button class="tile wide" data-g="roteiro"><span class="e">🗓️</span><span><b>Roteiro</b><small>Programação dia a dia, de 20/11 a 04/12</small></span></button>
      <button class="tile" data-g="parques"><span class="e">🎢</span><b>Parques</b><small>${nP} parques · ${nR} atrações</small></button>
@@ -1354,7 +1355,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
      <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
-    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button>${window.PREVIEW?`<button class="mini" id="phup">☁️ Enviar as fotos deste link para o app</button>`:`<button class="mini" id="phimp">📥 Importar arquivo de fotos</button><button class="mini" id="bkrest">♻️ Restaurar meu backup</button>`}</div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 17/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+    </div><div class="minirow"><button class="mini" data-g="ck">🧳 Checklist pré-viagem</button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 17/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
@@ -1954,5 +1955,6 @@ SYNC.start();try{BK.start()}catch(e){}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update().catch(()=>{})})}).catch(()=>{})})}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 </script>
+<script>document.addEventListener('click',e=>{const m=document.getElementById('cfgmenu');if(!m)return;if(e.target.closest('#cfgbtn')){m.hidden=!m.hidden;return}if(e.target.closest('.cfgitem')||!e.target.closest('#cfgmenu'))m.hidden=true});</script>
 </body>
 </html>
