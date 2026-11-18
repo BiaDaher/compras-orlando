@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="gopen">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -480,6 +480,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .wx{display:inline-block;margin:4px 0 2px;font-size:12.5px;color:#2d5f86;background:#eaf4fb;border-radius:999px;padding:3px 10px}.wx.rain{background:#e3ecff;color:#1f3f8a;font-weight:600}.wxd{margin:6px 0 10px;background:#eaf4fb;border-radius:12px;padding:10px 12px;color:#1f4a6b;font-size:14px}.wxd b{display:block}.wxd small{display:block;color:#5b7a92;font-size:12px;margin-top:3px}
 .cov{border-radius:999px;padding:2px 8px;font-size:12px}.cov.c{background:#e8f3ea;color:#2f6b3a}.cov.o{background:#eaf1fb;color:#2d5f86}.cov.m{background:#f3efe2;color:#6b5a2f}.wxp{margin:10px 0;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.4}.wxp b{display:block}.wxp div{margin-top:4px}.wxp small{display:block;font-size:12px;opacity:.75;margin-top:6px}.wxp.ok{background:#eaf4fb;color:#1f4a6b}.wxp.th{background:#fdecea;color:#7a1f16}.wxp.rn{background:#fff4e0;color:#7a4b06}.wxcov{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.wxcov span{background:#fff;border-radius:999px;padding:3px 9px;font-size:12.5px;color:#2f6b3a;font-weight:600}
 .shbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 12px;margin-bottom:8px}.shrow{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.shrow:last-of-type{border-bottom:0}.she{font-size:22px;line-height:1.2}.shrow b{display:block}.shrow small{display:block;color:var(--muted);font-size:13px;margin-top:3px}.shrow .kchip{margin-top:4px;display:inline-block}.shtip{background:#fff7e6;border-radius:10px;padding:8px 10px;margin:6px 0 4px;font-size:13px;color:#7a4b06}.shop{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;line-height:1.45}.shop b{display:block;font-size:16px;margin-bottom:2px}.shop .w{color:var(--muted);font-size:13px;margin:3px 0}.shop .kchip{display:inline-block;margin-top:4px}.shimg{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}.shphoto{display:block;width:100%;height:170px;object-fit:cover;border-radius:10px;margin-bottom:8px}.shatt{background:#f3e8ff;color:#5b2a86;float:right;margin-left:6px}.shat{background:#f6efff;border-radius:10px;padding:7px 10px;margin:6px 0;color:#4a2470}
+html.gopen,html.gopen body{overflow:hidden;height:100%}.guide{overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -1277,7 +1278,7 @@ function hm(h){const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return 1500;let v=
 function ovOf(d){return gPlan['~'+srcOf(d)]||{}}
 function dayItems(x){x=Object.assign({},dayBase(srcOf(x.d)),{d:x.d});const ov=ovOf(x.d);return (x.items||[]).map((e,i)=>{const o=ov['b'+i];if(e.hide||o&&o.del)return null;const r=Object.assign({base:1,k:'b'+i,o:i,bi:i},e);if(o){r.h=o.h;r.t=o.t;r.n=o.n;r.edited=1;const v=hm(o.h);if(v!==1500)r.s=v}return r}).filter(Boolean).concat((gPlan[x.d]||[]).map((e,i)=>Object.assign({k:'u'+i,ui:i,s:hm(e.h),o:999},e))).sort((a,b)=>(a.s-b.s)||(a.o-b.o))}
 function parkById(id){return GUIDE.parks.find(p=>p.id===id)}
-function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
+function openGuide(v){gView=v||'home';gForm=false;$('#guide').classList.add('show');document.documentElement.classList.add('gopen');$('#welcome').classList.remove('show');renderGuide();$('#guide').scrollTop=0}
 let idOpen=false,idPinFor=null;
 function idHtml(idn){
   let h=`<div class="idwrap"><div class="idbar">${idn?`<button type="button" class="idav" data-idedit="1" aria-label="Trocar avatar"><span class="av">${avHtml(idn)}</span><span class="idpen">✏️</span></button>`:`<span class="av idav0">👤</span>`}<button type="button" class="idtog" data-idtog="1"><span class="idt"><small>${idn?'Usando como':'Primeiro passo'}</small>${idn?esc(idn):'Escolha quem é você'}</span><span class="idgo">${idOpen?'▴':'▾'}</span></button></div>`;
@@ -1339,7 +1340,7 @@ const BK=(()=>{
 })();
 document.addEventListener('click',e=>{if(e.target.closest('#bkrest')){BK.restore(true)}});
 function openIdPick(){closeGuide();openWelcome(true)}
-function closeGuide(){$('#guide').classList.remove('show')}
+function closeGuide(){$('#guide').classList.remove('show');document.documentElement.classList.remove('gopen')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
 // ===== Previsão do tempo no roteiro (Open-Meteo, atualiza ao abrir o app) =====
 const WX=(()=>{const LOC={orl:[28.37,-81.52,'Orlando'],mia:[25.77,-80.2,'Miami'],wpb:[26.7,-80.1,'West Palm Beach']};const K='orl-wx-v1';
