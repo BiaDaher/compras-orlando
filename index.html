@@ -365,7 +365,7 @@ a.go{display:inline-block;text-decoration:none}
 .pha{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
 .pha a,.pha button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:999px;padding:3px 10px;text-decoration:none;font-weight:600}
 .gth{float:right;width:64px;height:64px;object-fit:cover;border-radius:10px;margin:0 0 6px 8px}
-.phero{display:block;width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:4px}
+.phero{display:block;width:100%;aspect-ratio:3/1;max-height:150px;object-fit:cover;border-radius:14px;margin-bottom:4px}
 .tile .timg{width:64px;height:64px;object-fit:cover;border-radius:12px;display:block;margin:0 auto 6px}
 .gzoom{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:70;display:none;align-items:center;justify-content:center;padding:20px}
 .gzoom.show{display:flex;flex-direction:column;gap:14px}
@@ -481,7 +481,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .cov{border-radius:999px;padding:2px 8px;font-size:12px}.cov.c{background:#e8f3ea;color:#2f6b3a}.cov.o{background:#eaf1fb;color:#2d5f86}.cov.m{background:#f3efe2;color:#6b5a2f}.wxp{margin:10px 0;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.4}.wxp b{display:block}.wxp div{margin-top:4px}.wxp small{display:block;font-size:12px;opacity:.75;margin-top:6px}.wxp.ok{background:#eaf4fb;color:#1f4a6b}.wxp.th{background:#fdecea;color:#7a1f16}.wxp.rn{background:#fff4e0;color:#7a4b06}.wxcov{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.wxcov span{background:#fff;border-radius:999px;padding:3px 9px;font-size:12.5px;color:#2f6b3a;font-weight:600}
 .shbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 12px;margin-bottom:8px}.shrow{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.shrow:last-of-type{border-bottom:0}.she{font-size:22px;line-height:1.2}.shrow b{display:block}.shrow small{display:block;color:var(--muted);font-size:13px;margin-top:3px}.shrow .kchip{margin-top:4px;display:inline-block}.shtip{background:#fff7e6;border-radius:10px;padding:8px 10px;margin:6px 0 4px;font-size:13px;color:#7a4b06}.shop{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;line-height:1.45}.shop b{display:block;font-size:16px;margin-bottom:2px}.shop .w{color:var(--muted);font-size:13px;margin:3px 0}.shop .kchip{display:inline-block;margin-top:4px}.shimg{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}.shphoto{display:block;width:100%;height:170px;object-fit:cover;border-radius:10px;margin-bottom:8px}.shatt{background:#f3e8ff;color:#5b2a86;float:right;margin-left:6px}.shat{background:#f6efff;border-radius:10px;padding:7px 10px;margin:6px 0;color:#4a2470}
 html.gopen,html.gopen body{overflow:hidden;height:100%}.guide{overscroll-behavior:contain}
-</style>
+.prow2{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0 4px}.prow2 .prog2{margin:0}.fdet{position:relative}.fdet summary{list-style:none;cursor:pointer;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;white-space:nowrap}.fdet summary::-webkit-details-marker{display:none}.fdet summary.on{background:var(--ink);color:#fff;border-color:var(--ink)}.fdet .ifil{position:absolute;right:0;top:38px;z-index:15;width:260px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px;margin:0}\n</style>
 </head>
 <body>
 <header>
@@ -1437,7 +1437,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
       h+=`<div class="pinfo"><b>📅 ${esc(effDateLabel(p))}</b>${p.sub?`<div class="psub">${esc(p.sub)}</div>`:''}</div>`+WX.park(p);
 
       const F=[['','Todos'],['IMP','⭐ Imperdíveis'],['Leve','🟢 Leve'],['Moderada','🟡 Moderada'],['Forte','🟠 Forte'],['Muito forte','🔴 Muito forte'],['WET','💧 Molha']];
-      h+=`<div class="ifil" id="ifil">${F.map(([v,l])=>`<button data-lv="${v}" class="${gLv===v?'on':''}">${l}</button>`).join('')}</div><div class="prog2">${cnt} de ${acts.length+p.extras.length} feitos · na ordem do roteiro · toque para ver detalhes</div><div class="syncst sst"></div>`;
+      const fl=(F.find(x=>x[0]===gLv)||['',''])[1];h+=`<div class="prow2"><div class="prog2">${cnt} de ${acts.length+p.extras.length} feitos</div><details class="fdet"><summary class="${gLv?'on':''}">⚙️ ${gLv?esc(fl):'Filtrar'} ▾</summary><div class="ifil" id="ifil">${F.map(([v,l])=>`<button data-lv="${v}" class="${gLv===v?'on':''}">${l}</button>`).join('')}</div></details></div><div class="syncst sst"></div>`;
       const pass=r=>!gLv||(gLv==='IMP'?r.pri==='Imperdível':gLv==='WET'?!!r.wet:r.i===gLv);
       let n=0;h+=p.rides.map(r=>{if(r.act)n++;return pass(r)||(!r.act&&!gLv)?stepCard(p,r,r.act?n:0,dn):''}).join('');
       if(p.extras.length){const ex=p.extras.filter(pass);if(ex.length)h+=`<div class="gsec">➕ Outras atrações (se sobrar tempo)</div>`+ex.map(r=>stepCard(p,r,0,dn)).join('')}
