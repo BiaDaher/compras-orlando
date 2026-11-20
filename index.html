@@ -1859,10 +1859,12 @@ $('#guide').addEventListener('submit',e=>{if(e.target.id!=='exf')return;e.preven
 const SYNC=(()=>{
   const BASE='https://orlando-2026-a171b-default-rtdb.firebaseio.com/trips/orl26-646c3697a123f642';
   const QK='orl-sync-q',SK='orl-sync-snap',LK='orl-sync-last';
-  let q=[],snap={mkt:{},md:{},rd:{},ex:{},img:{},mx:{},me:{},pl:{},plt:{},ck:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
+  let q=[],snap={mkt:{},md:{},rd:{},ex:{},img:{},mx:{},me:{},pl:{},plt:{},ck:{},ci:{}},last=0,busy=false,applying=false,es=null,tmr=null,ok=null;
   try{q=JSON.parse(localStorage.getItem(QK)||'[]')||[]}catch(e){q=[]}
   try{snap=Object.assign(snap,JSON.parse(localStorage.getItem(SK)||'{}')||{})}catch(e){}
-  snap.pl=snap.pl||{};snap.plt=snap.plt||{};snap.ck=snap.ck||{};
+  snap.pl=snap.pl||{};snap.plt=snap.plt||{};snap.ck=snap.ck||{};snap.ci=snap.ci||{};
+  const hsh=str=>{let h=5381;for(let i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return str.length+':'+(h>>>0).toString(36)};
+  const ownItems=()=>custom.filter(c=>c&&c.id&&c.who!=='Mercado'&&!c.mkt);
   try{last=+localStorage.getItem(LK)||0}catch(e){}
   const sv=()=>{try{localStorage.setItem(QK,JSON.stringify(q));localStorage.setItem(SK,JSON.stringify(snap));localStorage.setItem(LK,String(last))}catch(e){}};
   const mktItems=()=>custom.filter(c=>c.who==='Mercado');
@@ -1875,6 +1877,10 @@ const SYNC=(()=>{
     const cur={};mktItems().forEach(c=>cur[c.id]=c);
     Object.keys(cur).forEach(id=>{if(!snap.mkt[id]){snap.mkt[id]=1;put('mkt/'+id,{it:cur[id],del:0,t:now})}});
     Object.keys(snap.mkt).forEach(id=>{if(snap.mkt[id]&&!cur[id]){snap.mkt[id]=0;put('mkt/'+id,{del:1,t:now})}});
+    // itens que cada pessoa acrescenta na própria lista (com a foto do item)
+    {const cur2={};ownItems().forEach(c=>cur2[c.id]=c);
+     Object.keys(cur2).forEach(id=>{const j=JSON.stringify(cur2[id]);const sg=hsh(j);if(snap.ci[id]!==sg){snap.ci[id]=sg;put('ci/'+id,{j,del:0,t:now})}});
+     Object.keys(snap.ci).forEach(id=>{if(snap.ci[id]&&!cur2[id]&&!custom.some(c=>c.id===id)){snap.ci[id]='';put('ci/'+id,{del:1,t:now})}});}
     // comprados do mercado
     const ids=mktIds();
     ids.forEach(id=>{const d=done[id]?1:0;if((snap.md[id]||0)!==d){snap.md[id]=d;put('md/'+id,{v:d,t:now})}});
@@ -1906,7 +1912,7 @@ const SYNC=(()=>{
     let sent=0;
     try{while(q.length){const x=q[0];let v=x.v;
         if(v&&v.ref){const k=v.ref;v=k.startsWith('c~')?photos[k.slice(2)]:gImg[k.slice(2)];if(v==null)v=null}
-        const r=await fetch(BASE+'/'+x.p+'.json',{method:'PUT',body:JSON.stringify(v),cache:'no-store'});if(!r.ok)throw new Error(r.status);q.shift();sv();sent++}
+        const r=await fetch(BASE+'/'+x.p+'.json',{method:'PUT',body:JSON.stringify(v),cache:'no-store'});if(!r.ok){if(r.status>=400&&r.status<500){q.shift();sv();continue}throw new Error(r.status)}q.shift();sv();sent++}
       if(sent)await fetch(BASE+'/rev.json',{method:'PUT',body:JSON.stringify(Date.now()),cache:'no-store'});ok=true}
     catch(e){ok=false}
     busy=false;status();
@@ -1917,6 +1923,10 @@ const SYNC=(()=>{
     Object.keys(M).forEach(id=>{if(pending('mkt/'+id))return;const r=M[id]||{};const has=custom.some(c=>c.id===id);
       if(r.del){if(has){custom=custom.filter(c=>c.id!==id);ch=true}snap.mkt[id]=0}
       else if(r.it){if(!has){custom.push(Object.assign({},r.it,{who:'Mercado',mkt:1}));ch=true}snap.mkt[id]=1}});
+    {const CI=data.ci||{};Object.keys(CI).forEach(id=>{if(pending('ci/'+id))return;const r=CI[id];if(!r)return;const i=custom.findIndex(c=>c.id===id);
+      if(r.del){if(i>=0&&custom[i].who!=='Mercado'){custom.splice(i,1);ch=true}snap.ci[id]='';return}
+      if(typeof r.j!=='string')return;const sg=hsh(r.j);if(snap.ci[id]===sg&&i>=0)return;let it=null;try{it=JSON.parse(r.j)}catch(e){return}if(!it||!it.id)return;
+      if(i>=0)custom[i]=it;else custom.push(it);snap.ci[id]=sg;ch=true})}
     if(ch)try{localStorage.setItem(CKEY,JSON.stringify(custom))}catch(e){}
     let dch=false;const D=data.md||{};
     Object.keys(D).forEach(id=>{if(pending('md/'+id))return;const v=D[id]&&D[id].v?1:0;
@@ -1950,7 +1960,7 @@ const SYNC=(()=>{
   }
   async function pull(){
     if(navigator.onLine===false)return status();
-    try{const parts=['mkt','md','rd','ex','imgidx','dmap','mx','me','pl','ck'];
+    try{const parts=['mkt','md','rd','ex','imgidx','dmap','mx','me','pl','ck','ci'];
       const res=await Promise.all(parts.map(x=>fetch(BASE+'/'+x+'.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()})));
       const data={};parts.forEach((x,i)=>data[x]=res[i]);apply(data);await pullImgs(data.imgidx||{})}catch(e){ok=false;status()}
   }
