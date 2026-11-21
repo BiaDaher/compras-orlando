@@ -1674,9 +1674,14 @@ function eqSplit(total,names){const n=names.length,base=Math.floor(total/n);let 
 function balances(){const b={};GROUP.forEach(p=>b[p]=0);gEx.forEach(e=>{if(e.del)return;b[e.payer]=(b[e.payer]||0)+e.amt;Object.keys(e.split||{}).forEach(p=>{b[p]=(b[p]||0)-e.split[p]})});return b}
 function settle(b){const cr=[],db=[];Object.keys(b).forEach(p=>{if(b[p]>0)cr.push([p,b[p]]);else if(b[p]<0)db.push([p,-b[p]])});cr.sort((a,c)=>c[1]-a[1]);db.sort((a,c)=>c[1]-a[1]);
   const out=[];let i=0,j=0;while(i<db.length&&j<cr.length){const v=Math.min(db[i][1],cr[j][1]);if(v>0)out.push({from:db[i][0],to:cr[j][0],v});db[i][1]-=v;cr[j][1]-=v;if(!db[i][1])i++;if(!cr[j][1])j++}return out}
+function pairDebts(){const o={};const add=(a,c,v)=>{if(a===c||!v)return;o[a]=o[a]||{};o[a][c]=(o[a][c]||0)+v};
+  gEx.forEach(e=>{if(e.del)return;Object.keys(e.split||{}).forEach(p=>add(p,e.payer,e.split[p]))});
+  const out=[];const ppl=[...new Set(GROUP.concat(Object.keys(o)))];
+  ppl.forEach((a,i)=>ppl.slice(i+1).forEach(c=>{const d=((o[a]||{})[c]||0)-((o[c]||{})[a]||0);if(d>0)out.push({from:a,to:c,v:d});else if(d<0)out.push({from:c,to:a,v:-d})}));
+  return out.sort((x,y)=>y.v-x.v)}
 function myName(){try{return euGet()||(who&&GROUP.includes(who)?who:'Bia')}catch(e){return 'Bia'}}
 function renderContas(B){
-  const L=gEx.filter(e=>!e.del).sort((a,c)=>c.t-a.t);const b=balances();const st=settle(b);
+  const L=gEx.filter(e=>!e.del).sort((a,c)=>c.t-a.t);const b=balances();const st=pairDebts();
   let h=gTop('💸 Contas do grupo');
   if(exForm){h+=exFormHtml();B.innerHTML=h;exUpd();return}
   h+=`<button class="gbtn" data-exnew="1">+ Nova despesa</button><div class="syncst sst" style="margin-top:6px"></div>`;
