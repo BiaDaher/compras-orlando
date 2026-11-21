@@ -444,7 +444,7 @@ button.gslot.sm.empty{font-size:16px}button.gslot.sm.empty small{font-size:9px}
 .exp .ic{font-size:22px;line-height:1}
 .exp .b{flex:1;min-width:0}.exp .b b{display:block;font-size:15px}.exp .b small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .exp .v{font-weight:700;font-size:15px;white-space:nowrap}
-.exp .del{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 0 0 4px}
+.exp .del{border:0;background:none;color:#b9aca2;font-size:16px;padding:0 0 0 4px}.exp .exbtns{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.exp .exbtns>div{display:flex;align-items:center;gap:2px}.exp .ed{border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12.5px;padding:3px 9px;color:#5a4a3f;font-weight:600}.exp[data-exedit]{cursor:pointer}
 .exp.pay{background:#f6fbf7}
 .pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .pchips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:14px;color:var(--ink)}
@@ -1683,9 +1683,9 @@ function renderContas(B){
   h+=`<div class="gsec">💰 Saldo de cada um</div><div class="bal">${GROUP.map(p=>{const v=b[p]||0;return `<div class="r"><span>${esc(p)}</span><span class="amt ${v>0?'pos':v<0?'neg':'zero'}">${v>0?'recebe '+usd(v):v<0?'deve '+usd(-v):'em dia'}</span></div>`}).join('')}</div>`;
   h+=`<div class="gsec">🤝 Como acertar</div>`+(st.length?st.map(s=>{const key=s.from+'|'+s.to;return `<div class="sett"><span class="tx"><b>${esc(s.from)}</b> paga <b>${usd(s.v)}</b> para <b>${esc(s.to)}</b></span><span class="sbtns"><button data-settle="${esc(s.from)}|${esc(s.to)}|${s.v}">Pagou tudo</button><button class="alt" data-part="${esc(key)}">Pagou parte</button></span>${payPart===key?`<form class="partf" data-k="${esc(key)}|${s.v}"><input id="part_v" inputmode="decimal" placeholder="Quanto pagou (US$)"><button type="submit">Registrar</button><div id="part_err" style="color:#a1231b;font-size:12.5px;flex:1 1 100%"></div></form>`:''}</div>`}).join(''):`<div class="gempty">Ninguém deve nada a ninguém 🎉</div>`);
   h+=`<div class="gsec">🧾 Despesas (${L.filter(e=>e.kind!=='pay').length})</div>`+(L.length?L.map(e=>{const ps=Object.keys(e.split||{});const dt=new Date(e.t);const ds=dt.getDate()+'/'+(dt.getMonth()+1);
-    if(e.kind==='pay')return `<div class="exp pay"><span class="ic">💸</span><div class="b"><b>${esc(e.payer)} pagou ${esc(ps[0]||'')}</b><small>Acerto de contas · ${ds}</small></div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`;
+    if(e.kind==='pay')return `<div class="exp pay"><span class="ic">💸</span><div class="b"><b>${esc(e.payer)} pagou ${esc(ps[0]||'')}</b><small>Acerto de contas · ${ds}</small></div><div class="exbtns"><div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div><button type="button" class="ed" data-exedit="${e.id}">✏️ Editar</button></div></div>`;
     const all=ps.length===GROUP.length;const allNow=!all&&ps.length===GROUP.length-Object.keys(JOIN).length&&Object.keys(JOIN).every(p=>!ps.includes(p));const eq=ps.every(p=>Math.abs(e.split[p]-e.amt/ps.length)<1);
-    return `<div class="exp">${gImg['nf:'+e.id]?`<img class="nfth sm" src="${gImg['nf:'+e.id]}" data-zoom="nf:${e.id}" alt="">`:`<span class="ic">${e.ic||'🧾'}</span>`}<div class="b"><b>${esc(e.desc)}</b><small>Pago por ${esc(e.payer)} · ${e.day?(+e.day.slice(8))+'/'+e.day.slice(5,7):ds}${e.pl&&e.pl!==e.desc?' · 📍 '+esc(e.pl):''}</small><small>${all?'Dividido entre todos':allNow?'Dividido entre todos (antes de Yuri e Serena chegarem)':'Dividido entre '+ps.map(esc).join(', ')}${eq?(ps.length>1?' · '+usd(Math.round(e.amt/ps.length))+' cada':''):''}</small>${eq?'':`<small>${ps.map(p=>esc(p)+' '+usd(e.split[p])).join(' · ')}</small>`}</div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div>`}).join(''):`<div class="gempty">Nenhuma despesa ainda.<br>Toque em “+ Nova despesa”.</div>`);
+    return `<div class="exp">${gImg['nf:'+e.id]?`<img class="nfth sm" src="${gImg['nf:'+e.id]}" data-zoom="nf:${e.id}" alt="">`:`<span class="ic">${e.ic||'🧾'}</span>`}<div class="b"><b>${esc(e.desc)}</b><small>Pago por ${esc(e.payer)} · ${e.day?(+e.day.slice(8))+'/'+e.day.slice(5,7):ds}${e.pl&&e.pl!==e.desc?' · 📍 '+esc(e.pl):''}</small><small>${all?'Dividido entre todos':allNow?'Dividido entre todos (antes de Yuri e Serena chegarem)':'Dividido entre '+ps.map(esc).join(', ')}${eq?(ps.length>1?' · '+usd(Math.round(e.amt/ps.length))+' cada':''):''}</small>${eq?'':`<small>${ps.map(p=>esc(p)+' '+usd(e.split[p])).join(' · ')}</small>`}</div><div class="exbtns"><div><span class="v">${usd(e.amt)}</span><button class="del" data-exdel="${e.id}" aria-label="Apagar">✕</button></div><button type="button" class="ed" data-exedit="${e.id}">✏️ Editar</button></div></div>`}).join(''):`<div class="gempty">Nenhuma despesa ainda.<br>Toque em “+ Nova despesa”.</div>`);
   h+=`<p class="gnote">Valores em dólar. Todos do grupo veem as mesmas contas.</p>`;
   B.innerHTML=h;
 }
@@ -1808,7 +1808,13 @@ $('#guide').addEventListener('submit',e=>{const fid=e.target.id;
   const me=myWho;if(!me)return;const mf=myForm||{};const pl=mf.other?(($('#my_pl')||{}).value||'').trim():(mf.pl||'');(gMy[me]=gMy[me]||[]).push({id:mf.id||('m'+Date.now()),desc:d||'Nota fiscal',nf:hasNf?1:0,amt:v,day:mf.day||myDefDay(),pl,t:Date.now()});saveMy();myForm={day:mf.day,pl:mf.pl,other:mf.other,otherv:mf.otherv};renderGuide();showToast('👛 '+(d||'Nota fiscal')+' · '+usd(v)+' anotado')},true);
 
 function exFormHtml(){const f=exForm;
-  return `<form class="gform" id="exf" autocomplete="off">
+  if(f.kind==='pay')return `<form class="gform" id="exf" autocomplete="off"><p class="glead" style="margin:0 0 6px"><b>✏️ Editar acerto de contas</b></p>
+  <label>Quem pagou</label><div class="pchips">${GROUP.map(p=>`<button type="button" data-expayer="${esc(p)}" class="${f.payer===p?'on':''}">${esc(p)}</button>`).join('')}</div>
+  <label>Para quem</label><div class="pchips">${GROUP.map(p=>`<button type="button" data-exto="${esc(p)}" class="${f.to===p?'on':''}">${esc(p)}</button>`).join('')}</div>
+  <label>Valor (US$) *</label><input id="ex_v" inputmode="decimal" value="${esc(f.v)}" placeholder="0,00">
+  <div class="ferr" id="ex_err" style="color:#a1231b;font-size:13px"></div><div id="ex_sum"></div>
+  <button class="gbtn" type="submit">Salvar alterações</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`;
+  return `<form class="gform" id="exf" autocomplete="off">${f.edit?'<p class="glead" style="margin:0 0 6px"><b>✏️ Editar despesa</b> · as mudanças aparecem para todo o grupo</p>':''}
   <label>Dia</label><div class="chips" id="exdays" style="padding-bottom:6px">${GUIDE.days.map(z=>{const [y,m,d]=z.d.split('-');return `<button type="button" class="chip${z.d===f.day?' on':''}" data-exday="${z.d}"><small>${z.w}</small><b>${+d}</b><small>${MES[m-1]}</small></button>`}).join('')}</div>
   <label>Onde <small>(do roteiro do dia)</small></label><div class="pchips">${myPlaces(f.day).map(o=>`<button type="button" data-expl="${esc(o)}" class="${f.pl===o?'on':''}">${esc(o)}</button>`).join('')}<button type="button" data-expl="__outro" class="${f.other?'on':''}">+ Outro lugar</button></div>
   ${f.other?`<input id="ex_pl" value="${esc(f.otherv||'')}" placeholder="Nome do lugar" style="margin-top:8px">`:''}
@@ -1820,18 +1826,24 @@ function exFormHtml(){const f=exForm;
   <div id="ex_rows">${f.mode==='val'?f.who.map(p=>`<div class="splitrow"><span>${esc(p)}</span><input data-exval="${esc(p)}" inputmode="decimal" value="${esc(f.vals[p]||'')}" placeholder="0,00"></div>`).join(''):''}</div>
   <div class="sumchk" id="ex_sum"></div><div class="ferr" id="ex_err" style="color:#a1231b;font-size:13px"></div>
   <div class="nfrow">${gImg['nf:'+f.id]?`<img class="nfth" src="${gImg['nf:'+f.id]}" data-zoom="nf:${f.id}" alt=""><span>🧾 Nota anexada · todos do grupo veem</span>`:`<button type="button" class="nfbtn" data-ph="nf:${f.id}">📷 Foto da nota fiscal <small>(opcional)</small></button>`}</div>
-  <button class="gbtn" type="submit">Salvar despesa</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
-function exUpd(){const f=exForm;if(!f)return;const el=$('#ex_sum');if(!el)return;const tot=cents(f.v);
+  <button class="gbtn" type="submit">${f.edit?'Salvar alterações':'Salvar despesa'}</button><button class="gbtn alt" type="button" data-cancel="1">Cancelar</button></form>`}
+function exUpd(){const f=exForm;if(!f||f.kind==='pay')return;const el=$('#ex_sum');if(!el)return;const tot=cents(f.v);
   if(!f.who.length){el.className='sumchk bad';el.textContent='Escolha pelo menos uma pessoa.';return}
   if(isNaN(tot)||tot<=0){el.className='sumchk';el.textContent='';return}
   if(f.mode==='eq'){el.className='sumchk good';el.textContent=f.who.length>1?`${usd(Math.round(tot/f.who.length))} para cada um (${f.who.length} pessoas)`:`Tudo para ${f.who[0]}`;return}
   const s=f.who.reduce((a,p)=>a+(cents(f.vals[p])||0),0),d=tot-s;
   el.className='sumchk '+(d===0?'good':'bad');el.textContent=d===0?'✓ A soma bate com o total':(d>0?`Faltam ${usd(d)} para fechar o total`:`Passou ${usd(-d)} do total`)}
+function exEditForm(x){const fmt=c=>(c/100).toFixed(2).replace('.',',');const ps=GROUP.filter(p=>(x.split||{})[p]!=null).concat(Object.keys(x.split||{}).filter(p=>!GROUP.includes(p)));
+  if(x.kind==='pay')return {id:x.id,edit:true,kind:'pay',payer:x.payer,to:ps[0]||'',v:fmt(x.amt)};
+  const day=x.day||(()=>{const d=new Date(x.t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+  const pl=x.pl||'';const inList=pl&&myPlaces(day).includes(pl);const eq=ps.length&&ps.every(p=>Math.abs(x.split[p]-x.amt/ps.length)<1);const vals={};ps.forEach(p=>vals[p]=fmt(x.split[p]));
+  return {id:x.id,edit:true,day,pl:inList?pl:'',other:!!(pl&&!inList),otherv:inList?'':pl,desc:x.desc&&x.desc!==pl?x.desc:'',v:fmt(x.amt),ic:x.ic||'🧾',payer:x.payer,who:ps,mode:eq?'eq':'val',vals}}
 function exSync(){const f=exForm;if(!f)return;const d=$('#ex_d'),v=$('#ex_v'),o=$('#ex_pl');if(d)f.desc=d.value;if(v)f.v=v.value;if(o)f.otherv=o.value;document.querySelectorAll('[data-exval]').forEach(i=>f.vals[i.dataset.exval]=i.value)}
 $('#guide').addEventListener('input',e=>{if(!exForm)return;if(e.target.closest('#exf')){exSync();exUpd()}});
 $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   if(gView!=='contas')return;
   if(t.closest('[data-exnew]')){exForm={id:'x'+Date.now()+Math.floor(Math.random()*999),day:myDefDay(),pl:'',other:false,otherv:'',desc:'',v:'',ic:'🧾',payer:myName(),who:presentNow(),mode:'eq',vals:{}};renderGuide();$('#guide').scrollTop=0;setTimeout(()=>{const i=$('#ex_d');if(i)i.focus()},50);e.stopImmediatePropagation();return}
+  if(!exForm&&!t.closest('[data-exdel]')&&!t.closest('[data-zoom]')&&(b=t.closest('[data-exedit]'))){const x=gEx.find(z=>z.id===b.dataset.exedit);if(x){exForm=exEditForm(x);renderGuide();$('#guide').scrollTop=0}e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-exdel]'))){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Apagar?';b.style.color='#a1231b';b.style.fontSize='12.5px';b.style.fontWeight='700';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='✕';b.removeAttribute('style')}},3500);e.stopImmediatePropagation();return}
     const ex=gEx.find(x=>x.id===b.dataset.exdel);if(ex){ex.del=1;ex.t2=Date.now();saveEx();renderGuide();showToast('Despesa apagada',()=>{ex.del=0;ex.t2=Date.now();saveEx();renderGuide()})}e.stopImmediatePropagation();return}
   if(!exForm&&(b=t.closest('[data-part]'))){payPart=payPart===b.dataset.part?null:b.dataset.part;renderGuide();const i=$('#part_v');if(i)i.focus();e.stopImmediatePropagation();return}
@@ -1841,17 +1853,22 @@ $('#guide').addEventListener('click',e=>{const t=e.target;let b;
   exSync();
   if(b=t.closest('[data-exday]')){exSync();exForm.day=b.dataset.exday;exForm.pl='';exForm.other=false;const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;const c=$('#exdays .chip.on');if(c)c.scrollIntoView({inline:'center',block:'nearest'});e.stopImmediatePropagation();return}
   if(b=t.closest('[data-expl]')){exSync();const v=b.dataset.expl;if(v==='__outro'){exForm.other=!exForm.other;exForm.pl=''}else{exForm.pl=exForm.pl===v?'':v;exForm.other=false}const y=$('#guide').scrollTop;renderGuide();$('#guide').scrollTop=y;if(exForm.other){const i=$('#ex_pl');if(i)i.focus()}e.stopImmediatePropagation();return}
+  if(b=t.closest('[data-exto]')){exForm.to=b.dataset.exto;renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-expayer]')){exForm.payer=b.dataset.expayer;renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exsplit]')){const p=b.dataset.exsplit,w=exForm.who;if(w.includes(p))exForm.who=w.filter(x=>x!==p);else exForm.who=GROUP.filter(x=>w.includes(x)||x===p);renderGuide();e.stopImmediatePropagation();return}
   if(b=t.closest('[data-exmode]')){exForm.mode=b.dataset.exmode;renderGuide();e.stopImmediatePropagation();return}
   if(t.closest('[data-cancel]')){if(exForm&&exForm.id&&gImg['nf:'+exForm.id]&&!gEx.some(x=>x.id===exForm.id)){delete gImg['nf:'+exForm.id];gImgSave()}exForm=null;renderGuide();e.stopImmediatePropagation();return}
 },true);
 $('#guide').addEventListener('submit',e=>{if(e.target.id!=='exf')return;e.preventDefault();e.stopImmediatePropagation();exSync();const f=exForm,err=$('#ex_err');
+  if(f.kind==='pay'){const v=cents(f.v);if(isNaN(v)||v<=0){err.textContent='Coloque o valor.';return}if(!f.to||f.to===f.payer){err.textContent='Escolha para quem foi pago (pessoa diferente de quem pagou).';return}
+    const x=gEx.find(z=>z.id===f.id);if(x){x.payer=f.payer;x.amt=v;x.split={[f.to]:v};x.t2=Date.now();saveEx()}exForm=null;renderGuide();$('#guide').scrollTop=0;showToast('✏️ Acerto atualizado');return}
   const tot=cents(f.v);const pl=f.other?(f.otherv||'').trim():(f.pl||'');if(!f.desc.trim()&&!pl){err.textContent='Escolha o lugar ou escreva o que foi.';return}
   if(isNaN(tot)||tot<=0){err.textContent='Coloque o valor.';return}
   if(!f.who.length){err.textContent='Escolha quem vai dividir.';return}
   let split;if(f.mode==='eq')split=eqSplit(tot,f.who);else{split={};let s=0;for(const p of f.who){const c=cents(f.vals[p])||0;if(c<0){err.textContent='Valor inválido.';return}split[p]=c;s+=c}if(s!==tot){err.textContent='A soma por pessoa precisa bater com o total.';return}Object.keys(split).forEach(p=>{if(!split[p])delete split[p]})}
-  const now=Date.now();gEx.push({id:f.id||('x'+now+Math.floor(Math.random()*999)),kind:'exp',desc:f.desc.trim()||pl,pl,day:f.day,ic:f.ic,amt:tot,payer:f.payer,split,t:now});
+  const now=Date.now();const old=f.edit&&gEx.find(z=>z.id===f.id);
+  if(old){Object.assign(old,{desc:f.desc.trim()||pl,pl,day:f.day,ic:f.ic,amt:tot,payer:f.payer,split,t2:now});saveEx();exForm=null;renderGuide();$('#guide').scrollTop=0;showToast('✏️ Despesa atualizada');return}
+  gEx.push({id:f.id||('x'+now+Math.floor(Math.random()*999)),kind:'exp',desc:f.desc.trim()||pl,pl,day:f.day,ic:f.ic,amt:tot,payer:f.payer,split,t:now});
   saveEx();exForm=null;renderGuide();$('#guide').scrollTop=0;showToast('🧾 Despesa salva');
 },true);
 
