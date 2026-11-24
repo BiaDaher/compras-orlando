@@ -1342,13 +1342,33 @@ document.addEventListener('click',e=>{if(e.target.closest('#bkrest')){BK.restore
 function openIdPick(){closeGuide();openWelcome(true)}
 function closeGuide(){$('#guide').classList.remove('show');document.documentElement.classList.remove('gopen')}
 function gTop(t,back){return `<div class="topbar gtop"><button class="backbtn" data-g="${back||'home'}">‹ ${back&&back!=='home'?'Parques':'Início'}</button><h3 class="ttl">${t}</h3></div>`}
-// ===== Previsão do tempo no roteiro (Open-Meteo, atualiza ao abrir o app) =====
-const WX=(()=>{const LOC={orl:[28.37,-81.52,'Orlando'],mia:[25.77,-80.2,'Miami'],wpb:[26.7,-80.1,'West Palm Beach']};const K='orl-wx-v1';
+// ===== Previsão do tempo no roteiro (NWS + Open-Meteo, atualiza ao abrir o app) =====
+const WX=(()=>{const LOC={orl:[28.37,-81.52,'Orlando'],mia:[25.77,-80.2,'Miami'],wpb:[26.7,-80.1,'West Palm Beach']};const K='orl-wx-v2';
+  // Fonte principal: NWS (Serviço Nacional de Meteorologia dos EUA, ~7 dias). Open-Meteo só completa os dias que o NWS ainda não cobre.
+  const NWSP={orl:'MLB/21,60',mia:'MFL/109,50',wpb:'MFL/109,91'};
   let st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')||{}}catch(e){}let busy=false;
+  function nwsCode(s,p){s=(s||'').toLowerCase();const wet=/thunder|t-storm|shower|rain|drizzle/.test(s);
+    if(wet&&p<30)return 3;if(/thunder|t-storm/.test(s))return 95;const hv=/heavy/.test(s);if(/shower/.test(s))return hv?82:80;if(/drizzle/.test(s))return 51;if(/rain/.test(s))return hv?65:61;
+    if(/fog|haze|smoke/.test(s))return 45;if(/^(sunny|clear)$/.test(s))return 0;if(/mostly (sunny|clear)/.test(s))return 1;if(/partly/.test(s))return 2;if(/cloudy|overcast/.test(s))return 3;return 2}
+  async function getOM(k){const [la,lo]=LOC[k];const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FNew_York&forecast_days=16`,{cache:'no-store'});if(!r.ok)throw 0;return r.json()}
+  async function getNWS(k){const r=await fetch(`https://api.weather.gov/gridpoints/${NWSP[k]}/forecast/hourly?units=si`,{cache:'no-store',headers:{Accept:'application/geo+json'}});if(!r.ok)throw 0;
+    const P=((await r.json()).properties||{}).periods;if(!P||!P.length)throw 0;
+    return P.map(p=>{const pr=(p.probabilityOfPrecipitation&&p.probabilityOfPrecipitation.value)||0;return {t:p.startTime.slice(0,13)+':00',c:p.temperatureUnit==='F'?(p.temperature-32)*5/9:p.temperature,p:pr,w:nwsCode(p.shortForecast,pr)}})}
+  function merge(o,n){const M=new Map();
+    if(o&&o.hourly){const H=o.hourly;H.time.forEach((t,i)=>M.set(t,{c:H.temperature_2m[i],p:H.precipitation_probability[i],w:H.weather_code[i]}))}
+    const nd=new Set();if(n)n.forEach(h=>{M.set(h.t,{c:h.c,p:h.p,w:h.w});nd.add(h.t.slice(0,10))});
+    const ts=[...M.keys()].sort();const hourly={time:ts,temperature_2m:ts.map(t=>M.get(t).c),precipitation_probability:ts.map(t=>M.get(t).p),weather_code:ts.map(t=>M.get(t).w)};
+    const D=o&&o.daily?{time:[...o.daily.time],weather_code:[...o.daily.weather_code],temperature_2m_max:[...o.daily.temperature_2m_max],temperature_2m_min:[...o.daily.temperature_2m_min],precipitation_probability_max:[...o.daily.precipitation_probability_max]}:{time:[],weather_code:[],temperature_2m_max:[],temperature_2m_min:[],precipitation_probability_max:[]};
+    const now=new Date(),nowH=`${now.getFullYear()}-${p2(now.getMonth()+1)}-${p2(now.getDate())}T${p2(now.getHours())}:00`;
+    [...nd].sort().forEach(dd=>{const hs=ts.filter(t=>t.slice(0,10)===dd);if(!hs.length)return;const fut=hs.filter(t=>t>=nowH);const use=fut.length?fut:hs;
+      const tc=hs.map(t=>M.get(t).c).filter(x=>x!=null);const pm=Math.max(0,...use.map(t=>M.get(t).p||0));
+      const day=use.filter(t=>{const h=+t.slice(11,13);return h>=8&&h<=20});const wc=Math.max(...(day.length?day:use).map(t=>M.get(t).w??0));
+      let i=D.time.indexOf(dd);if(i<0){D.time.push(dd);D.weather_code.push(0);D.temperature_2m_max.push(0);D.temperature_2m_min.push(0);D.precipitation_probability_max.push(0);i=D.time.length-1}
+      D.weather_code[i]=wc;D.temperature_2m_max[i]=Math.max(...tc);D.temperature_2m_min[i]=Math.min(...tc);D.precipitation_probability_max[i]=pm});
+    return {hourly,daily:D,nws:[...nd]}}
   async function load(force){if(busy||navigator.onLine===false)return;if(!force&&st.t&&Date.now()-st.t<30*60e3)return;busy=true;
-    try{const out={};for(const k of Object.keys(LOC)){const [la,lo]=LOC[k];
-        const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FNew_York&forecast_days=16`,{cache:'no-store'});
-        if(!r.ok)throw 0;out[k]=await r.json()}
+    try{const out={};await Promise.all(Object.keys(LOC).map(async k=>{const [o,n]=await Promise.all([getOM(k).catch(()=>null),getNWS(k).catch(()=>null)]);if(o||n)out[k]=merge(o,n)}));
+      if(!Object.keys(out).length)throw 0;
       st={t:Date.now(),d:out};try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}
       if(typeof gView!=='undefined'&&(gView==='roteiro'&&!gEdit&&!gForm||gView==='park'))renderGuide()}catch(e){}busy=false}
   function locOf(day,e){const s=e?(e.t||'')+' '+(e.addr||''):'';if(/West Palm/i.test(s))return 'wpb';if(/Kissimmee|apartamento|Orlando, FL/i.test(s))return 'orl';if(/Miami|\bMIA\b/i.test(s))return 'mia';return (day==='2026-11-20'||day==='2026-12-01')?'mia':'orl'}
@@ -1361,9 +1381,9 @@ const WX=(()=>{const LOC={orl:[28.37,-81.52,'Orlando'],mia:[25.77,-80.2,'Miami']
     const a=Math.round(tn),b=Math.round(tx);return `<div class="wx${pm>=50?' rain':''}">${emo(c,r[0])} ${a===b?b+'°C':a+'–'+b+'°C'} · 💧 ${pm}% de chuva${pm>=50?' · leve capa ☂️':''}</div>`}catch(_){return ''}}
   function day(dd){try{const L=locOf(dd,null);if(!st.d)return navigator.onLine===false?'':'<div class="wxd">🌤️ Carregando a previsão do tempo…</div>';
     const D=st.d[L]&&st.d[L].daily;const i=D?D.time.indexOf(dd):-1;
-    if(i<0){if(D&&dd<D.time[0])return '';const av=new Date(new Date(dd+'T12:00')-15*864e5);return `<div class="wxd">🌤️ A previsão do tempo deste dia aparece a partir de ${av.getDate()}/${p2(av.getMonth()+1)}.</div>`}
+    if(i<0){if(D&&dd<D.time[0])return '';const av=new Date(new Date(dd+'T12:00')-15*864e5);if(av<=new Date())return '<div class="wxd">🌤️ A previsão deste dia ainda não está disponível. Tente de novo mais tarde.</div>';return `<div class="wxd">🌤️ A previsão do tempo deste dia aparece a partir de ${av.getDate()}/${p2(av.getMonth()+1)}.</div>`}
     const tm=new Date(st.t),hoje=new Date().toDateString()===tm.toDateString();
-    return `<div class="wxd"><b>${emo(D.weather_code[i],12)} ${LOC[L][2]}: ${Math.round(D.temperature_2m_min[i])}° a ${Math.round(D.temperature_2m_max[i])}°C · 💧 até ${D.precipitation_probability_max[i]}% de chuva</b><small>Atualizada ${hoje?'hoje':'em '+tm.getDate()+'/'+p2(tm.getMonth()+1)} às ${p2(tm.getHours())}:${p2(tm.getMinutes())}.</small></div>`}catch(_){return ''}}
+    return `<div class="wxd"><b>${emo(D.weather_code[i],12)} ${LOC[L][2]}: ${Math.round(D.temperature_2m_min[i])}° a ${Math.round(D.temperature_2m_max[i])}°C · 💧 até ${D.precipitation_probability_max[i]}% de chuva</b><small>Atualizada ${hoje?'hoje':'em '+tm.getDate()+'/'+p2(tm.getMonth()+1)} às ${p2(tm.getHours())}:${p2(tm.getMinutes())} · fonte: ${(st.d[L].nws||[]).includes(dd)?'NWS (serviço oficial dos EUA)':'Open-Meteo (o NWS só prevê 7 dias)'}.</small></div>`}catch(_){return ''}}
   function park(pk){try{const iso=dispOf(parkBase(pk.id));const d=st.d&&st.d.orl;if(!d||!iso)return '';const H=d.hourly,D=d.daily;const di=D.time.indexOf(iso);if(di<0)return '';
     const rows=[];for(let h=8;h<=23;h++){const i=H.time.indexOf(iso+'T'+p2(h)+':00');if(i<0)continue;const c=H.weather_code[i],pr=H.precipitation_probability[i]||0;
       const th=c>=95&&pr>=40,rn=!th&&(pr>=70||([63,65,81,82].includes(c)&&pr>=50));rows.push({h,th,rn,pr})}
@@ -1394,7 +1414,7 @@ function renderGuide(){setTimeout(()=>{try{SYNC.status()}catch(e){}},0);
      <button class="tile" data-g="mercado"><span class="e">🛒</span><b>Mercado</b><small>Lista do grupo</small></button>
      <button class="tile" data-g="contas"><span class="e">💸</span><b>Contas do grupo</b><small>${(()=>{const n=gEx.filter(e=>!e.del&&e.kind!=='pay').length;return n?n+' despesas':'Dividir e acertar'})()}</small></button>
      <button class="tile" data-g="meus"><span class="e">👛</span><b>Meus gastos</b><small>Individual</small></button>
-    </div><div class="tiles" style="margin-top:12px"><button class="tile wide" data-g="ck"><span class="e">🧳</span><span><b>Checklist pré-viagem</b><small>O que levar e o que resolver antes de embarcar</small></span></button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 17/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
+    </div><div class="tiles" style="margin-top:12px"><button class="tile wide" data-g="ck"><span class="e">🧳</span><span><b>Checklist pré-viagem</b><small>O que levar e o que resolver antes de embarcar</small></span></button></div><p class="gnote"><span class="syncst"></span><br>Roteiro, mercado, brinquedos feitos, contas, checklist e fotos aparecem para todo o grupo. Meus gastos ficam só neste celular.<br>Versão 24/11<br><button class="upd" id="updbtn">🔄 Atualizar app</button></p>`;
     return;
   }
   if(gView==='contas'){renderContas(B);return}
